@@ -346,6 +346,8 @@ class Trainer:
         # single frame path
         if self.train_teacher_and_pose:
             feats = self.models["mono_encoder"](inputs["color_aug", 0, 0])
+            print(len(feats))
+            print(feats[0].shape)
             mono_outputs.update(self.models['mono_depth'](feats))
         else:
             with torch.no_grad():
