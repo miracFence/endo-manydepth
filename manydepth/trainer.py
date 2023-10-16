@@ -18,6 +18,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 #from tensorboardX import SummaryWriter
+import wandb
+
+wandb.init(project="MySfMLearner2", entity="respinosa")
+
 
 import json
 
@@ -736,31 +740,22 @@ class Trainer:
     def log(self, mode, inputs, outputs, losses):
         """Write an event to the tensorboard events file
         """
-        """
-        writer = self.writers[mode]
+    
+        #writer = self.writers[mode]
         for l, v in losses.items():
-            writer.add_scalar("{}".format(l), v, self.step)
+            wandb.log({mode+"{}".format(l):v},step =self.step)
 
         for j in range(min(4, self.opt.batch_size)):  # write a maxmimum of four images
             s = 0  # log only max scale
             for frame_id in self.opt.frame_ids:
-                writer.add_image(
-                    "color_{}_{}/{}".format(frame_id, s, j),
-                    inputs[("color", frame_id, s)][j].data, self.step)
+
+                wandb.log({ "color_{}_{}/{}".format(frame_id, s, j),: wandb.Image(inputs[("color", frame_id, s)][j].data)},step=self.step)
                 if s == 0 and frame_id != 0:
-                    writer.add_image(
-                        "color_pred_{}_{}/{}".format(frame_id, s, j),
-                        outputs[("color", frame_id, s)][j].data, self.step)
-
+                    wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
             disp = colormap(outputs[("disp", s)][j, 0])
-            writer.add_image(
-                "disp_multi_{}/{}".format(s, j),
-                disp, self.step)
-
+            wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp)},step=self.step)
             disp = colormap(outputs[('mono_disp', s)][j, 0])
-            writer.add_image(
-                "disp_mono/{}".format(j),
-                disp, self.step)
+            wandb.log({"disp_mono/{}".format(j): wandb.Image(disp)},step=self.step)
 
             if outputs.get("lowest_cost") is not None:
                 lowest_cost = outputs["lowest_cost"][j]
@@ -773,20 +768,11 @@ class Trainer:
                 lowest_cost = torch.clamp(lowest_cost, min_val, max_val)
                 lowest_cost = colormap(lowest_cost)
 
-                writer.add_image(
-                    "lowest_cost/{}".format(j),
-                    lowest_cost, self.step)
-                writer.add_image(
-                    "lowest_cost_masked/{}".format(j),
-                    lowest_cost * consistency_mask, self.step)
-                writer.add_image(
-                    "consistency_mask/{}".format(j),
-                    consistency_mask, self.step)
-
+                wandb.log({"lowest_cost/{}".format(j): lowest_cost},step=self.step)                    
+                wandb.log({"lowest_cost_masked/{}".format(j): lowest_cost * consistency_mask},step=self.step)                    
+                wandb.log({"consistency_mask/{}".format(j): consistency_mask},step=self.step)                    
                 consistency_target = colormap(outputs["consistency_target/0"][j])
-                writer.add_image(
-                    "consistency_target/{}".format(j),
-                    consistency_target, self.step)"""
+                wandb.log({"consistency_target/{}".format(j): consistency_target},step=self.step)         
 
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
