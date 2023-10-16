@@ -773,7 +773,7 @@ class Trainer:
                 wandb.log({"lowest_cost_masked/{}".format(j): lowest_cost * consistency_mask},step=self.step)                    
                 wandb.log({"consistency_mask/{}".format(j): consistency_mask},step=self.step)                    
                 consistency_target = colormap(outputs["consistency_target/0"][j])
-                wandb.log({"consistency_target/{}".format(j): consistency_target.transpose(1, 2, 0)},step=self.step)         
+                wandb.log({"consistency_target/{}".format(j): consistency_target},step=self.step)         
 
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
