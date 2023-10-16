@@ -897,7 +897,7 @@ def colormap(inputs, normalize=True, torch_transpose=True):
         if torch_transpose:
             vis = vis.transpose(2, 0, 1)
 
-    return vis
+    return vis.transpose(1, 2,0)
 
 # Copyright Niantic 2021. Patent Pending. All rights reserved.
 #
