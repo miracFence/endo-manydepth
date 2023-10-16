@@ -24,7 +24,7 @@ import json
 from utils import *
 from layers import *
 
-from manydepth import datasets, networks
+from manydepth import *
 import matplotlib.pyplot as plt
 
 
