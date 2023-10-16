@@ -54,7 +54,23 @@ class SCAREDDataset(MonoDataset):
 
         return color
 
+    def index_to_folder_and_frame_idx(self, index):
+        """Convert index in the dataset to a folder name, frame_idx and any other bits
+        """
+        line = self.filenames[index].split()
+        folder = line[0]
 
+        if len(line) == 3:
+            frame_index = int(line[1])
+        else:
+            frame_index = 0
+
+        if len(line) == 3:
+            side = line[2]
+        else:
+            side = None
+
+        return folder, frame_index, side
 class SCAREDRAWDataset(SCAREDDataset):
     def __init__(self, *args, **kwargs):
         super(SCAREDRAWDataset, self).__init__(*args, **kwargs)
