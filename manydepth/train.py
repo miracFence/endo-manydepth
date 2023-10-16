@@ -8,7 +8,8 @@ import random
 import numpy as np
 from trainer import Trainer
 from options import MonodepthOptions
-
+import datasets
+import networks
 
 
 def seed_all(seed):
