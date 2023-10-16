@@ -346,8 +346,8 @@ class Trainer:
         # single frame path
         if self.train_teacher_and_pose:
             feats = self.models["mono_encoder"](inputs["color_aug", 0, 0])
-            print(len(feats))
-            print(feats[0].shape)
+            #print(len(feats))
+            #print(feats[0].shape)
             mono_outputs.update(self.models['mono_depth'](feats))
         else:
             with torch.no_grad():
@@ -742,7 +742,6 @@ class Trainer:
     def log(self, mode, inputs, outputs, losses):
         """Write an event to the tensorboard events file
         """
-        """
         #writer = self.writers[mode]
         for l, v in losses.items():
             wandb.log({mode+"{}".format(l):v},step =self.step)
@@ -775,7 +774,7 @@ class Trainer:
                 wandb.log({"consistency_mask/{}".format(j): consistency_mask},step=self.step)                    
                 consistency_target = colormap(outputs["consistency_target/0"][j])
                 wandb.log({"consistency_target/{}".format(j): consistency_target},step=self.step)         
-            """
+
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
         """
