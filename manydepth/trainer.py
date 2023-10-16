@@ -749,7 +749,7 @@ class Trainer:
             s = 0  # log only max scale
             for frame_id in self.opt.frame_ids:
 
-                wandb.log({ "color_{}_{}/{}".format(frame_id, s, j),: wandb.Image(inputs[("color", frame_id, s)][j].data)},step=self.step)
+                wandb.log({ "color_{}_{}/{}".format(frame_id, s, j): wandb.Image(inputs[("color", frame_id, s)][j].data)},step=self.step)
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
             disp = colormap(outputs[("disp", s)][j, 0])
