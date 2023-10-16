@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 
 import json
 
@@ -170,8 +170,8 @@ class Trainer:
         self.val_iter = iter(self.val_loader)
 
         self.writers = {}
-        for mode in ["train", "val"]:
-            self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
+        """for mode in ["train", "val"]:
+            self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))"""
 
         if not self.opt.no_ssim:
             self.ssim = SSIM()
@@ -736,6 +736,7 @@ class Trainer:
     def log(self, mode, inputs, outputs, losses):
         """Write an event to the tensorboard events file
         """
+        """
         writer = self.writers[mode]
         for l, v in losses.items():
             writer.add_scalar("{}".format(l), v, self.step)
@@ -785,7 +786,7 @@ class Trainer:
                 consistency_target = colormap(outputs["consistency_target/0"][j])
                 writer.add_image(
                     "consistency_target/{}".format(j),
-                    consistency_target, self.step)
+                    consistency_target, self.step)"""
 
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
