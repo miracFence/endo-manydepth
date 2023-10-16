@@ -740,7 +740,7 @@ class Trainer:
     def log(self, mode, inputs, outputs, losses):
         """Write an event to the tensorboard events file
         """
-    
+        """
         #writer = self.writers[mode]
         for l, v in losses.items():
             wandb.log({mode+"{}".format(l):v},step =self.step)
@@ -752,9 +752,9 @@ class Trainer:
                 wandb.log({ "color_{}_{}/{}".format(frame_id, s, j): wandb.Image(inputs[("color", frame_id, s)][j].data)},step=self.step)
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
-            disp = colormap(outputs[("disp", s)][j, 0]).transpose(1,2,0)
+            disp = colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp)},step=self.step)
-            disp = colormap(outputs[('mono_disp', s)][j, 0]).transpose(1,2,0)
+            disp = colormap(outputs[('mono_disp', s)][j, 0])
             wandb.log({"disp_mono/{}".format(j): wandb.Image(disp)},step=self.step)
 
             if outputs.get("lowest_cost") is not None:
@@ -773,7 +773,7 @@ class Trainer:
                 wandb.log({"consistency_mask/{}".format(j): consistency_mask},step=self.step)                    
                 consistency_target = colormap(outputs["consistency_target/0"][j])
                 wandb.log({"consistency_target/{}".format(j): consistency_target},step=self.step)         
-
+            """
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
         """
