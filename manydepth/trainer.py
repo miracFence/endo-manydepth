@@ -752,9 +752,9 @@ class Trainer:
                 wandb.log({ "color_{}_{}/{}".format(frame_id, s, j): wandb.Image(inputs[("color", frame_id, s)][j].data)},step=self.step)
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
-            disp = colormap(outputs[("disp", s)][j, 0])
+            disp = colormap(outputs[("disp", s)][j, 0]).transpose(1,2,0)
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp)},step=self.step)
-            disp = colormap(outputs[('mono_disp', s)][j, 0])
+            disp = colormap(outputs[('mono_disp', s)][j, 0]).transpose(1,2,0)
             wandb.log({"disp_mono/{}".format(j): wandb.Image(disp)},step=self.step)
 
             if outputs.get("lowest_cost") is not None:
