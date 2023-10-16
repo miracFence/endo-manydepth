@@ -754,9 +754,9 @@ class Trainer:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
             disp = colormap(outputs[("disp", s)][j, 0])
-            wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp)},step=self.step)
+            wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             disp = colormap(outputs[('mono_disp', s)][j, 0])
-            wandb.log({"disp_mono/{}".format(j): wandb.Image(disp)},step=self.step)
+            wandb.log({"disp_mono/{}".format(j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
 
             if outputs.get("lowest_cost") is not None:
                 lowest_cost = outputs["lowest_cost"][j]
@@ -773,7 +773,7 @@ class Trainer:
                 wandb.log({"lowest_cost_masked/{}".format(j): lowest_cost * consistency_mask},step=self.step)                    
                 wandb.log({"consistency_mask/{}".format(j): consistency_mask},step=self.step)                    
                 consistency_target = colormap(outputs["consistency_target/0"][j])
-                wandb.log({"consistency_target/{}".format(j): consistency_target},step=self.step)         
+                wandb.log({"consistency_target/{}".format(j): consistency_target.transpose(1, 2, 0)},step=self.step)         
 
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
