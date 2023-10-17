@@ -34,6 +34,7 @@ splits_dir = "splits"
 STEREO_SCALE_FACTOR = 5.4
 
 
+
 def compute_errors(gt, pred):
     """Computation of error metrics between predicted and ground truth depths
     """
@@ -111,7 +112,7 @@ def evaluate(opt):
             print('No "height" or "width" keys found in the encoder state_dict, resorting to '
                   'using command line values!')
             HEIGHT, WIDTH = opt.height, opt.width
-
+        """
         if opt.eval_split == 'cityscapes':
             dataset = datasets.CityscapesEvalDataset(opt.data_path, filenames,
                                                      HEIGHT, WIDTH,
@@ -123,6 +124,11 @@ def evaluate(opt):
                                                encoder_dict['height'], encoder_dict['width'],
                                                frames_to_load, 4,
                                                is_train=False)
+        """
+        dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
+                                          HEIGHT, WIDTH,
+                                           [0], 4, is_train=False)
+
         dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
@@ -400,3 +406,4 @@ def evaluate(opt):
 if __name__ == "__main__":
     options = MonodepthOptions()
     evaluate(options.parse())
+
