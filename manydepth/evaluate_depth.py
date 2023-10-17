@@ -14,11 +14,13 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from .utils import readlines
-from .options import MonodepthOptions
+#from .utils import readlines
+from utils import *
+from options import MonodepthOptions
 from manydepth import datasets, networks
-from .layers import transformation_from_parameters, disp_to_depth
+from layers import transformation_from_parameters, disp_to_depth
 import tqdm
+
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
