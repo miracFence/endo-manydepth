@@ -330,7 +330,7 @@ def evaluate(opt):
     errors = []
     ratios = []
 
-    """
+
     for i in tqdm.tqdm(range(pred_disps.shape[0])):
 
         if opt.eval_split == 'cityscapes':
@@ -382,6 +382,7 @@ def evaluate(opt):
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
+
     """
     for i in range(pred_disps.shape[0]):
 
@@ -439,6 +440,7 @@ def evaluate(opt):
                                            "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
     print("\n-> Done!")
+    """
 
 
 if __name__ == "__main__":
