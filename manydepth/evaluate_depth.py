@@ -94,6 +94,7 @@ def evaluate(opt):
 
         # Setup dataloaders
         filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
+        
 
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
