@@ -418,7 +418,7 @@ def evaluate(opt):
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
-
+    """
     if opt.save_pred_disps:
         print("saving errors")
         if opt.zero_cost_volume:
@@ -440,7 +440,7 @@ def evaluate(opt):
                                            "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
     print("\n-> Done!")
-    """
+    
 
 
 if __name__ == "__main__":
