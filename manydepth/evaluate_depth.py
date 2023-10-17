@@ -383,42 +383,6 @@ def evaluate(opt):
 
         errors.append(compute_errors(gt_depth, pred_depth))
 
-    """
-    for i in range(pred_disps.shape[0]):
-
-        gt_depth = gt_depths[i]
-        gt_height, gt_width = gt_depth.shape[:2]
-
-        pred_disp = pred_disps[i]
-        pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))
-        pred_depth = 1/pred_disp
-
-        if opt.eval_split == "eigen":
-            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
-
-            crop = np.array([0.40810811 * gt_height, 0.99189189 * gt_height,
-                             0.03594771 * gt_width,  0.96405229 * gt_width]).astype(np.int32)
-            crop_mask = np.zeros(mask.shape)
-            crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
-            mask = np.logical_and(mask, crop_mask)
-
-        else:
-            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
-
-        pred_depth = pred_depth[mask]
-        gt_depth = gt_depth[mask]
-
-        pred_depth *= opt.pred_depth_scale_factor
-        if not opt.disable_median_scaling:
-            ratio = np.median(gt_depth) / np.median(pred_depth)
-            ratios.append(ratio)
-            pred_depth *= ratio
-
-        pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
-        pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
-
-        errors.append(compute_errors(gt_depth, pred_depth))
-    """
     if opt.save_pred_disps:
         print("saving errors")
         if opt.zero_cost_volume:
