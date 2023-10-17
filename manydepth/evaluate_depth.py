@@ -71,7 +71,7 @@ def evaluate(opt):
     """Evaluates a pretrained model using a specified test set
     """
     MIN_DEPTH = 1e-3
-    MAX_DEPTH = 80
+    MAX_DEPTH = 150
 
     frames_to_load = [0]
     if opt.use_future_frame:
@@ -128,7 +128,7 @@ def evaluate(opt):
         """
         dataset = datasets.SCAREDDataset(opt.data_path, filenames,
                                           HEIGHT, WIDTH,
-                                           [0], 4, is_train=False)
+                                           frames_to_load, 4, is_train=False)
 
         dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
@@ -417,7 +417,7 @@ def evaluate(opt):
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
-        
+
     if opt.save_pred_disps:
         print("saving errors")
         if opt.zero_cost_volume:
