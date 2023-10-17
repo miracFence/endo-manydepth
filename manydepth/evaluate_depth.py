@@ -17,7 +17,8 @@ from torch.utils.data import DataLoader
 #from .utils import readlines
 from utils import *
 from options import MonodepthOptions
-from manydepth import datasets, networks
+import datasets
+import networks
 from layers import transformation_from_parameters, disp_to_depth
 import tqdm
 
