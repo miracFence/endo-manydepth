@@ -126,7 +126,7 @@ def evaluate(opt):
                                                frames_to_load, 4,
                                                is_train=False)
         """
-        dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
+        dataset = datasets.SCAREDDataset(opt.data_path, filenames,
                                           HEIGHT, WIDTH,
                                            [0], 4, is_train=False)
 
