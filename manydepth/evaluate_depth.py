@@ -71,7 +71,7 @@ def evaluate(opt):
     """Evaluates a pretrained model using a specified test set
     """
     MIN_DEPTH = 1e-3
-    MAX_DEPTH = 80
+    MAX_DEPTH = 150
 
     frames_to_load = [0]
     if opt.use_future_frame:
@@ -143,7 +143,7 @@ def evaluate(opt):
                                 input_width=encoder_dict['width'],
                                 input_height=encoder_dict['height'],
                                 adaptive_bins=True,
-                                min_depth_bin=0.1, max_depth_bin=20.0,
+                                min_depth_bin=0.1, max_depth_bin=150.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins)
             pose_enc_dict = torch.load(os.path.join(opt.load_weights_folder, "pose_encoder.pth"))
