@@ -456,11 +456,11 @@ class Trainer:
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
-
             for f_i in self.matching_ids:
                 if f_i != 0:
-                    pose_feats = {f_i: outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[f_i] + outputs["b_"+str(f_i)+"_"+str(0)]}
+                    pose_feats[f_i] = {f_i: outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[f_i] + outputs["b_"+str(f_i)+"_"+str(0)]}
 
+            #outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["ch_"+str(frame_id)+"_"+str(scale)] * outputs[("color", frame_id, scale)]  + outputs["bh_"+str(frame_id)+"_"+str(scale)]
             with torch.no_grad():
                 # compute pose from 0->-1, -1->-2, -2->-3 etc and multiply to find 0->-3
                 for fi in self.matching_ids[1:]:
@@ -476,7 +476,7 @@ class Trainer:
                             pose = torch.matmul(pose, inputs[('relative_pose', fi + 1)])
 
                     else:
-                        pose_inputs = [pose_feats[fi - 1],pose_feats[fi]]
+                        pose_inputs = [pose_feats[fi - 1], pose_feats[fi]]
                         pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
                         axisangle, translation = self.models["pose"](pose_inputs)
                         pose = transformation_from_parameters(
