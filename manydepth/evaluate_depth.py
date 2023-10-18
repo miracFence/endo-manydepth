@@ -128,7 +128,7 @@ def evaluate(opt):
         """
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
                                           HEIGHT, WIDTH,
-                                           frames_to_load, 4, is_train=False)
+                                           frames_to_load, 2, is_train=False)
 
         dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)

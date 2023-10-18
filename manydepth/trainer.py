@@ -555,12 +555,6 @@ class Trainer:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border", align_corners=True)
 
-                """
-                outputs["ch_"+str(frame_id)+"_"+str(scale)] = F.interpolate(
-                            outputs["c_"+str(frame_id)+"_"+str(scale)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                outputs["bh_"+str(frame_id)+"_"+str(scale)] = F.interpolate(
-                            outputs["b_"+str(frame_id)+"_"+str(scale)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False) """
-
                 outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["c_"+str(frame_id)+"_"+str(0)] * outputs[("color", frame_id, scale)]  + outputs["b_"+str(frame_id)+"_"+str(0)]
                 
                 if not self.opt.disable_automasking:
