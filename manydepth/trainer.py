@@ -350,8 +350,6 @@ class Trainer:
         # single frame path
         if self.train_teacher_and_pose:
             feats = self.models["mono_encoder"](inputs["color_aug", 0, 0])
-            #print(len(feats))
-            #print(feats[0].shape)
             mono_outputs.update(self.models['mono_depth'](feats))
         else:
             with torch.no_grad():
@@ -455,8 +453,11 @@ class Trainer:
                         outputs["b_"+str(f_i)+"_"+str(scale)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(f_i)+"_"+str(scale)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
 
+
             # now we need poses for matching - compute without gradients
-            pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
+            pose_feats = {f_i: outputs["c_"+str(f_i)+"_"+str(0)] * inputs["color_aug", f_i, 0] + outputs["b_"+str(f_i)+"_"+str(0)] for f_i in self.matching_ids}
+
+            #outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["ch_"+str(frame_id)+"_"+str(scale)] * outputs[("color", frame_id, scale)]  + outputs["bh_"+str(frame_id)+"_"+str(scale)]
             with torch.no_grad():
                 # compute pose from 0->-1, -1->-2, -2->-3 etc and multiply to find 0->-3
                 for fi in self.matching_ids[1:]:
@@ -549,12 +550,13 @@ class Trainer:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border", align_corners=True)
 
+                """
                 outputs["ch_"+str(frame_id)+"_"+str(scale)] = F.interpolate(
                             outputs["c_"+str(frame_id)+"_"+str(scale)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 outputs["bh_"+str(frame_id)+"_"+str(scale)] = F.interpolate(
-                            outputs["b_"+str(frame_id)+"_"+str(scale)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)                            
+                            outputs["b_"+str(frame_id)+"_"+str(scale)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False) """
 
-                outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["ch_"+str(frame_id)+"_"+str(scale)] * outputs[("color", frame_id, scale)]  + outputs["bh_"+str(frame_id)+"_"+str(scale)]
+                outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["c_"+str(frame_id)+"_"+str(0)] * outputs[("color", frame_id, scale)]  + outputs["b_"+str(frame_id)+"_"+str(0)]
                 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
