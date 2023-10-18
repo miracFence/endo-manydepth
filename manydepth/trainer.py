@@ -461,7 +461,7 @@ class Trainer:
                 # compute pose from 0->-1, -1->-2, -2->-3 etc and multiply to find 0->-3
                 for fi in self.matching_ids[1:]:
                     if fi < 0:
-                        pose_inputs = [outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi] + outputs["b_"+str(f_i)+"_"+str(0)], outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi + 1] + outputs["b_"+str(f_i)+"_"+str(0)]]
+                        pose_inputs = [outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi] + outputs["b_"+str(f_i)+"_"+str(0)], outputs["c_"+str(fi + 1)+"_"+str(0)] * pose_feats[fi + 1] + outputs["b_"+str(fi + 1)+"_"+str(0)]]
                         pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
                         axisangle, translation = self.models["pose"](pose_inputs)
                         pose = transformation_from_parameters(
@@ -472,7 +472,7 @@ class Trainer:
                             pose = torch.matmul(pose, inputs[('relative_pose', fi + 1)])
 
                     else:
-                        pose_inputs = [outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi - 1] + outputs["b_"+str(f_i)+"_"+str(0)], pose_feats[fi]]
+                        pose_inputs = [outputs["c_"+str(f_i - 1)+"_"+str(0)] * pose_feats[fi - 1] + outputs["b_"+str(fi - 1) +"_"+str(0)],outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi] + outputs["b_"+str(fi) +"_"+str(0)]]
                         pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
                         axisangle, translation = self.models["pose"](pose_inputs)
                         pose = transformation_from_parameters(
