@@ -459,7 +459,7 @@ class Trainer:
 
             for f_i in self.matching_ids:
                 if f_i != 0:
-                    pose_feats = {f_i: outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[fi] + outputs["b_"+str(f_i)+"_"+str(0)]}
+                    pose_feats = {f_i: outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[f_i] + outputs["b_"+str(f_i)+"_"+str(0)]}
 
             with torch.no_grad():
                 # compute pose from 0->-1, -1->-2, -2->-3 etc and multiply to find 0->-3
