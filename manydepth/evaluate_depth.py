@@ -79,6 +79,10 @@ def evaluate(opt):
     for idx in range(-1, -1 - opt.num_matching_frames, -1):
         if idx not in frames_to_load:
             frames_to_load.append(idx)
+    
+    for i in frames_to_load:
+        print(i)
+    
 
     assert sum((opt.eval_mono, opt.eval_stereo)) == 1, \
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
