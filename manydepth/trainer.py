@@ -448,11 +448,11 @@ class Trainer:
                     # Invert the matrix if the frame id is negative
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
-                    
+                    """
                     for scale in self.opt.scales:
                         outputs["b_"+str(f_i)+"_"+str(scale)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(f_i)+"_"+str(scale)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-
+                    """
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
@@ -461,9 +461,10 @@ class Trainer:
             #outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["ch_"+str(frame_id)+"_"+str(scale)] * outputs[("color", frame_id, scale)]  + outputs["bh_"+str(frame_id)+"_"+str(scale)]
             with torch.no_grad():
                 # Lighting change 
+                """
                 for f_i in self.matching_ids:
                     if f_i != 0:
-                        pose_feats[f_i] = outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[f_i] + outputs["b_"+str(f_i)+"_"+str(0)]
+                        pose_feats[f_i] = outputs["c_"+str(f_i)+"_"+str(0)] * pose_feats[f_i] + outputs["b_"+str(f_i)+"_"+str(0)]"""
                 # compute pose from 0->-1, -1->-2, -2->-3 etc and multiply to find 0->-3
                 for fi in self.matching_ids[1:]:
                     if fi < 0:
