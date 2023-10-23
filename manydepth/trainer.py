@@ -779,7 +779,7 @@ class Trainer:
                 
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
-                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["refinedCB_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
+                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["refined_target"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
                     wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["b_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
                     wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = colormap(outputs[("disp", s)][j, 0])
