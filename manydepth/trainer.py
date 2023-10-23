@@ -450,16 +450,11 @@ class Trainer:
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    
+
                     for scale in self.opt.scales:
                         outputs[("b",scale,f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs[("c",scale,f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs[("bh",scale, f_i)] = F.interpolate(
-                            outputs[("b",scale,f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                        outputs[("ch",scale, f_i)] = F.interpolate(
-                            outputs[("c",scale,f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    
-                        outputs["refined_target"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh",scale, f_i)]
+                        
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
@@ -564,7 +559,14 @@ class Trainer:
                     padding_mode="border", align_corners=True)
 
                 #outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["c_"+str(frame_id)+"_"+str(0)] * outputs[("color", frame_id, scale)]  + outputs["b_"+str(frame_id)+"_"+str(0)]
-                
+                for scale in self.opt.scales:
+                        outputs[("bh",scale, frame_id)] = F.interpolate(
+                            outputs[("b",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                        outputs[("ch",scale, frame_id)] = F.interpolate(
+                            outputs[("c",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                    
+                        outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs[("ch",scale, frame_id)] *  outputs[("color", frame_id, scale)] + outputs[("bh",scale, frame_id)]
+
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
                         inputs[("color", frame_id, source_scale)]
@@ -629,14 +631,14 @@ class Trainer:
 
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
-            #target = inputs[("color", 0, source_scale)]
+            target = inputs[("color", 0, source_scale)]
             
             #target = outputs["refinedCB_"+str(f_i)+"_"+str(scale)]
 
             for frame_id in self.opt.frame_ids[1:]:
-                #pred = outputs[("refinedCB", frame_id, scale)]
-                target = outputs["refined_target"+str(frame_id)+"_"+str(scale)] 
-                pred = outputs[("color", frame_id, scale)]
+                pred = outputs[("refinedCB", frame_id, scale)]
+                #target = outputs["refined_target"+str(frame_id)+"_"+str(scale)] 
+                #pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
             reprojection_losses = torch.cat(reprojection_losses, 1)
 
