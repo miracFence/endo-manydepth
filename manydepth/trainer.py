@@ -439,7 +439,7 @@ class Trainer:
 
                     pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
 
-                    outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    
 
                     axisangle, translation = self.models["pose"](pose_inputs)
                     outputs[("axisangle", 0, f_i)] = axisangle
@@ -448,7 +448,9 @@ class Trainer:
                     # Invert the matrix if the frame id is negative
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
-
+                    
+                    outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    
                     for scale in self.opt.scales:
                         outputs[("b",scale,f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs[("c",scale,f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
@@ -457,7 +459,7 @@ class Trainer:
                         outputs[("ch",scale, f_i)] = F.interpolate(
                             outputs[("c",scale,f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     
-                        outputs["refined_target"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)].detach() + outputs[("bh",scale, f_i)]
+                        outputs["refined_target"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh",scale, f_i)]
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
