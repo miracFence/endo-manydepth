@@ -633,7 +633,7 @@ class Trainer:
 
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("refinedCB", frame_id, scale)]
-                target = outputs["refined_target"+str(frame_id)+"_"+str(0)] 
+                target = outputs["refined_target"+str(frame_id)+"_"+str(scale)] 
                 pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
             reprojection_losses = torch.cat(reprojection_losses, 1)
