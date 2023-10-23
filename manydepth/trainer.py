@@ -636,7 +636,8 @@ class Trainer:
             #target = outputs["refinedCB_"+str(f_i)+"_"+str(scale)]
 
             for frame_id in self.opt.frame_ids[1:]:
-                pred = outputs[("refinedCB", frame_id, scale)]
+                #pred = outputs[("refinedCB", frame_id, scale)]
+                pred = outputs["refinedCB_"+str(frame_id)+"_"+str(scale)]
                 #target = outputs["refined_target"+str(frame_id)+"_"+str(scale)] 
                 #pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
