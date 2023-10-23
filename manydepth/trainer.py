@@ -452,7 +452,9 @@ class Trainer:
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs["refined_target"+str(f_i)+"_"+str(scale)] = outputs["c_"+str(scale)+"_"+str(f_i)] * inputs[("color", 0, 0)] + outputs["b_"+str(scale)+"_"+str(f_i)]
+                    
+                    
+                    outputs["refined_target"+str(f_i)+"_"+str(0)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
@@ -628,7 +630,7 @@ class Trainer:
 
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("refinedCB", frame_id, scale)]
-                target = outputs["refined_target"+str(frame_id)+"_"+str(scale)] 
+                target = outputs["refined_target"+str(frame_id)+"_"+str(0)] 
                 pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
             reprojection_losses = torch.cat(reprojection_losses, 1)
