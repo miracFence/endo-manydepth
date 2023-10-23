@@ -450,11 +450,14 @@ class Trainer:
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
 
                     for scale in self.opt.scales:
-                        outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
-                        outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
+                        outputs[("b",scale,f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
+                        outputs[("c",scale,f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
+                        outputs[("bh",scale, f_i)] = F.interpolate(
+                            outputs[("b",scale,f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                        outputs[("ch",scale, f_i)] = F.interpolate(
+                            outputs[("c",scale,f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     
-                    
-                    outputs["refined_target"+str(f_i)+"_"+str(0)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
+                        outputs["refined_target"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh",scale, f_i)]
 
             # now we need poses for matching - compute without gradients
             pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.matching_ids}
