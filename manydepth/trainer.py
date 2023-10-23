@@ -559,13 +559,13 @@ class Trainer:
                     padding_mode="border", align_corners=True)
 
                 #outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs["c_"+str(frame_id)+"_"+str(0)] * outputs[("color", frame_id, scale)]  + outputs["b_"+str(frame_id)+"_"+str(0)]
-                for scale in self.opt.scales:
-                        outputs[("bh",scale, frame_id)] = F.interpolate(
-                            outputs[("b",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                        outputs[("ch",scale, frame_id)] = F.interpolate(
-                            outputs[("c",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    
-                        outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs[("ch",scale, frame_id)] *  outputs[("color", frame_id, scale)] + outputs[("bh",scale, frame_id)]
+                #for scale in self.opt.scales:
+                outputs[("bh",scale, frame_id)] = F.interpolate(
+                    outputs[("b",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                outputs[("ch",scale, frame_id)] = F.interpolate(
+                    outputs[("c",scale,frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+            
+                outputs["refinedCB_"+str(frame_id)+"_"+str(scale)] = outputs[("ch",scale, frame_id)] *  outputs[("color", frame_id, scale)] + outputs[("bh",scale, frame_id)]
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
