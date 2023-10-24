@@ -342,7 +342,7 @@ class Trainer_Monodepth:
                     outputs[("ch",scale, f_i)] = F.interpolate(
                         outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 
-                    outputs["refinedCB_"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh",scale, f_i)]
+                    outputs[("color_refined", frame_id, s)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh",scale, f_i)]
 
         else:
             # Here we input all frames to the pose net (and predict all poses) together
@@ -501,7 +501,7 @@ class Trainer_Monodepth:
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color_flow", frame_id, scale)]
-                target = outputs["refinedCB_"+str(frame_id)+"_"+str(scale)]
+                target = outputs[("color_refined", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
                 loss_motion_flow += (
                     self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)])
@@ -759,7 +759,7 @@ class Trainer_Monodepth:
         rgb_map[1] -= 0.5*(normalized_flow_map[0] + normalized_flow_map[1])
         rgb_map[2] += normalized_flow_map[1]
         return rgb_map.clip(0,1)
-        
+
     def colormap(self, inputs, normalize=True, torch_transpose=True):
         if isinstance(inputs, torch.Tensor):
             inputs = inputs.detach().cpu().numpy()
