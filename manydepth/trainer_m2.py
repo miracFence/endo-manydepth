@@ -77,10 +77,6 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
-        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
-        self.models["motion_flow"].to(self.device)
-        self.parameters_to_train += list(self.models["motion_flow"].parameters())
-
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
                 self.models["pose_encoder"] = networks.ResnetEncoder(
@@ -323,7 +319,6 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
