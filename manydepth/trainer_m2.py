@@ -325,7 +325,7 @@ class Trainer_Monodepth:
 
                         outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                         outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                        input_original = inputs[("color", 0, 0)].detach()
+                        input_original = inputs[("color", f_i, 0)].detach()
                         outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * input_original + outputs[("bh", scale, f_i)]
 
         else:
