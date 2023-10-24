@@ -165,7 +165,15 @@ class MonodepthOptions:
                                  help="how many images the pose network gets",
                                  default="pairs",
                                  choices=["pairs", "all"])
-
+        self.parser.add_argument("--use_stereo",
+                                 help="if set, uses stereo pair for training",
+                                 action="store_true",
+                                 default=False)
+        self.parser.add_argument("--pose_model_type",
+                                 type=str,
+                                 help="normal or shared",
+                                 default="separate_resnet",
+                                 choices=["posecnn", "separate_resnet", "shared"])
         # SYSTEM options
         self.parser.add_argument("--no_cuda",
                                  help="if set disables CUDA",
