@@ -610,15 +610,15 @@ class Trainer_Monodepth:
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             disp = colormap(outputs[('mono_disp', s)][j, 0])
             wandb.log({"disp_mono/{}".format(j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-                for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
-                        wandb.log({
-                            "predictive_mask_{}_{}/{}".format(frame_id, s, j),
-                            outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
-                            },self.step)
+            for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
+                wandb.log({
+                    "predictive_mask_{}_{}/{}".format(frame_id, s, j),
+                    outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
+                    },self.step)
 
-                        wandb.log({
-                        "automask_{}/{}".format(s, j),
-                        outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
+                wandb.log({
+                "automask_{}/{}".format(s, j),
+                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
                   
 
     def save_opts(self):
