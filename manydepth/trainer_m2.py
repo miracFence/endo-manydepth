@@ -299,13 +299,16 @@ class Trainer_Monodepth:
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
                     # To maintain ordering we always pass frames in temporal order
+                    """
                     if f_i < 0:
                         pose_inputs = [pose_feats[f_i], pose_feats[0]]
                     else:
-                        pose_inputs = [pose_feats[0], pose_feats[f_i]]
+                        pose_inputs = [pose_feats[0], pose_feats[f_i]]"""
+
+                    pose_inputs = [pose_feats[f_i], pose_feats[0]]
 
                     if self.opt.pose_model_type == "separate_resnet":
-                        pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
+                        pose_inputs = [self.models["pose_encoder"](torch.cat(inputs_all, 1))]
                         
                     elif self.opt.pose_model_type == "posecnn":
                         pose_inputs = torch.cat(pose_inputs, 1)
@@ -427,8 +430,6 @@ class Trainer_Monodepth:
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
-                    
-                
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
