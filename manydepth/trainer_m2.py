@@ -406,7 +406,7 @@ class Trainer_Monodepth:
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
-                    padding_mode="border")
+                    padding_mode="border",align_corners=True)
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
@@ -613,8 +613,6 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            disp = self.colormap(outputs[('mono_disp', s)][j, 0])
-            wandb.log({"disp_mono/{}".format(j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                 wandb.log({
                     "predictive_mask_{}_{}/{}".format(frame_id, s, j),
