@@ -6,6 +6,11 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
+os.environ["MKL_NUM_THREADS"] = "1"  # noqa F402
+os.environ["NUMEXPR_NUM_THREADS"] = "1"  # noqa F402
+os.environ["OMP_NUM_THREADS"] = "1"  # noqa F402
+
 import numpy as np
 import time
 import random
