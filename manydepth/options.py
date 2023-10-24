@@ -176,8 +176,7 @@ class MonodepthOptions:
                                  choices=["posecnn", "separate_resnet", "shared"])
         self.parser.add_argument("--predictive_mask",
                                  help="if set, uses a predictive masking scheme as in Zhou et al",
-                                 action="store_true",
-                                 default= True)
+                                 action="store_true")
         # SYSTEM options
         self.parser.add_argument("--no_cuda",
                                  help="if set disables CUDA",
