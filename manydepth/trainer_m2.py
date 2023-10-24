@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 #from tensorboardX import SummaryWriter
 import wandb
 
-wandb.init(project="MySfMLearner2", entity="respinosa")
+wandb.init(project="MySfMLearner3", entity="respinosa")
 
 
 import json
@@ -94,6 +94,7 @@ class Trainer_Monodepth:
 
                 self.models["lighting"] = networks.LightingDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
+                self.parameters_to_train += list(self.models["lighting"].parameters())
 
             elif self.opt.pose_model_type == "shared":
                 self.models["pose"] = networks.PoseDecoder(
@@ -413,7 +414,7 @@ class Trainer_Monodepth:
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
-
+                    
                 outputs[("bh",scale, frame_id)] = F.interpolate(
                     outputs["b_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 outputs[("ch",scale, frame_id)] = F.interpolate(
