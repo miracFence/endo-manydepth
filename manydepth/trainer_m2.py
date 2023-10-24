@@ -58,11 +58,14 @@ class Trainer_Monodepth:
 
         self.num_scales = len(self.opt.scales)
         self.num_input_frames = len(self.opt.frame_ids)
-        self.num_pose_frames = 2
+        self.num_pose_frames = 2 if self.opt.pose_model_input == "pairs" else self.num_input_frames
 
         assert self.opt.frame_ids[0] == 0, "frame_ids must start with 0"
 
-        self.use_pose_net = True
+        self.use_pose_net = not (self.opt.use_stereo and self.opt.frame_ids == [0])
+
+        if self.opt.use_stereo:
+            self.opt.frame_ids.append("s")
 
         self.models["encoder"] = networks.ResnetEncoder(
             self.opt.num_layers, self.opt.weights_init == "pretrained")
@@ -157,9 +160,9 @@ class Trainer_Monodepth:
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
         self.val_iter = iter(self.val_loader)
 
-        self.writers = {}
-        for mode in ["train", "val"]:
-            self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
+        #self.writers = {}
+        #for mode in ["train", "val"]:
+        #    self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
 
         if not self.opt.no_ssim:
             self.ssim = SSIM()
@@ -648,7 +651,7 @@ class Trainer_Monodepth:
                 # save the sizes - these are needed at prediction time
                 to_save['height'] = self.opt.height
                 to_save['width'] = self.opt.width
-                #to_save['use_stereo'] = self.opt.use_stereo
+                to_save['use_stereo'] = self.opt.use_stereo
             torch.save(to_save, save_path)
 
         save_path = os.path.join(save_folder, "{}.pth".format("adam"))
