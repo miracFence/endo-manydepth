@@ -160,6 +160,11 @@ class MonodepthOptions:
                                  action='store_true',
                                  help="If set, will not apply static camera augmentation or "
                                       "zero cost volume augmentation during training")
+        self.parser.add_argument("--pose_model_input",
+                                 type=str,
+                                 help="how many images the pose network gets",
+                                 default="pairs",
+                                 choices=["pairs", "all"])
 
         # SYSTEM options
         self.parser.add_argument("--no_cuda",
