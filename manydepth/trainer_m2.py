@@ -321,7 +321,7 @@ class Trainer_Monodepth:
                     # Invert the matrix if the frame id is negative
                     """outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))"""
-                        
+
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0])
                     
@@ -479,7 +479,7 @@ class Trainer_Monodepth:
             if not self.opt.disable_automasking:
                 identity_reprojection_losses = []
                 for frame_id in self.opt.frame_ids[1:]:
-                    target = outputs[("color_refined", frame_id, scale)]
+                    target = outputs[("color", frame_id, scale)]
                     pred = inputs[("color", frame_id, source_scale)]
                     identity_reprojection_losses.append(
                         self.compute_reprojection_loss(pred, target))
