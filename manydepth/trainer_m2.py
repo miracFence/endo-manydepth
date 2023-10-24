@@ -64,9 +64,6 @@ class Trainer_Monodepth:
 
         self.use_pose_net = True
 
-        if self.opt.use_stereo:
-            self.opt.frame_ids.append("s")
-
         self.models["encoder"] = networks.ResnetEncoder(
             self.opt.num_layers, self.opt.weights_init == "pretrained")
         self.models["encoder"].to(self.device)
@@ -651,7 +648,7 @@ class Trainer_Monodepth:
                 # save the sizes - these are needed at prediction time
                 to_save['height'] = self.opt.height
                 to_save['width'] = self.opt.width
-                to_save['use_stereo'] = self.opt.use_stereo
+                #to_save['use_stereo'] = self.opt.use_stereo
             torch.save(to_save, save_path)
 
         save_path = os.path.join(save_folder, "{}.pth".format("adam"))
