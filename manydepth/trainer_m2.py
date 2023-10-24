@@ -77,6 +77,10 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
+        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
+        self.models["motion_flow"].to(self.device)
+        self.parameters_to_train += list(self.models["motion_flow"].parameters())
+
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
                 self.models["pose_encoder"] = networks.ResnetEncoder(
@@ -164,6 +168,9 @@ class Trainer_Monodepth:
         #self.writers = {}
         #for mode in ["train", "val"]:
         #    self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
+
+        self.spatial_transform = SpatialTransformer((self.opt.height, self.opt.width))
+        self.spatial_transform.to(self.device)
 
         if not self.opt.no_ssim:
             self.ssim = SSIM()
@@ -319,9 +326,12 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
+                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
 
         else:
             # Here we input all frames to the pose net (and predict all poses) together
@@ -414,13 +424,15 @@ class Trainer_Monodepth:
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
+
+                outputs[("color_flow", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)], outputs["mf_"+str(0)+"_"+str(frame_id)])
                     
                 outputs[("bh",scale, frame_id)] = F.interpolate(
                     outputs["b_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 outputs[("ch",scale, frame_id)] = F.interpolate(
                     outputs["c_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
             
-                outputs[("color_refined", frame_id, scale)] = outputs[("ch",scale, frame_id)] * outputs[("color", frame_id, scale)] + outputs[("bh", scale, frame_id)]
+                outputs[("color_refined", frame_id, scale)] = outputs[("ch",scale, frame_id)] * outputs[("color_flow", frame_id, scale)] + outputs[("bh", scale, frame_id)]
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
@@ -624,7 +636,7 @@ class Trainer_Monodepth:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id, s)][j].data)},step=self.step)
-                    #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["b_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
+                    wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_flow", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
