@@ -169,9 +169,6 @@ class Trainer_Monodepth:
         #for mode in ["train", "val"]:
         #    self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
 
-        self.spatial_transform = SpatialTransformer((self.opt.height, self.opt.width))
-        self.spatial_transform.to(self.device)
-
         if not self.opt.no_ssim:
             self.ssim = SSIM()
             self.ssim.to(self.device)
@@ -326,23 +323,10 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
-
+                    
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
-            """
-            for f_i in self.opt.frame_ids[1:]:
-                for scale in self.opt.scales:
-                    #outputs["color_motion_"+str(f_i)+"_"+str(scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
-                    
-                    outputs[("bh",scale, f_i)] = F.interpolate(
-                        outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    outputs[("ch",scale, f_i)] = F.interpolate(
-                        outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)].detach() + outputs[("bh",scale, f_i)]"""
 
         else:
             # Here we input all frames to the pose net (and predict all poses) together
@@ -435,15 +419,13 @@ class Trainer_Monodepth:
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
-
-                #outputs[("color_flow", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)], outputs["mf_"+str(0)+"_"+str(frame_id)])
-
+                    
                 outputs[("bh",scale, frame_id)] = F.interpolate(
-                        outputs["b_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                    outputs["b_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 outputs[("ch",scale, frame_id)] = F.interpolate(
                     outputs["c_"+str(scale)+"_"+str(frame_id)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                
-                outputs[("color_refined", frame_id, scale)] = outputs[("ch",scale, frame_id)] * outputs[("color", frame_id, scale)] + outputs[("bh",scale, frame_id)]
+            
+                outputs[("color_refined", frame_id, scale)] = outputs[("ch",scale, frame_id)] * outputs[("color", frame_id, scale)] + outputs[("bh", scale, frame_id)]
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
@@ -462,26 +444,6 @@ class Trainer_Monodepth:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         return reprojection_loss
-    
-    def get_motion_flow_loss(self,motion_map):
-        """A regularizer that encourages sparsity.
-        This regularizer penalizes nonzero values. Close to zero it behaves like an L1
-        regularizer, and far away from zero its strength decreases. The scale that
-        distinguishes "close" from "far" is the mean value of the absolute of
-        `motion_map`.
-        Args:
-            motion_map: A torch.Tensor of shape [B, C, H, W]
-        Returns:
-            A scalar torch.Tensor, the regularizer to be added to the training loss.
-        """
-        tensor_abs = torch.abs(motion_map)
-        mean = torch.mean(tensor_abs, dim=(2, 3), keepdim=True).detach()
-        # We used L0.5 norm here because it's more sparsity encouraging than L1.
-        # The coefficients are designed in a way that the norm asymptotes to L1 in
-        # the small value limit.
-        #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
-        return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
-
 
     def compute_losses(self, inputs, outputs):
         """Compute the reprojection and smoothness losses for a minibatch
@@ -492,7 +454,6 @@ class Trainer_Monodepth:
         for scale in self.opt.scales:
             loss = 0
             reprojection_losses = []
-            loss_motion_flow = 0
 
             if self.opt.v1_multiscale:
                 source_scale = scale
@@ -502,15 +463,11 @@ class Trainer_Monodepth:
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
             target = inputs[("color", 0, source_scale)]
-            
+
             for frame_id in self.opt.frame_ids[1:]:
+                #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color_refined", frame_id, scale)]
-                #pred = outputs[("color_flow", frame_id, scale)]
-                #target = outputs[("color_refined", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
-                """loss_motion_flow += (
-                    self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)])
-                )"""
 
             reprojection_losses = torch.cat(reprojection_losses, 1)
 
@@ -566,7 +523,6 @@ class Trainer_Monodepth:
                 outputs["identity_selection/{}".format(scale)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
-            #loss += 0.001 * loss_motion_flow / (2 ** scale)
             loss += to_optimise.mean()
 
             mean_disp = disp.mean(2, True).mean(3, True)
@@ -673,14 +629,10 @@ class Trainer_Monodepth:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id, s)][j].data)},step=self.step)
-                    #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_flow", frame_id, s)][j].data)},step=self.step)
+                    #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["b_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
-            flow = self.flow2rgb(f,32)
-            flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
             if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j):
@@ -750,21 +702,6 @@ class Trainer_Monodepth:
         else:
             print("Cannot find Adam weights so Adam is randomly initialized")
     
-        
-    def flow2rgb(self,flow_map, max_value):
-        flow_map_np = flow_map.detach().cpu().numpy()
-        _, h, w = flow_map_np.shape
-        flow_map_np[:,(flow_map_np[0] == 0) & (flow_map_np[1] == 0)] = float('nan')
-        rgb_map = np.ones((3,h,w)).astype(np.float32)
-        if max_value is not None:
-            normalized_flow_map = flow_map_np / max_value
-        else:
-            normalized_flow_map = flow_map_np / (np.abs(flow_map_np).max())
-        rgb_map[0] += normalized_flow_map[0]
-        rgb_map[1] -= 0.5*(normalized_flow_map[0] + normalized_flow_map[1])
-        rgb_map[2] += normalized_flow_map[1]
-        return rgb_map.clip(0,1)
-
     def colormap(self, inputs, normalize=True, torch_transpose=True):
         if isinstance(inputs, torch.Tensor):
             inputs = inputs.detach().cpu().numpy()
