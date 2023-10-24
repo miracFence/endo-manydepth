@@ -555,8 +555,7 @@ class Trainer_Monodepth:
                                   sec_to_hm_str(time_sofar), sec_to_hm_str(training_time_left)))
     """
     def log(self, mode, inputs, outputs, losses):
-        """Write an event to the tensorboard events file
-        """
+
         writer = self.writers[mode]
         for l, v in losses.items():
             writer.add_scalar("{}".format(l), v, self.step)
