@@ -336,8 +336,7 @@ class Trainer_Monodepth:
                 for scale in self.opt.scales:
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    input_original = inputs[("color", 0, 0)].detach()
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * input_original + outputs[("bh", scale, f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
 
         else:
             # Here we input all frames to the pose net (and predict all poses) together
@@ -466,16 +465,16 @@ class Trainer_Monodepth:
 
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
-            #target = inputs[("color", 0, source_scale)]
+            target = inputs[("color", 0, source_scale)]
 
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
+                #target = outputs[("color_refined", frame_id, scale)]
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, outputs[("color_refined", frame_id, scale)]))
 
             reprojection_losses = torch.cat(reprojection_losses, 1)
-
+            """
             if not self.opt.disable_automasking:
                 identity_reprojection_losses = []
                 for frame_id in self.opt.frame_ids[1:]:
@@ -492,19 +491,19 @@ class Trainer_Monodepth:
                     # save both images, and do min all at once below
                     identity_reprojection_loss = identity_reprojection_losses
 
-            elif self.opt.predictive_mask:
-                # use the predicted mask
-                mask = outputs["predictive_mask"]["disp", scale]
-                if not self.opt.v1_multiscale:
-                    mask = F.interpolate(
-                        mask, [self.opt.height, self.opt.width],
-                        mode="bilinear", align_corners=False)
+            elif self.opt.predictive_mask:"""
+            # use the predicted mask
+            mask = outputs["predictive_mask"]["disp", scale]
+            if not self.opt.v1_multiscale:
+                mask = F.interpolate(
+                    mask, [self.opt.height, self.opt.width],
+                    mode="bilinear", align_corners=False)
 
-                reprojection_losses *= mask
+            reprojection_losses *= mask
 
-                # add a loss pushing mask to 1 (using nn.BCELoss for stability)
-                weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
-                loss += weighting_loss.mean()
+            # add a loss pushing mask to 1 (using nn.BCELoss for stability)
+            weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
+            loss += weighting_loss.mean()
 
             if self.opt.avg_reprojection:
                 reprojection_loss = reprojection_losses.mean(1, keepdim=True)
