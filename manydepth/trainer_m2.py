@@ -58,11 +58,11 @@ class Trainer_Monodepth:
 
         self.num_scales = len(self.opt.scales)
         self.num_input_frames = len(self.opt.frame_ids)
-        self.num_pose_frames = 2 if self.opt.pose_model_input == "pairs" else self.num_input_frames
+        self.num_pose_frames = 2
 
         assert self.opt.frame_ids[0] == 0, "frame_ids must start with 0"
 
-        self.use_pose_net = not (self.opt.use_stereo and self.opt.frame_ids == [0])
+        self.use_pose_net = True
 
         if self.opt.use_stereo:
             self.opt.frame_ids.append("s")
