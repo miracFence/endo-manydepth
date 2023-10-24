@@ -451,6 +451,26 @@ class Trainer_Monodepth:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         return reprojection_loss
+    
+    def get_motion_flow_loss(self,motion_map):
+        """A regularizer that encourages sparsity.
+        This regularizer penalizes nonzero values. Close to zero it behaves like an L1
+        regularizer, and far away from zero its strength decreases. The scale that
+        distinguishes "close" from "far" is the mean value of the absolute of
+        `motion_map`.
+        Args:
+            motion_map: A torch.Tensor of shape [B, C, H, W]
+        Returns:
+            A scalar torch.Tensor, the regularizer to be added to the training loss.
+        """
+        tensor_abs = torch.abs(motion_map)
+        mean = torch.mean(tensor_abs, dim=(2, 3), keepdim=True).detach()
+        # We used L0.5 norm here because it's more sparsity encouraging than L1.
+        # The coefficients are designed in a way that the norm asymptotes to L1 in
+        # the small value limit.
+        #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
+        return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
+
 
     def compute_losses(self, inputs, outputs):
         """Compute the reprojection and smoothness losses for a minibatch
@@ -461,6 +481,7 @@ class Trainer_Monodepth:
         for scale in self.opt.scales:
             loss = 0
             reprojection_losses = []
+            loss_motion_flow = 0
 
             if self.opt.v1_multiscale:
                 source_scale = scale
@@ -475,6 +496,9 @@ class Trainer_Monodepth:
                 #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color_refined", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+                loss_motion_flow += (
+                    self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)])
+                )
 
             reprojection_losses = torch.cat(reprojection_losses, 1)
 
@@ -530,6 +554,7 @@ class Trainer_Monodepth:
                 outputs["identity_selection/{}".format(scale)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
+            loss += 0.001 * loss_motion_flow / (2 ** scale)
             loss += to_optimise.mean()
 
             mean_disp = disp.mean(2, True).mean(3, True)
