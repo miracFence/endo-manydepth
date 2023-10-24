@@ -331,12 +331,12 @@ class Trainer_Monodepth:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
                         
-            
+            """
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]"""
 
         else:
             # Here we input all frames to the pose net (and predict all poses) together
@@ -471,7 +471,7 @@ class Trainer_Monodepth:
                 #pred = outputs[("color", frame_id, scale)]
                 #target = outputs[("color_refined", frame_id, scale)]
                 pred = outputs[("color", frame_id, scale)]
-                reprojection_losses.append(self.compute_reprojection_loss(pred, outputs[("color_refined", frame_id, scale)]))
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target))
 
             reprojection_losses = torch.cat(reprojection_losses, 1)
             """
