@@ -613,12 +613,13 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
-                wandb.log({
-                    "predictive_mask_{}_{}/{}".format(frame_id, s, j),
-                    outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
-                    },self.step)
-
+            if self.opt.predictive_mask:
+                for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
+                    wandb.log({
+                        "predictive_mask_{}_{}/{}".format(frame_id, s, j),
+                        outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
+                        },self.step)
+            elif not self.opt.disable_automasking:
                 wandb.log({
                 "automask_{}/{}".format(s, j),
                 outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
