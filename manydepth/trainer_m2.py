@@ -501,7 +501,7 @@ class Trainer_Monodepth:
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color_flow", frame_id, scale)]
-                target = outputs["refinedCB_"+str(f_i)+"_"+str(scale)]
+                target = outputs["refinedCB_"+str(frame_id)+"_"+str(scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
                 loss_motion_flow += (
                     self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)])
@@ -672,6 +672,10 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
+            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            flow = self.flow2rgb(f,32)
+            flow = torch.from_numpy(flow)
+            wandb.log({mode+"_Motion_Flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
             if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j):
@@ -741,6 +745,21 @@ class Trainer_Monodepth:
         else:
             print("Cannot find Adam weights so Adam is randomly initialized")
     
+        
+    def flow2rgb(self,flow_map, max_value):
+        flow_map_np = flow_map.detach().cpu().numpy()
+        _, h, w = flow_map_np.shape
+        flow_map_np[:,(flow_map_np[0] == 0) & (flow_map_np[1] == 0)] = float('nan')
+        rgb_map = np.ones((3,h,w)).astype(np.float32)
+        if max_value is not None:
+            normalized_flow_map = flow_map_np / max_value
+        else:
+            normalized_flow_map = flow_map_np / (np.abs(flow_map_np).max())
+        rgb_map[0] += normalized_flow_map[0]
+        rgb_map[1] -= 0.5*(normalized_flow_map[0] + normalized_flow_map[1])
+        rgb_map[2] += normalized_flow_map[1]
+        return rgb_map.clip(0,1)
+        
     def colormap(self, inputs, normalize=True, torch_transpose=True):
         if isinstance(inputs, torch.Tensor):
             inputs = inputs.detach().cpu().numpy()
