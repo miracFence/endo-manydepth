@@ -611,9 +611,9 @@ class Trainer_Monodepth:
                     #wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["refinedCB_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["b_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
-            disp = colormap(outputs[("disp", s)][j, 0])
+            disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            disp = colormap(outputs[('mono_disp', s)][j, 0])
+            disp = self.colormap(outputs[('mono_disp', s)][j, 0])
             wandb.log({"disp_mono/{}".format(j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                 wandb.log({
@@ -684,7 +684,7 @@ class Trainer_Monodepth:
         else:
             print("Cannot find Adam weights so Adam is randomly initialized")
     
-    def colormap(inputs, normalize=True, torch_transpose=True):
+    def colormap(self, inputs, normalize=True, torch_transpose=True):
         if isinstance(inputs, torch.Tensor):
             inputs = inputs.detach().cpu().numpy()
 
