@@ -308,7 +308,7 @@ class Trainer_Monodepth:
                     pose_inputs = [pose_feats[f_i], pose_feats[0]]
 
                     if self.opt.pose_model_type == "separate_resnet":
-                        pose_inputs = [self.models["pose_encoder"](torch.cat(inputs_all, 1))]
+                        pose_inputs = [self.models["pose_encoder"](torch.cat(pose_inputs, 1))]
                         
                     elif self.opt.pose_model_type == "posecnn":
                         pose_inputs = torch.cat(pose_inputs, 1)
