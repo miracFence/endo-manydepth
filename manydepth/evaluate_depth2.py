@@ -110,7 +110,7 @@ def evaluate(opt):
         pred_disps = []
 
         print("-> Computing predictions with size {}x{}".format(
-            encoder_dict['width'], encoder_dict['height']))
+            WIDTH, HEIGHT))
 
         with torch.no_grad():
             for data in dataloader:
