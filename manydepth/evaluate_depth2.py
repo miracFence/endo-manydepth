@@ -95,7 +95,7 @@ def evaluate(opt):
         encoder = networks.ResnetEncoder(opt.num_layers, False)
         depth_decoder = networks.DepthDecoder(encoder.num_ch_enc, scales=range(4))
 
-        encoder2 = networks.ResnetEncoderIIL(opt.num_layers, False)
+        #encoder2 = networks.ResnetEncoder(opt.num_layers, False)
 
         model_dict = encoder.state_dict()
         encoder.load_state_dict({k: v for k, v in encoder_dict.items() if k in model_dict})
@@ -119,17 +119,11 @@ def evaluate(opt):
                 if opt.post_process:
                     # Post-processed results require each image to have two forward passes
                     input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
-                a = F.interpolate(input_color, [256 + 2, 320 + 2], mode="bilinear", align_corners=True)
-                #features = en(inputs["color_aug", 0, 0])
-                dept_iif = get_ilumination_invariant_features(a)
 
-                iif = encoder2(dept_iif)
-                b = encoder(input_color)
-                input_combined = b
-                input_combined[:][:] = zip(b[:][:], iif[:][:])
-                output = depth_decoder(input_combined)
+                features = encoder(inputs["color_aug", 0, 0])
+                output = depth_decoder(features)
                 
-                pred_disp, _ = disp_to_depth(output["disp_0"], opt.min_depth, opt.max_depth)
+                pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
 
                 if opt.post_process:
