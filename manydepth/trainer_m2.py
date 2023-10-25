@@ -77,6 +77,10 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
+        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["ii_encoder"].num_ch_enc, self.opt.scales)
+        self.models["motion_flow"].to(self.device)
+        self.parameters_to_train += list(self.models["motion_flow"].parameters())
+
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
                 self.models["pose_encoder"] = networks.ResnetEncoder(
@@ -168,6 +172,9 @@ class Trainer_Monodepth:
         if not self.opt.no_ssim:
             self.ssim = SSIM()
             self.ssim.to(self.device)
+
+        self.spatial_transform = SpatialTransformer((self.opt.height, self.opt.width))
+        self.spatial_transform.to(self.device)
 
         self.backproject_depth = {}
         self.project_3d = {}
@@ -326,10 +333,12 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
 
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
+                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         
             
             for f_i in self.opt.frame_ids[1:]:
@@ -430,6 +439,8 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
 
+                outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)],outputs["mf_"+str(0)+"_"+str(frame_id)])
+
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
                         inputs[("color", frame_id, source_scale)]
@@ -447,17 +458,37 @@ class Trainer_Monodepth:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         return reprojection_loss
+    
+    def get_motion_flow_loss(self,motion_map):
+        """A regularizer that encourages sparsity.
+        This regularizer penalizes nonzero values. Close to zero it behaves like an L1
+        regularizer, and far away from zero its strength decreases. The scale that
+        distinguishes "close" from "far" is the mean value of the absolute of
+        `motion_map`.
+        Args:
+            motion_map: A torch.Tensor of shape [B, C, H, W]
+        Returns:
+            A scalar torch.Tensor, the regularizer to be added to the training loss.
+        """
+        tensor_abs = torch.abs(motion_map)
+        mean = torch.mean(tensor_abs, dim=(2, 3), keepdim=True).detach()
+        # We used L0.5 norm here because it's more sparsity encouraging than L1.
+        # The coefficients are designed in a way that the norm asymptotes to L1 in
+        # the small value limit.
+        #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
+        return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
 
     def compute_losses(self, inputs, outputs):
         """Compute the reprojection and smoothness losses for a minibatch
         """
         losses = {}
         loss_reprojection = 0
+        loss_motion_flow = 0
         total_loss = 0
 
         for scale in self.opt.scales:
             loss = 0
-            reprojection_losses = []
+            #reprojection_losses = []
 
             if self.opt.v1_multiscale:
                 source_scale = scale
@@ -478,13 +509,10 @@ class Trainer_Monodepth:
 
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
-                #target = outputs[("color_refined", frame_id, scale)]
-                #pred = outputs[("color", frame_id, scale)]
-                #loss_reprojection += self.compute_reprojection_loss(outputs[("color", frame_id, scale)], outputs[("color_refined", frame_id, scale)])
-                loss_reprojection += (self.compute_reprojection_loss(outputs[("color", frame_id, scale)], outputs[("color_refined", frame_id, scale)]) * mask).sum() / mask.sum()
-                #self.compute_reprojection_loss(outputs["color_"+str(frame_id)+"_"+str(scale)], outputs["refinedCB_"+str(frame_id)+"_"+str(scale)]) * occu_mask_backward).sum() / occu_mask_backward.sum()
+                target = outputs[("color_refined", frame_id, scale)]
+                loss_reprojection += (self.compute_reprojection_loss(pred,target) * mask).sum() / mask.sum()
+                loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
 
-            #reprojection_losses = torch.cat(reprojection_losses, 1)
             """
             if not self.opt.disable_automasking:
                 identity_reprojection_losses = []
@@ -524,8 +552,8 @@ class Trainer_Monodepth:
             if self.opt.avg_reprojection:
                 reprojection_loss = reprojection_losses.mean(1, keepdim=True)
             else:
-                reprojection_loss = reprojection_losses"""
-            """
+                reprojection_loss = reprojection_losses
+            
             if not self.opt.disable_automasking:
                 # add random numbers to break ties
                 identity_reprojection_loss += torch.randn(
@@ -546,7 +574,7 @@ class Trainer_Monodepth:
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
             """
             loss += loss_reprojection / 2.0
-
+            loss += 0.001 * loss_motion_flow / (2 ** scale)
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
@@ -655,15 +683,15 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            if self.opt.predictive_mask:
-                for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
-                    wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j):
-                        outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
-                        },self.step)
-            elif not self.opt.disable_automasking:
+            #if self.opt.predictive_mask:
+            for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
+                wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j):
+                    outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
+                    },self.step)
+            """elif not self.opt.disable_automasking:
                 wandb.log({
                 "automask_{}/{}".format(s, j):
-                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
+                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)"""
                   
 
     def save_opts(self):
