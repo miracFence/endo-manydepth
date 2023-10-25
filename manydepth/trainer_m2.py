@@ -495,7 +495,7 @@ class Trainer_Monodepth:
 
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
-            target = inputs[("color", 0, source_scale)]
+            #target = inputs[("color", 0, source_scale)]
 
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("color", frame_id, scale)]
@@ -509,6 +509,7 @@ class Trainer_Monodepth:
                 identity_reprojection_losses = []
                 for frame_id in self.opt.frame_ids[1:]:
                     pred = inputs[("color", frame_id, source_scale)]
+                    target = outputs[("color_refined", frame_id, scale)]
                     identity_reprojection_losses.append(
                         self.compute_reprojection_loss(pred, target))
 
@@ -755,7 +756,7 @@ class Trainer_Monodepth:
             elif not self.opt.disable_automasking:
                 wandb.log({
                 "automask_{}/{}".format(s, j):
-                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
+                wandb.Image(outputs["identity_selection/{}".format(s)][j][None, ...])}, self.step)
                   
 
     def save_opts(self):
