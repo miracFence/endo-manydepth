@@ -512,23 +512,23 @@ class Trainer_Monodepth:
                 #target = inputs[("color", 0, source_scale)]
                 #pred = outputs[("color", frame_id, scale)]
                 #reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+                target = inputs[("color", 0, 0)]
                 pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
                 rep = self.compute_reprojection_loss(pred, target)
                 pred = inputs[("color", frame_id, source_scale)]
                 rep_identity = self.compute_reprojection_loss(pred, target)
                 #identity_reprojection_losses = torch.cat(rep, 1)
                 #reprojection_losses = torch.cat(rep_identity, 1)
-                reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
+                reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,identity_reprojection_losses)
                 
-                loss_reprojection += (rep * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                """
+                target = inputs[("color", 0, source_scale)]
                 pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
+                loss_reprojection + = (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+
 
 
                 
-                loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()"""
+                #loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
             #print(reprojection_loss_mask.shape)
             """
             for frame_id in self.opt.frame_ids[1:]:
