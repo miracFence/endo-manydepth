@@ -486,6 +486,7 @@ class Trainer_Monodepth:
 
         for scale in self.opt.scales:
             loss = 0
+            identity_reprojection_loss = 0
             reprojection_losses = []
 
             if self.opt.v1_multiscale:
@@ -523,8 +524,7 @@ class Trainer_Monodepth:
             
             if not self.opt.disable_automasking:
                 # add random numbers to break ties
-                identity_reprojection_loss += torch.randn(
-                    identity_reprojection_loss.shape).to(self.device) * 0.00001
+                identity_reprojection_loss += torch.randn(identity_reprojection_loss.shape).to(self.device) * 0.00001
 
             reprojection_loss_mask = self.compute_loss_masks(reprojection_loss,
                                                              identity_reprojection_loss)
