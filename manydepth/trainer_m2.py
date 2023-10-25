@@ -502,7 +502,7 @@ class Trainer_Monodepth:
                     mask, [self.opt.height, self.opt.width],
                     mode="bilinear", align_corners=False)"""
 
-            print(mask.shape)
+            #print(mask.shape)
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
             #target = inputs[("color", 0, source_scale)]
