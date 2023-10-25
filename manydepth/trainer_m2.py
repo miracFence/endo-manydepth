@@ -487,7 +487,6 @@ class Trainer_Monodepth:
         for scale in self.opt.scales:
             loss = 0
             #identity_reprojection_loss = 0
-            loss_reprojection = 0
             reprojection_losses = []
 
             if self.opt.v1_multiscale:
@@ -499,7 +498,11 @@ class Trainer_Monodepth:
             color = inputs[("color", 0, scale)]
             #target = inputs[("color", 0, source_scale)]
 
-            
+            for frame_id in self.opt.frame_ids[1:]:
+                #pred = outputs[("color", frame_id, scale)]
+                pred = outputs[("color", frame_id, scale)]
+                target = outputs[("color_refined", frame_id, scale)]
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target))
 
             #reprojection_losses = torch.cat(reprojection_losses, 1)
 
@@ -522,13 +525,13 @@ class Trainer_Monodepth:
             else:
                 identity_reprojection_loss = None
             
-            """
+
             if self.opt.avg_reprojection:
                 reprojection_loss = reprojection_losses.mean(1, keepdim=True)
             else:
                 # differently to Monodepth2, compute mins as we go
-                reprojection_loss, _ = torch.min(reprojection_losses, dim=1, keepdim=True)
-            """
+                #reprojection_loss, _ = torch.min(reprojection_losses, dim=1, keepdim=True)
+                reprojection_loss = reprojection_losses
 
             if not self.opt.disable_automasking:
                 # add random numbers to break ties
@@ -540,14 +543,8 @@ class Trainer_Monodepth:
                                                              identity_reprojection_loss)
 
             # standard reprojection loss
-            #reprojection_loss = reprojection_loss * reprojection_loss_mask
-            #reprojection_loss = reprojection_loss.sum() / (reprojection_loss_mask.sum() + 1e-7)
-
-            for frame_id in self.opt.frame_ids[1:]:
-                #pred = outputs[("color", frame_id, scale)]
-                pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
-                loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+            reprojection_loss = reprojection_loss * reprojection_loss_mask
+            reprojection_loss = reprojection_loss.sum() / (reprojection_loss_mask.sum() + 1e-7)
 
             """
             elif self.opt.predictive_mask:
@@ -588,7 +585,7 @@ class Trainer_Monodepth:
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
             loss += to_optimise.mean()"""
-            loss += loss_reprojection / 2.0
+            loss += reprojection_loss
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
