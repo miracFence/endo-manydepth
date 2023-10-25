@@ -494,13 +494,13 @@ class Trainer_Monodepth:
             else:
                 source_scale = 0
 
-            
+            """
             # use the predicted mask
             mask = outputs["predictive_mask"]["disp", scale]
             if not self.opt.v1_multiscale:
                 mask = F.interpolate(
                     mask, [self.opt.height, self.opt.width],
-                    mode="bilinear", align_corners=False)
+                    mode="bilinear", align_corners=False)"""
 
             print(mask.shape)
             disp = outputs[("disp", scale)]
@@ -519,18 +519,18 @@ class Trainer_Monodepth:
 
             reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,
                                                              identity_reprojection_losses)
-            print(reprojection_loss_mask.shape)
+            #print(reprojection_loss_mask.shape)
 
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
                 target = outputs[("color_refined", frame_id, scale)]
-                loss_reprojection += (self.compute_reprojection_loss(pred,target) * mask).sum() / mask.sum()
+                loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             #loss_reprojection *= mask
-
+            """
             # add a loss pushing mask to 1 (using nn.BCELoss for stability)
             weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
-            loss += weighting_loss.mean()
+            loss += weighting_loss.mean()"""
             
             loss += loss_reprojection / 2.0
             loss += 0.001 * loss_motion_flow / (2 ** scale)
