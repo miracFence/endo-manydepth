@@ -13,6 +13,7 @@ from options import MonodepthOptions
 import datasets
 import networks
 from layers import *
+from utils import *
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
@@ -81,7 +82,8 @@ def evaluate(opt):
         decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
         
         encoder_dict = torch.load(encoder_path)
-        HEIGHT, WIDTH = encoder_dict['height'], encoder_dict['width']
+        HEIGHT, WIDTH = self.opt.height, self.opt.width
+        #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
 
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
