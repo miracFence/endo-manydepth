@@ -521,7 +521,7 @@ class Trainer_Monodepth:
                 #reprojection_losses = torch.cat(rep_identity, 1)
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 
-                target = inputs[("color", 0, source_scale)]
+                target = outputs[("color_refined", frame_id, scale)]
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
 
