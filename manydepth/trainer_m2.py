@@ -482,7 +482,7 @@ class Trainer_Monodepth:
 
         losses = {}
         loss_reprojection = 0
-        loss_motion_flow = 0
+        #loss_motion_flow = 0
         total_loss = 0
 
         for scale in self.opt.scales:
@@ -541,7 +541,7 @@ class Trainer_Monodepth:
             loss += weighting_loss.mean()"""
             
             loss += loss_reprojection / 2.0
-            loss += 0.001 * loss_motion_flow / (2 ** scale)
+            #loss += 0.001 * loss_motion_flow / (2 ** scale)
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
