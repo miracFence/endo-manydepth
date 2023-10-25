@@ -570,10 +570,9 @@ class Trainer_Monodepth:
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
-
+    """
     def compute_losses_(self, inputs, outputs):
-        """Compute the reprojection and smoothness losses for a minibatch
-        """
+
         losses = {}
         loss_reprojection = 0
         loss_motion_flow = 0
@@ -605,36 +604,6 @@ class Trainer_Monodepth:
                 target = outputs[("color_refined", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred,target) * mask).sum() / mask.sum()
                 loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
-
-            """
-            if not self.opt.disable_automasking:
-                identity_reprojection_losses = []
-                for frame_id in self.opt.frame_ids[1:]:
-                    target = outputs[("color", frame_id, scale)]
-                    pred = inputs[("color", frame_id, source_scale)]
-                    identity_reprojection_losses.append(
-                        self.compute_reprojection_loss(pred, target))
-
-                identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
-
-                if self.opt.avg_reprojection:
-                    identity_reprojection_loss = identity_reprojection_losses.mean(1, keepdim=True)
-                else:
-                    # save both images, and do min all at once below
-                    identity_reprojection_loss = identity_reprojection_losses
-
-            elif self.opt.predictive_mask:"""
-            """
-            # use the predicted mask
-            mask = outputs["predictive_mask"]["disp", scale]
-            if not self.opt.v1_multiscale:
-                mask = F.interpolate(
-                    mask, [self.opt.height, self.opt.width],
-                    mode="bilinear", align_corners=False)   
-
-                    loss_reprojection += (
-                    self.compute_reprojection_loss(outputs["color_"+str(frame_id)+"_"+str(scale)], outputs["refinedCB_"+str(frame_id)+"_"+str(scale)]) * occu_mask_backward).sum() / occu_mask_backward.sum()
-            """
             #loss_reprojection *= mask
 
             # add a loss pushing mask to 1 (using nn.BCELoss for stability)
@@ -678,7 +647,7 @@ class Trainer_Monodepth:
 
         total_loss /= self.num_scales
         losses["loss"] = total_loss
-        return losses
+        return losses"""
 
     def compute_depth_losses(self, inputs, outputs, losses):
         """Compute depth metrics, to allow monitoring during training
