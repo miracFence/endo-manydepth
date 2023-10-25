@@ -487,8 +487,7 @@ class Trainer_Monodepth:
 
         for scale in self.opt.scales:
             loss = 0
-            reprojection_losses = []
-            identity_reprojection_losses = []
+
             if self.opt.v1_multiscale:
                 source_scale = scale
             else:
@@ -508,6 +507,8 @@ class Trainer_Monodepth:
             #target = inputs[("color", 0, source_scale)]
             
             for frame_id in self.opt.frame_ids[1:]:
+                reprojection_losses = []
+                identity_reprojection_losses = []
                 target = inputs[("color", 0, source_scale)]
                 pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
@@ -516,8 +517,15 @@ class Trainer_Monodepth:
                 identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
                 reprojection_losses = torch.cat(reprojection_losses, 1)
                 reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,identity_reprojection_losses)
-            #print(reprojection_loss_mask.shape)
 
+                pred = outputs[("color", frame_id, scale)]
+                target = outputs[("color_refined", frame_id, scale)]
+
+
+                
+                loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+            #print(reprojection_loss_mask.shape)
+            """
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
                 target = outputs[("color_refined", frame_id, scale)]
@@ -526,7 +534,7 @@ class Trainer_Monodepth:
                 
                 loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
-            #loss_reprojection *= mask
+            #loss_reprojection *= mask"""
             """
             # add a loss pushing mask to 1 (using nn.BCELoss for stability)
             weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
