@@ -523,7 +523,7 @@ class Trainer_Monodepth:
                 
                 target = inputs[("color", 0, source_scale)]
                 pred = outputs[("color", frame_id, scale)]
-                loss_reprojection + = (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
 
 
 
