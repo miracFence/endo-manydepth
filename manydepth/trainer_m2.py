@@ -77,7 +77,7 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
-        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["ii_encoder"].num_ch_enc, self.opt.scales)
+        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["motion_flow"].to(self.device)
         self.parameters_to_train += list(self.models["motion_flow"].parameters())
 
