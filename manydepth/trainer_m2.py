@@ -487,13 +487,14 @@ class Trainer_Monodepth:
 
         for scale in self.opt.scales:
             loss = 0
-            #reprojection_losses = []
-
+            reprojection_losses = []
+            identity_reprojection_losses = []
             if self.opt.v1_multiscale:
                 source_scale = scale
             else:
                 source_scale = 0
 
+            
             # use the predicted mask
             mask = outputs["predictive_mask"]["disp", scale]
             if not self.opt.v1_multiscale:
@@ -501,10 +502,24 @@ class Trainer_Monodepth:
                     mask, [self.opt.height, self.opt.width],
                     mode="bilinear", align_corners=False)
 
-            #print(mask.shape)
+            print(mask.shape)
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
             #target = inputs[("color", 0, source_scale)]
+
+            for frame_id in self.opt.frame_ids[1:]:
+                target = inputs[("color", 0, source_scale)]
+                pred = outputs[("color", frame_id, scale)]
+                reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+                pred = inputs[("color", frame_id, source_scale)]
+                identity_reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+
+            identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
+            reprojection_losses = torch.cat(reprojection_losses, 1)
+
+            reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,
+                                                             identity_reprojection_losses)
+            print(reprojection_loss_mask.shape)
 
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
