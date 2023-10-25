@@ -82,7 +82,7 @@ def evaluate(opt):
         decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
         
         encoder_dict = torch.load(encoder_path)
-        HEIGHT, WIDTH = self.opt.height, self.opt.width
+        HEIGHT, WIDTH = 256, 320
         #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
 
