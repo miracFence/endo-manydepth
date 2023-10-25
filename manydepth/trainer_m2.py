@@ -343,10 +343,10 @@ class Trainer_Monodepth:
             
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
-                    outputs[("color_motion", frame_id, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(frame_id)])
+                    outputs[("color_motion", f_i, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * outputs[("color_motion", frame_id, scale)] + outputs[("bh", scale, f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * outputs[("color_motion", f_i, scale)] + outputs[("bh", scale, f_i)]
 
 
         else:
