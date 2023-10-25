@@ -516,11 +516,24 @@ class Trainer_Monodepth:
                 identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
 
                 if self.opt.avg_reprojection:
-                    identity_reprojection_loss = identity_reprojection_losses.mean(1, keepdim=True)
+                    reprojection_loss = reprojection_losses.mean(1, keepdim=True)
                 else:
-                    # save both images, and do min all at once below
-                    identity_reprojection_loss = identity_reprojection_losses
+                    # differently to Monodepth2, compute mins as we go
+                    reprojection_loss, _ = torch.min(reprojection_losses, dim=1, keepdim=True)
+            
+            if not self.opt.disable_automasking:
+                # add random numbers to break ties
+                identity_reprojection_loss += torch.randn(
+                    identity_reprojection_loss.shape).to(self.device) * 0.00001
 
+            reprojection_loss_mask = self.compute_loss_masks(reprojection_loss,
+                                                             identity_reprojection_loss)
+
+            # standard reprojection loss
+            reprojection_loss = reprojection_loss * reprojection_loss_mask
+            reprojection_loss = reprojection_loss.sum() / (reprojection_loss_mask.sum() + 1e-7)
+
+            """
             elif self.opt.predictive_mask:
                 # use the predicted mask
                 mask = outputs["predictive_mask"]["disp", scale]
@@ -558,8 +571,8 @@ class Trainer_Monodepth:
                 outputs["identity_selection/{}".format(scale)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
-            loss += to_optimise.mean()
-
+            loss += to_optimise.mean()"""
+            loss += reprojection_loss
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
@@ -649,6 +662,23 @@ class Trainer_Monodepth:
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses"""
+
+    @staticmethod
+    def compute_loss_masks(reprojection_loss, identity_reprojection_loss):
+        """ Compute loss masks for each of standard reprojection and depth hint
+        reprojection"""
+
+        if identity_reprojection_loss is None:
+            # we are not using automasking - standard reprojection loss applied to all pixels
+            reprojection_loss_mask = torch.ones_like(reprojection_loss)
+
+        else:
+            # we are using automasking
+            all_losses = torch.cat([reprojection_loss, identity_reprojection_loss], dim=1)
+            idxs = torch.argmin(all_losses, dim=1, keepdim=True)
+            reprojection_loss_mask = (idxs == 0).float()
+
+        return reprojection_loss_mask
 
     def compute_depth_losses(self, inputs, outputs, losses):
         """Compute depth metrics, to allow monitoring during training
