@@ -477,10 +477,10 @@ class Trainer_Monodepth:
         # the small value limit.
         #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
         return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
-
+    """
     def compute_losses(self, inputs, outputs):
-        """Compute the reprojection and smoothness losses for a minibatch
-        """
+
+
         losses = {}
         total_loss = 0
 
@@ -501,7 +501,7 @@ class Trainer_Monodepth:
             for frame_id in self.opt.frame_ids[1:]:
                 #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
+                #target = outputs[("color_refined", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
 
             reprojection_losses = torch.cat(reprojection_losses, 1)
@@ -548,7 +548,7 @@ class Trainer_Monodepth:
             reprojection_loss = reprojection_loss * reprojection_loss_mask
             reprojection_loss = reprojection_loss.sum() / (reprojection_loss_mask.sum())
 
-            """
+            
             elif self.opt.predictive_mask:
                 # use the predicted mask
                 mask = outputs["predictive_mask"]["disp", scale]
@@ -586,7 +586,7 @@ class Trainer_Monodepth:
                 outputs["identity_selection/{}".format(scale)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
 
-            loss += to_optimise.mean()"""
+            loss += to_optimise.mean()
             loss += reprojection_loss
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
@@ -598,9 +598,9 @@ class Trainer_Monodepth:
 
         total_loss /= self.num_scales
         losses["loss"] = total_loss
-        return losses
-    """
-    def compute_losses_(self, inputs, outputs):
+        return losses"""
+    
+    def compute_losses(self, inputs, outputs):
 
         losses = {}
         loss_reprojection = 0
@@ -632,37 +632,12 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 target = outputs[("color_refined", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred,target) * mask).sum() / mask.sum()
-                loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
+                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             #loss_reprojection *= mask
 
             # add a loss pushing mask to 1 (using nn.BCELoss for stability)
             weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
             loss += weighting_loss.mean()
-
-            
-            if self.opt.avg_reprojection:
-                reprojection_loss = reprojection_losses.mean(1, keepdim=True)
-            else:
-                reprojection_loss = reprojection_losses
-            
-            if not self.opt.disable_automasking:
-                # add random numbers to break ties
-                identity_reprojection_loss += torch.randn(
-                    identity_reprojection_loss.shape, device=self.device) * 0.00001
-
-                combined = torch.cat((identity_reprojection_loss, reprojection_loss), dim=1)
-            else:
-            
-            combined = reprojection_loss
-
-            if combined.shape[1] == 1:
-                to_optimise = combined
-            else:
-                to_optimise, idxs = torch.min(combined, dim=1)
-
-            if not self.opt.disable_automasking:
-                outputs["identity_selection/{}".format(scale)] = (
-                    idxs > identity_reprojection_loss.shape[1] - 1).float()
             
             loss += loss_reprojection / 2.0
             loss += 0.001 * loss_motion_flow / (2 ** scale)
@@ -676,7 +651,7 @@ class Trainer_Monodepth:
 
         total_loss /= self.num_scales
         losses["loss"] = total_loss
-        return losses"""
+        return losses
 
     @staticmethod
     def compute_loss_masks(reprojection_loss, identity_reprojection_loss):
