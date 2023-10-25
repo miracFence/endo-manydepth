@@ -506,24 +506,24 @@ class Trainer_Monodepth:
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
             #target = inputs[("color", 0, source_scale)]
-
+            
             for frame_id in self.opt.frame_ids[1:]:
                 target = inputs[("color", 0, source_scale)]
                 pred = outputs[("color", frame_id, scale)]
                 reprojection_losses.append(self.compute_reprojection_loss(pred, target))
                 pred = inputs[("color", frame_id, source_scale)]
                 identity_reprojection_losses.append(self.compute_reprojection_loss(pred, target))
-
-            identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
-            reprojection_losses = torch.cat(reprojection_losses, 1)
-
-            reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,
-                                                             identity_reprojection_losses)
+                identity_reprojection_losses = torch.cat(identity_reprojection_losses, 1)
+                reprojection_losses = torch.cat(reprojection_losses, 1)
+                reprojection_loss_mask = self.compute_loss_masks(reprojection_losses,identity_reprojection_losses)
             #print(reprojection_loss_mask.shape)
 
             for frame_id in self.opt.frame_ids[1:]:
                 pred = outputs[("color", frame_id, scale)]
                 target = outputs[("color_refined", frame_id, scale)]
+
+
+                
                 loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             #loss_reprojection *= mask
