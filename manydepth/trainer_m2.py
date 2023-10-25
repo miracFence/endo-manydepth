@@ -493,57 +493,25 @@ class Trainer_Monodepth:
             else:
                 source_scale = 0
 
-            """
-            # use the predicted mask
-            mask = outputs["predictive_mask"]["disp", scale]
-            if not self.opt.v1_multiscale:
-                mask = F.interpolate(
-                    mask, [self.opt.height, self.opt.width],
-                    mode="bilinear", align_corners=False)"""
-
-            #print(mask.shape)
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
-            #target = inputs[("color", 0, source_scale)]
             
             for frame_id in self.opt.frame_ids[1:]:
-                #reprojection_losses = []
-                #identity_reprojection_losses = []
-                #target = inputs[("color", 0, source_scale)]
-                #pred = outputs[("color", frame_id, scale)]
-                #reprojection_losses.append(self.compute_reprojection_loss(pred, target))
+
                 target = inputs[("color", 0, 0)]
                 pred = outputs[("color", frame_id, scale)]
+
                 rep = self.compute_reprojection_loss(pred, target)
+
                 pred = inputs[("color", frame_id, source_scale)]
                 rep_identity = self.compute_reprojection_loss(pred, target)
-                #identity_reprojection_losses = torch.cat(rep, 1)
-                #reprojection_losses = torch.cat(rep_identity, 1)
+
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 
                 target = outputs[("color_refined", frame_id, scale)]
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
 
-
-
-                
-                #loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-            #print(reprojection_loss_mask.shape)
-            """
-            for frame_id in self.opt.frame_ids[1:]:
-                pred = outputs[("color", frame_id, scale)]
-                target = outputs[("color_refined", frame_id, scale)]
-
-
-                
-                loss_reprojection += (self.compute_reprojection_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
-            #loss_reprojection *= mask"""
-            """
-            # add a loss pushing mask to 1 (using nn.BCELoss for stability)
-            weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
-            loss += weighting_loss.mean()"""
             
             loss += loss_reprojection / 2.0
             #loss += 0.001 * loss_motion_flow / (2 ** scale)
