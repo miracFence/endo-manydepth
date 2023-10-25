@@ -521,12 +521,22 @@ class Trainer_Monodepth:
                 else:
                     # differently to Monodepth2, compute mins as we go
                     identity_reprojection_loss, _ = torch.min(identity_reprojection_losses, dim=1,
-                                                              keepdim=True)
+            else:
+                identity_reprojection_loss = None                                                  keepdim=True)
             
+
+            if self.opt.avg_reprojection:
+                reprojection_loss = reprojection_losses.mean(1, keepdim=True)
+            else:
+                # differently to Monodepth2, compute mins as we go
+                reprojection_loss, _ = torch.min(reprojection_losses, dim=1, keepdim=True)
+
             if not self.opt.disable_automasking:
                 # add random numbers to break ties
-                identity_reprojection_loss += torch.randn(identity_reprojection_loss.shape).to(self.device) * 0.00001
+                identity_reprojection_loss += torch.randn(
+                    identity_reprojection_loss.shape).to(self.device) * 0.00001
 
+            # find minimum losses from [reprojection, identity]
             reprojection_loss_mask = self.compute_loss_masks(reprojection_loss,
                                                              identity_reprojection_loss)
 
