@@ -548,7 +548,7 @@ class Trainer_Monodepth:
             weighting_loss = 0.2 * nn.BCELoss()(mask, torch.ones(mask.shape).cuda())
             loss += weighting_loss.mean()
 
-            """
+            
             if self.opt.avg_reprojection:
                 reprojection_loss = reprojection_losses.mean(1, keepdim=True)
             else:
@@ -572,7 +572,7 @@ class Trainer_Monodepth:
             if not self.opt.disable_automasking:
                 outputs["identity_selection/{}".format(scale)] = (
                     idxs > identity_reprojection_loss.shape[1] - 1).float()
-            """
+            
             loss += loss_reprojection / 2.0
             loss += 0.001 * loss_motion_flow / (2 ** scale)
             mean_disp = disp.mean(2, True).mean(3, True)
@@ -687,15 +687,13 @@ class Trainer_Monodepth:
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
             wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
-            #if self.opt.predictive_mask:
-            for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
-                wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j):
-                    outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...],
-                    },self.step)
-            """elif not self.opt.disable_automasking:
+            if self.opt.predictive_mask:
+                for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
+                    wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...])},self.step)
+            elif not self.opt.disable_automasking:
                 wandb.log({
                 "automask_{}/{}".format(s, j):
-                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)"""
+                outputs["identity_selection/{}".format(s)][j][None, ...]}, self.step)
                   
 
     def save_opts(self):
