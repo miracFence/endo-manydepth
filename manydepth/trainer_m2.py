@@ -520,7 +520,7 @@ class Trainer_Monodepth:
                     identity_reprojection_loss = identity_reprojection_losses.mean(1, keepdim=True)
                 else:
                     # differently to Monodepth2, compute mins as we go
-                    identity_reprojection_loss = identity_reprojection_loss
+                    identity_reprojection_loss = identity_reprojection_losses
                     """identity_reprojection_loss, _ = torch.min(identity_reprojection_losses, dim=1,
                                                               keepdim=True)"""
             else:
