@@ -79,12 +79,13 @@ def evaluate(opt):
         encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
         #encoder_path2 = os.path.join(opt.load_weights_folder, "ii_encoder_depth.pth")
         decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
-
+        
         encoder_dict = torch.load(encoder_path)
+        HEIGHT, WIDTH = encoder_dict['height'], encoder_dict['width']
         #encoder_dict2 = torch.load(encoder_path2)
 
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
-                                           encoder_dict['height'], encoder_dict['width'],
+                                           HEIGHT, WIDTH,
                                            [0], 4, is_train=False)
         dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
