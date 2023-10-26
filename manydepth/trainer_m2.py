@@ -324,15 +324,15 @@ class Trainer_Monodepth:
                         
                     elif self.opt.pose_model_type == "posecnn":
                         pose_inputs = torch.cat(pose_inputs, 1)
-
+                    """
                     if f_i < 0:
                         iif_all = [get_ilumination_invariant_features(pose_feats[f_i]),get_ilumination_invariant_features(pose_feats[0])] 
                     else:
                         iif_all = [get_ilumination_invariant_features(pose_feats[0]),get_ilumination_invariant_features(pose_feats[f_i])] 
-
+                    """
                     
-                    motion_inputs = [self.models["ii_encoder"](torch.cat(iif_all, 1))]
-                    outputs_mf = self.models["motion_flow"](motion_inputs[0])
+                    #motion_inputs = [self.models["ii_encoder"](torch.cat(pose_inputs, 1))]
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     """input_combined = pose_inputs
                     concatenated_list = []
