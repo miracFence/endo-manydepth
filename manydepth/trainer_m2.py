@@ -436,12 +436,25 @@ class Trainer_Monodepth:
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
+                outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
+                
+                if frame_id < 0:
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs["sample_"+str(frame_id)+"_"+str(scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                else:
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs["sample_"+str(frame_id)+"_"+str(scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+
+                """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
+                    padding_mode="border",align_corners=True)"""
+
+                outputs[("color", frame_id, scale)] = F.grid_sample(
+                    inputs[("color", frame_id, source_scale)],
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)],
                     padding_mode="border",align_corners=True)
 
-                outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
+                #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
 
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
