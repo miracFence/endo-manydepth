@@ -5,3 +5,4 @@ from .pose_decoder import PoseDecoder
 from .pose_cnn import PoseCNN
 from .lighting_decoder import LightingDecoder
 from .residual_flow_decoder import ResidualFLowDecoder
+from .resnet_encoder_iif import ResnetEncoderIIF
