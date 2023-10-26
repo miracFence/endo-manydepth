@@ -352,21 +352,21 @@ class Trainer_Monodepth:
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0])
                     
-                    outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    #outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
 
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         
             
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
-                    #outputs[("color_motion", f_i, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
+                    outputs[("color_motion", f_i, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * outputs[("color_motion", f_i, scale)] + outputs[("bh", scale, f_i)]
 
 
         else:
@@ -512,7 +512,7 @@ class Trainer_Monodepth:
         # The coefficients are designed in a way that the norm asymptotes to L1 in
         # the small value limit.
         #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
-        return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
+        return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
     
     def compute_losses(self, inputs, outputs):
 
@@ -545,13 +545,13 @@ class Trainer_Monodepth:
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 
                 target = outputs[("color_refined", frame_id, scale)]
-                pred = outputs[("color", frame_id, scale)]
-                #pred = outputs[("color_motion", frame_id, scale)]
+                #pred = outputs[("color", frame_id, scale)]
+                pred = outputs[("color_motion", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
+                loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             
             loss += loss_reprojection / 2.0
-            #loss += 0.001 * loss_motion_flow / (2 ** scale)
+            loss += 0.001 * loss_motion_flow / (2 ** scale)
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
@@ -678,10 +678,10 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
+            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
             """if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...])},self.step)
