@@ -439,9 +439,9 @@ class Trainer_Monodepth:
                 outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
                 
                 if frame_id < 0:
-                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs["sample_"+str(frame_id)+"_"+str(scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
                 else:
-                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs["sample_"+str(frame_id)+"_"+str(scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
 
                 """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
