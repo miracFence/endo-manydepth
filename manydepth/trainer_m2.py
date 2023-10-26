@@ -551,7 +551,8 @@ class Trainer_Monodepth:
                 #target = outputs[("color_refined", frame_id, scale)]
                 target = inputs[("color", 0, 0)] #Original
                 #pred = outputs[("color", frame_id, scale)]
-                pred = outputs[("color_motion", frame_id, scale)]
+                #pred = outputs[("color_motion", frame_id, scale)] #Lighting
+                pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             
