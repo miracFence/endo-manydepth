@@ -72,6 +72,10 @@ class Trainer_Monodepth:
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
 
+        self.models["ii_encoder"] = networks.ResnetEncoderIIF(
+            self.opt.num_layers, pretrained = False, num_input_images=2)  # 18
+        self.models["ii_encoder"].to(self.device)
+
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["depth"].to(self.device)
@@ -321,7 +325,23 @@ class Trainer_Monodepth:
                     elif self.opt.pose_model_type == "posecnn":
                         pose_inputs = torch.cat(pose_inputs, 1)
 
-                    axisangle, translation = self.models["pose"](pose_inputs)
+
+                    iif_all = [get_ilumination_invariant_features(pose_feats[f_i]),get_ilumination_invariant_features( pose_feats[0])] 
+                    
+                    motion_inputs = [self.models["ii_encoder"](torch.cat(iif_all, 1))]
+                    outputs_mf = self.models["motion_flow"](motion_inputs[0])
+                    input_combined = pose_inputs
+                    concatenated_list = []
+                    # Iterate over the corresponding tensors in list1 and list2 and concatenate them
+                    for tensor1, tensor2 in zip(pose_inputs[0], motion_inputs[0]):
+                        concatenated_tensor = torch.cat([tensor1, tensor2], dim=1)
+                        concatenated_list.append(concatenated_tensor)
+                    
+                    axisangle, translation = self.models["pose"]([concatenated_list])
+                    
+                    # Original
+                    #axisangle, translation = self.models["pose"](pose_inputs)
+
                     outputs[("axisangle", 0, f_i)] = axisangle
                     outputs[("translation", 0, f_i)] = translation
 
