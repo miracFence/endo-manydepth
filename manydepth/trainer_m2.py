@@ -461,7 +461,7 @@ class Trainer_Monodepth:
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
-                outputs["mfh_"+str(scale)+"_"+str(frame_id)] = outputs["mf_"+str(0)+"_"+str(frame_id)].view(0,2,3,1)
+                outputs["mfh_"+str(scale)+"_"+str(frame_id)] = outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
                 
                 #if frame_id < 0:
                 outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
