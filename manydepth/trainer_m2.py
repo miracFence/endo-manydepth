@@ -310,13 +310,13 @@ class Trainer_Monodepth:
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
                     # To maintain ordering we always pass frames in temporal order
-                    """
+                    
                     if f_i < 0:
                         pose_inputs = [pose_feats[f_i], pose_feats[0]]
                     else:
                         pose_inputs = [pose_feats[0], pose_feats[f_i]]
-                    """
-                    pose_inputs = [pose_feats[f_i], pose_feats[0]]
+                    
+                    #pose_inputs = [pose_feats[f_i], pose_feats[0]]
                     
 
                     if self.opt.pose_model_type == "separate_resnet":
@@ -350,27 +350,27 @@ class Trainer_Monodepth:
                     outputs[("translation", 0, f_i)] = translation
 
                     # Invert the matrix if the frame id is negative
-                    """outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))"""
-
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0])
-                    
-                    outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
 
+                    """outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
+                        axisangle[:, 0], translation[:, 0])"""
+                    
+                    #outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    
                     for scale in self.opt.scales:
-                        outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
-                        outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
+                        #outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
+                        #outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
                         outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         
-            
+            """
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
                     #outputs[("color_motion", f_i, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]"""
 
 
         else:
@@ -548,7 +548,8 @@ class Trainer_Monodepth:
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 
-                target = outputs[("color_refined", frame_id, scale)]
+                #target = outputs[("color_refined", frame_id, scale)]
+                target = inputs[("color", 0, 0)] #Original
                 #pred = outputs[("color", frame_id, scale)]
                 pred = outputs[("color_motion", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
