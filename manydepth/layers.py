@@ -313,39 +313,39 @@ class SpatialTransformer(nn.Module):
 
         return F.grid_sample(src, new_locs, mode=self.mode, padding_mode="border",align_corners=True)
 
-    def get_ilumination_invariant_features(img):
-        #ENDOVIS dataset
-        if(img.shape[1] != 1):
-            img_gray = transforms.functional.rgb_to_grayscale(img,1)
-        else: 
-            img_gray = img
-        #same padding
-        
-        #print(img_gray.shape)
-        #kernel = torch.tensor([[1, 2, 1],[0, 0, 0],[-1, -2, -1]]).to(device=img_gray.device)
-        K1 = torch.Tensor([[-1, 0, 1],[-2, 0, 2], [-1, 0, 1]]).to(device=img_gray.device)
-        K2 = torch.Tensor([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]).to(device=img_gray.device)
-        K3 = torch.Tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).to(device=img_gray.device)
-        K4 = torch.Tensor([[2, 1, 0], [1, 0, -1], [0, -1, -2]]).to(device=img_gray.device)
-        K5 = torch.Tensor([[1, 0,-1], [2, 0, -2], [1, 0, -1]]).to(device=img_gray.device)
-        K6 = torch.Tensor([[0,-1,-2], [1, 0, -1], [2, 1, 0]]).to(device=img_gray.device)
-        K7 = torch.Tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]]).to(device=img_gray.device)
-        K8 = torch.Tensor([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]]).to(device=img_gray.device)
+def get_ilumination_invariant_features(img):
+    #ENDOVIS dataset
+    if(img.shape[1] != 1):
+        img_gray = transforms.functional.rgb_to_grayscale(img,1)
+    else: 
+        img_gray = img
+    #same padding
+    
+    #print(img_gray.shape)
+    #kernel = torch.tensor([[1, 2, 1],[0, 0, 0],[-1, -2, -1]]).to(device=img_gray.device)
+    K1 = torch.Tensor([[-1, 0, 1],[-2, 0, 2], [-1, 0, 1]]).to(device=img_gray.device)
+    K2 = torch.Tensor([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]).to(device=img_gray.device)
+    K3 = torch.Tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).to(device=img_gray.device)
+    K4 = torch.Tensor([[2, 1, 0], [1, 0, -1], [0, -1, -2]]).to(device=img_gray.device)
+    K5 = torch.Tensor([[1, 0,-1], [2, 0, -2], [1, 0, -1]]).to(device=img_gray.device)
+    K6 = torch.Tensor([[0,-1,-2], [1, 0, -1], [2, 1, 0]]).to(device=img_gray.device)
+    K7 = torch.Tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]]).to(device=img_gray.device)
+    K8 = torch.Tensor([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]]).to(device=img_gray.device)
 
-        #img_gray = F.pad(img_gray, (0, 0, 1, 2))
-        padding = (3 - 1) // 2  # Padding to maintain input size
-        M1 = F.conv2d(img_gray, K1.view(1, 1, 3, 3), padding=padding)
-        M2 = F.conv2d(img_gray, K2.view(1, 1, 3, 3), padding=padding)
-        M3 = F.conv2d(img_gray, K3.view(1, 1, 3, 3), padding=padding)
-        M4 = F.conv2d(img_gray, K4.view(1, 1, 3, 3), padding=padding)
-        M5 = F.conv2d(img_gray, K5.view(1, 1, 3, 3), padding=padding)
-        M6 = F.conv2d(img_gray, K6.view(1, 1, 3, 3), padding=padding)
-        M7 = F.conv2d(img_gray, K7.view(1, 1, 3, 3), padding=padding)
-        M8 = F.conv2d(img_gray, K8.view(1, 1, 3, 3), padding=padding)
+    #img_gray = F.pad(img_gray, (0, 0, 1, 2))
+    padding = (3 - 1) // 2  # Padding to maintain input size
+    M1 = F.conv2d(img_gray, K1.view(1, 1, 3, 3), padding=padding)
+    M2 = F.conv2d(img_gray, K2.view(1, 1, 3, 3), padding=padding)
+    M3 = F.conv2d(img_gray, K3.view(1, 1, 3, 3), padding=padding)
+    M4 = F.conv2d(img_gray, K4.view(1, 1, 3, 3), padding=padding)
+    M5 = F.conv2d(img_gray, K5.view(1, 1, 3, 3), padding=padding)
+    M6 = F.conv2d(img_gray, K6.view(1, 1, 3, 3), padding=padding)
+    M7 = F.conv2d(img_gray, K7.view(1, 1, 3, 3), padding=padding)
+    M8 = F.conv2d(img_gray, K8.view(1, 1, 3, 3), padding=padding)
 
-        nor = (M1 ** 2).sum() + (M2 ** 2).sum() + (M3 ** 2).sum() +(M4 ** 2).sum() + (M5 ** 2).sum() + (M6 ** 2).sum() + (M7 ** 2).sum() + + (M8 ** 2).sum()
-        nor = torch.sqrt(nor) + 1e-09
+    nor = (M1 ** 2).sum() + (M2 ** 2).sum() + (M3 ** 2).sum() +(M4 ** 2).sum() + (M5 ** 2).sum() + (M6 ** 2).sum() + (M7 ** 2).sum() + + (M8 ** 2).sum()
+    nor = torch.sqrt(nor) + 1e-09
 
-        t = torch.cat((M1/nor,M2/nor,M3/nor,M4/nor,M5/nor,M6/nor,M7/nor,M8/nor), dim = 1)
+    t = torch.cat((M1/nor,M2/nor,M3/nor,M4/nor,M5/nor,M6/nor,M7/nor,M8/nor), dim = 1)
 
-        return t        
+    return t        
