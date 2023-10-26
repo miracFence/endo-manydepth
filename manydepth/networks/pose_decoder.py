@@ -16,8 +16,8 @@ class PoseDecoder(nn.Module):
         self.num_ch_enc = num_ch_enc
         
         self.num_input_features = num_input_features
-        print(num_input_features)
         
+
         if num_frames_to_predict_for is None:
             num_frames_to_predict_for = num_input_features - 1
         self.num_frames_to_predict_for = num_frames_to_predict_for
@@ -34,7 +34,7 @@ class PoseDecoder(nn.Module):
 
     def forward(self, input_features):
         last_features = [f[-1] for f in input_features]
-
+        print(num_input_features)
         cat_features = [self.relu(self.convs["squeeze"](f)) for f in last_features]
         cat_features = torch.cat(cat_features, 1)
 
