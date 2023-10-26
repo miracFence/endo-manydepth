@@ -353,12 +353,12 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
 
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         
             
             for f_i in self.opt.frame_ids[1:]:
@@ -456,23 +456,24 @@ class Trainer_Monodepth:
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
-                outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
+                #outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
                 
                 #if frame_id < 0:
-                outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)].detach() + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                #outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)].detach() + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
                 #else:
                 #outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
 
-                """
+                
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
-                    padding_mode="border",align_corners=True)"""
-
+                    padding_mode="border",align_corners=True)
+                    
+                """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs["cf_"+str(scale)+"_"+str(frame_id)],
-                    padding_mode="border",align_corners=True)
+                    padding_mode="border",align_corners=True)"""
 
                 #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
 
