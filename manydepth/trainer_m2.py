@@ -412,6 +412,7 @@ class Trainer_Monodepth:
             del inputs, outputs, losses
 
         self.set_train()
+    
 
     def generate_images_pred(self, inputs, outputs):
         """Generate the warped (reprojected) color images for a minibatch.
@@ -456,31 +457,29 @@ class Trainer_Monodepth:
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
-                outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].view(0,2,3,1)
+                #outputs["mfh_"+str(scale)+"_"+str(frame_id)] = outputs["mf_"+str(0)+"_"+str(frame_id)].view(0,2,3,1)
                 
                 #if frame_id < 0:
-                outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                #outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
                 #else:
                 #outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
-                
+                """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs["cf_"+str(scale)+"_"+str(frame_id)],
-                    padding_mode="border",align_corners=True)
+                    padding_mode="border",align_corners=True)"""
 
-                """
-                
-                 outputs[("color", frame_id, scale)] = F.grid_sample(
+                outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)    
+                
+
+                outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
                 """
-
-                #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
-
                 if not self.opt.disable_automasking:
                     outputs[("color_identity", frame_id, scale)] = \
-                        inputs[("color", frame_id, source_scale)]
+                        inputs[("color", frame_id, source_scale)]"""
 
     def compute_reprojection_loss(self, pred, target):
         """Computes reprojection loss between a batch of predicted and target images
@@ -546,8 +545,8 @@ class Trainer_Monodepth:
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 
                 target = outputs[("color_refined", frame_id, scale)]
-                pred = outputs[("color", frame_id, scale)]
-                #pred = outputs[("color_motion", frame_id, scale)]
+                #pred = outputs[("color", frame_id, scale)]
+                pred = outputs[("color_motion", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
             
