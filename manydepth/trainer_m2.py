@@ -22,6 +22,7 @@ from torch.utils.data import DataLoader
 #from tensorboardX import SummaryWriter
 import wandb
 
+
 wandb.init(project="MySfMLearner3", entity="respinosa")
 
 
@@ -80,6 +81,11 @@ class Trainer_Monodepth:
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
+
+        self.models["albedo"] = networks.DepthDecoder(
+            self.models["encoder"].num_ch_enc, self.opt.scales)
+        self.models["albedo"].to(self.device)
+        self.parameters_to_train += list(self.models["albedo"].parameters())
         """
         self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["motion_flow"].to(self.device)
@@ -277,6 +283,8 @@ class Trainer_Monodepth:
                 features[k] = [f[i] for f in all_features]
 
             outputs = self.models["depth"](features[0])
+            #Albedo outputs
+            outputs.update(self.models["albedo"](features[0]))
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
@@ -517,12 +525,26 @@ class Trainer_Monodepth:
 
         return ssim_loss
     
+    def get_albedo_loss(self,pred,target):
+        
+        value_channel = torch.ones(1, self.opt.height, self.opt.width) * 100
+        
+        new_pred = torch.cat((pred, value_channel.unsqueeze(1)), dim=1)
+        new_target = torch.cat((target, value_channel.unsqueeze(1)), dim=1)
+        
+        rgb_pred = self.hsv_to_rgb(new_pred)
+        rgb_target = self.hsv_to_rgb(new_target)
+        abs_diff = torch.abs(rgb_target - rgb_pred)
+        l1_loss = abs_diff.mean(1, True)
+        return l1_loss
+
     def compute_losses(self, inputs, outputs):
 
         losses = {}
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
+        albedo_loss = 0
 
         for scale in self.opt.scales:
             loss = 0
@@ -551,10 +573,14 @@ class Trainer_Monodepth:
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                #Albedo loss
+                albedo_loss += self.get_albedo_loss(pred,target)
             
             loss += loss_reprojection / 2.0
+            loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
             loss += 0.5 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
@@ -797,3 +823,82 @@ class Trainer_Monodepth:
                 vis = vis.transpose(2, 0, 1)
 
         return vis
+    
+    def rgb_to_hsv(self,rgb_image_tensor):
+        # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
+        if rgb_image_tensor.dim() != 4:
+            raise ValueError("Input tensor should have shape [batch_size, channels, height, width].")
+
+        # Split the input tensor into its components (R, G, B)
+        r, g, b = rgb_image_tensor[:, 0, :, :], rgb_image_tensor[:, 1, :, :], rgb_image_tensor[:, 2, :, :]
+
+        # Calculate the max and min values for each pixel in the batch
+        maxc = torch.max(rgb_image_tensor, dim=1).values
+        minc = torch.min(rgb_image_tensor, dim=1).values
+
+        # Initialize tensors to store the components of the HSV images
+        hue = torch.zeros_like(maxc)
+        saturation = torch.zeros_like(maxc)
+        value = torch.zeros_like(maxc)
+
+        # Calculate the Hue component
+        hue[maxc == r] = ((g - b) / (maxc - minc))[maxc == r]
+        hue[maxc == g] = 2.0 + ((b - r) / (maxc - minc))[maxc == g]
+        hue[maxc == b] = 4.0 + ((r - g) / (maxc - minc))[maxc == b]
+        hue = (hue / 6.0) % 1.0  # Normalize to the range [0, 1]
+
+        # Calculate the Saturation component
+        saturation[maxc != 0] = 1 - (minc[maxc != 0] / maxc[maxc != 0])
+
+        # Calculate the Value component
+        value = maxc
+
+        # Stack the Hue, Saturation, and Value components back together
+        hsv_image_tensor = torch.stack((hue.unsqueeze(1), saturation.unsqueeze(1), value.unsqueeze(1)), dim=1)
+
+        return hsv_image_tensor
+
+    import torch
+
+def hsv_to_rgb(hsv_image_tensor):
+    # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
+    if hsv_image_tensor.dim() != 4:
+        raise ValueError("Input tensor should have shape [batch_size, channels, height, width].")
+
+    # Split the input tensor into its components (Hue, Saturation, Value)
+    hue, saturation, value = hsv_image_tensor[:, 0, :, :], hsv_image_tensor[:, 1, :, :], hsv_image_tensor[:, 2, :, :]
+
+    # Calculate the Chroma (C) and intermediate values (X)
+    c = saturation * value
+    x = c * (1 - torch.abs((hue * 6) % 2 - 1))
+
+    # Initialize tensors to store the components of the RGB images
+    r, g, b = torch.zeros_like(hue), torch.zeros_like(hue), torch.zeros_like(hue)
+
+    # Set the RGB components based on the hue
+    r[(0 <= hue) & (hue < 1/6)] = c[(0 <= hue) & (hue < 1/6)]
+    g[(0 <= hue) & (hue < 1/6)] = x[(0 <= hue) & (hue < 1/6)]
+
+    r[(1/6 <= hue) & (hue < 2/6)] = x[(1/6 <= hue) & (hue < 2/6)]
+    g[(1/6 <= hue) & (hue < 2/6)] = c[(1/6 <= hue) & (hue < 2/6)]
+
+    g[(2/6 <= hue) & (hue < 3/6)] = c[(2/6 <= hue) & (hue < 3/6)]
+    b[(2/6 <= hue) & (hue < 3/6)] = x[(2/6 <= hue) & (hue < 3/6)]
+
+    g[(3/6 <= hue) & (hue < 4/6)] = x[(3/6 <= hue) & (hue < 4/6)]
+    b[(3/6 <= hue) & (hue < 4/6)] = c[(3/6 <= hue) & (hue < 4/6)]
+
+    r[(4/6 <= hue) & (hue < 5/6)] = x[(4/6 <= hue) & (hue < 5/6)]
+    b[(4/6 <= hue) & (hue < 5/6)] = c[(4/6 <= hue) & (hue < 5/6)]
+
+    r[(5/6 <= hue) & (hue <= 1)] = c[(5/6 <= hue) & (hue <= 1)]
+    b[(5/6 <= hue) & (hue <= 1)] = x[(5/6 <= hue) & (hue <= 1)]
+
+    # Add the luminance (value) component and clamp the RGB values to the range [0, 1]
+    r, g, b = r + value - c, g + value - c, b + value - c
+    r, g, b = torch.clamp(r, 0, 1), torch.clamp(g, 0, 1), torch.clamp(b, 0, 1)
+
+    # Stack the RGB components back together
+    rgb_image_tensor = torch.stack((r.unsqueeze(1), g.unsqueeze(1), b.unsqueeze(1)), dim=1)
+
+    return rgb_image_tensor
