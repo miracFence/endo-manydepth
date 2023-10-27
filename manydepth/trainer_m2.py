@@ -71,19 +71,19 @@ class Trainer_Monodepth:
             self.opt.num_layers, self.opt.weights_init == "pretrained")
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
-
+        """
         self.models["ii_encoder"] = networks.ResnetEncoderIIF(
             self.opt.num_layers, pretrained = False, num_input_images=2)  # 18
-        self.models["ii_encoder"].to(self.device)
+        self.models["ii_encoder"].to(self.device)"""
 
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
-
+        """
         self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["motion_flow"].to(self.device)
-        self.parameters_to_train += list(self.models["motion_flow"].parameters())
+        self.parameters_to_train += list(self.models["motion_flow"].parameters())"""
 
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
@@ -332,7 +332,7 @@ class Trainer_Monodepth:
                     """
                     
                     #motion_inputs = [self.models["ii_encoder"](torch.cat(pose_inputs, 1))]
-                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     """input_combined = pose_inputs
                     concatenated_list = []
@@ -549,7 +549,7 @@ class Trainer_Monodepth:
             color = inputs[("color", 0, scale)]
             #Losses & compute mask
             for frame_id in self.opt.frame_ids[1:]:
-
+                # Mask
                 target = inputs[("color", 0, 0)]
                 pred = outputs[("color", frame_id, scale)]
 
@@ -559,7 +559,7 @@ class Trainer_Monodepth:
                 rep_identity = self.compute_reprojection_loss(pred, target)
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
-                
+                #Losses
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 #target = inputs[("color", 0, 0)] #Original
                 #pred = outputs[("color", frame_id, scale)]
