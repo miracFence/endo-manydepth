@@ -357,12 +357,12 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         
             
             for f_i in self.opt.frame_ids[1:]:
@@ -460,7 +460,7 @@ class Trainer_Monodepth:
                     cam_points, inputs[("K", source_scale)], T)
 
                 outputs[("sample", frame_id, scale)] = pix_coords
-
+                """
                 outputs["mfh_"+str(scale)+"_"+str(frame_id)] = outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
                 
                 #if frame_id < 0:
@@ -471,13 +471,13 @@ class Trainer_Monodepth:
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs["cf_"+str(scale)+"_"+str(frame_id)],
-                    padding_mode="border",align_corners=True)
+                    padding_mode="border",align_corners=True)"""
 
-                """
+                
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
-                    padding_mode="border",align_corners=True)"""
+                    padding_mode="border",align_corners=True)
                 
 
                 #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
@@ -685,10 +685,10 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
+            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
             """if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...])},self.step)
