@@ -556,6 +556,7 @@ class Trainer_Monodepth:
                     self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
             
             loss += loss_reprojection / 2.0
+            print(loss_ilumination_invariant)
             loss += loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
