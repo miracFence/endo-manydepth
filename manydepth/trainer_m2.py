@@ -515,7 +515,7 @@ class Trainer_Monodepth:
         ssim_loss = self.ssim(features_p, features_t).mean(1, True)
         #ii_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
-        return torch.mean(ssim_loss)
+        return ssim_loss
     
     def compute_losses(self, inputs, outputs):
 
@@ -551,11 +551,11 @@ class Trainer_Monodepth:
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                #target = inputs[("color", 0, 0)]
-                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(outputs[("color", frame_id, scale)],inputs[("color", 0, 0)]))
+                target = inputs[("color", 0, 0)]
+                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
             
             loss += loss_reprojection / 2.0
-            print(loss_ilumination_invariant)
+            #print(loss_ilumination_invariant)
             loss += loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
