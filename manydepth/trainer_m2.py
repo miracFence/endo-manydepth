@@ -553,7 +553,7 @@ class Trainer_Monodepth:
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (
-                    self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                    self.get_ilumination_invariant_loss(pred.detach(),target.detach()) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
             
             loss += loss_reprojection / 2.0
             #loss += 0.001 * loss_motion_flow / (2 ** scale)
