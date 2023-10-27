@@ -460,18 +460,6 @@ class Trainer_Monodepth:
                     cam_points, inputs[("K", source_scale)], T)
 
                 outputs[("sample", frame_id, scale)] = pix_coords
-                """
-                outputs["mfh_"+str(scale)+"_"+str(frame_id)] = outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
-                
-                #if frame_id < 0:
-                outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
-                #else:
-                #outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs[("sample", frame_id, scale)] - outputs["mfh_"+str(scale)+"_"+str(frame_id)]
-                
-                outputs[("color", frame_id, scale)] = F.grid_sample(
-                    inputs[("color", frame_id, source_scale)],
-                    outputs["cf_"+str(scale)+"_"+str(frame_id)],
-                    padding_mode="border",align_corners=True)"""
 
                 
                 outputs[("color", frame_id, scale)] = F.grid_sample(
@@ -561,12 +549,9 @@ class Trainer_Monodepth:
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 #Losses
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
-                #target = inputs[("color", 0, 0)] #Original
-                #pred = outputs[("color", frame_id, scale)]
-                #pred = outputs[("color_motion", frame_id, scale)] 
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
+                target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (
                     self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
             
