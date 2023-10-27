@@ -284,7 +284,7 @@ class Trainer_Monodepth:
 
             outputs = self.models["depth"](features[0])
             #Albedo outputs
-            outputs.update(self.models["albedo"](features[0]))
+            #outputs.update(self.models["albedo"](features[0]))
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
@@ -474,7 +474,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
-                outputs[("albedo_pred", frame_id, scale)] = self.models["albedo"](outputs[("color", frame_id, scale)])
+                #outputs[("albedo_pred", frame_id, scale)] = self.models["albedo"](outputs[("color", frame_id, scale)])
 
                 #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
                 """
@@ -583,7 +583,7 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
-            loss += 0.5 * loss_ilumination_invariant / 2.0
+            loss += 0.25 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
