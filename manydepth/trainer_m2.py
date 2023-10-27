@@ -534,7 +534,7 @@ class Trainer_Monodepth:
 
         losses = {}
         loss_reprojection = 0
-        #loss_motion_flow = 0
+        loss_ilumination_invariant = 0
         total_loss = 0
 
         for scale in self.opt.scales:
