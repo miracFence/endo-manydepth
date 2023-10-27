@@ -474,6 +474,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
+                outputs[("albedo_pred", frame_id, scale)] = self.models["albedo"](outputs[("color", frame_id, scale)])
 
                 #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
                 """
@@ -577,10 +578,10 @@ class Trainer_Monodepth:
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Albedo loss
-                albedo_loss += self.get_albedo_loss(pred,target)
+                #albedo_loss += self.get_albedo_loss(outputs[("albedo_pred", frame_id, scale)],outputs[("albedo", frame_id, scale)])
             
             loss += loss_reprojection / 2.0
-            loss += albedo_loss / 2.0
+            #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
             loss += 0.5 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
