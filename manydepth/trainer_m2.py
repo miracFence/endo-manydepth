@@ -507,7 +507,7 @@ class Trainer_Monodepth:
 
     def norm_loss(self, pred, target, pose):
 
-        rotation = pose[:, 0].view(12, 3, 1, 1)
+        rotation = pose[:, 0].view(12, 1, 1, 3)
         print(rotation.shape)
         print(target.shape)
         new_target = rotation * target 
