@@ -357,3 +357,19 @@ def get_feature_oclution_mask(img):
     o = F.conv2d(img, kernel.view(1, 1, 3, 3), padding=padding)
     t = torch.cat((o,o,o,o,o,o,o,o), dim = 1)
     return t
+
+def calculate_surface_normal_from_depth(depth_map, K):
+    # Calculate gradients using finite differences
+    dz_dx = torch.nn.functional.conv2d(depth_map.unsqueeze(1), torch.tensor([[[1, 0, -1], [2, 0, -2], [1, 0, -1]]]).unsqueeze(0).float())
+    dz_dy = torch.nn.functional.conv2d(depth_map.unsqueeze(1), torch.tensor([[[1, 2, 1], [0, 0, 0], [-1, -2, -1]]]).unsqueeze(0).float())
+
+    # Calculate surface normals
+    V_p = torch.cat((dz_dx, dz_dy, torch.ones_like(depth_map)), dim=1)
+
+    # Apply K⁻¹ to transform to world coordinates
+    V_p = torch.matmul(torch.inverse(K), V_p)
+
+    # Normalize the surface normals
+    V_p /= torch.norm(V_p, p=2, dim=1, keepdim=True)
+
+    return V_p

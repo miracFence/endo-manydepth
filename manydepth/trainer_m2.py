@@ -508,8 +508,8 @@ class Trainer_Monodepth:
     def norm_loss(self, pred, target, pose):
         """Computes reprojection loss between a batch of predicted and target images
         """
-        new_pred = pose * pred
-        abs_diff = torch.abs(target - new_pred)
+        new_target = torch.matmul(pose, target)  target
+        abs_diff = torch.abs(new_target - pred)
         l1_loss = abs_diff.mean(1, True)
 
         return l1_loss
