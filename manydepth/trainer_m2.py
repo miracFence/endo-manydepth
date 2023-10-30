@@ -82,10 +82,17 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
+        self.models["normal"] = networks.DepthDecoder(
+            self.models["encoder"].num_ch_enc, self.opt.scales)
+        self.models["normal"].to(self.device)
+        self.parameters_to_train += list(self.models["normal"].parameters())
+
+        """
         self.models["albedo"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["albedo"].to(self.device)
         self.parameters_to_train += list(self.models["albedo"].parameters())
+        """
         """
         self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["motion_flow"].to(self.device)
@@ -283,12 +290,14 @@ class Trainer_Monodepth:
                 features[k] = [f[i] for f in all_features]
 
             outputs = self.models["depth"](features[0])
+            
             #Albedo outputs
             #outputs.update(self.models["albedo"](features[0]))
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
             outputs = self.models["depth"](features)
+            outputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -474,6 +483,10 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
+        #Normal prediction
+        for i, frame_id in enumerate(self.opt.frame_ids[1:]):
+            features = self.models["encoder"](outputs[("color", frame_id, 0)])
+            outputs[("normal_pred",frame_id,scale)] = self.models["normal"](features)
                 #outputs[("albedo_pred", frame_id, scale)] = self.models["albedo"](outputs[("color", frame_id, scale)])
 
                 #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
@@ -495,6 +508,15 @@ class Trainer_Monodepth:
             reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss
 
         return reprojection_loss
+
+    def norm_loss(self, pred, target, pose):
+        """Computes reprojection loss between a batch of predicted and target images
+        """
+        new_pred = pose * pred
+        abs_diff = torch.abs(target - new_pred)
+        l1_loss = abs_diff.mean(1, True)
+
+        return l1_loss
     
     def get_motion_flow_loss(self,motion_map):
         """A regularizer that encourages sparsity.
@@ -546,6 +568,7 @@ class Trainer_Monodepth:
         loss_ilumination_invariant = 0
         total_loss = 0
         albedo_loss = 0
+        normal_loss = 0
 
         for scale in self.opt.scales:
             loss = 0
@@ -574,6 +597,8 @@ class Trainer_Monodepth:
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #Normal loss
+                normal_loss += self.norm_loss(outputs[("normal_pred",frame_id,scale)],outputs[("normal",frame_id,scale)], outputs[("axisangle", 0, f_i)])
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
@@ -583,6 +608,7 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
+            loss += normal_loss / 2.0
             loss += 0.40 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)

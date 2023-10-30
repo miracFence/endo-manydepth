@@ -13,7 +13,7 @@ from layers import ConvBlock, Conv3x3, upsample
 
 
 class NormalDecoder(nn.Module):
-    def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, use_skips=True):
+    def __init__(self, num_ch_enc, scales=range(4), num_output_channels=3, use_skips=True):
         super(NormalDecoder, self).__init__()
 
         self.num_output_channels = num_output_channels
