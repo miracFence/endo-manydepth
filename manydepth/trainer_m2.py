@@ -594,6 +594,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
+                print(outputs[("axisangle", 0, frame_id)].shape)
                 normal_loss += self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], outputs[("axisangle", 0, frame_id)])
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
