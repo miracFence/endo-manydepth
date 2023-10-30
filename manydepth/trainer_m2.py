@@ -487,13 +487,7 @@ class Trainer_Monodepth:
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal_pred",frame_id,scale)] = self.models["normal"](features)
-                #outputs[("albedo_pred", frame_id, scale)] = self.models["albedo"](outputs[("color", frame_id, scale)])
 
-                #outputs[("color_motion", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)].detach(),outputs["mf_"+str(0)+"_"+str(frame_id)])
-                """
-                if not self.opt.disable_automasking:
-                    outputs[("color_identity", frame_id, scale)] = \
-                        inputs[("color", frame_id, source_scale)]"""
 
     def compute_reprojection_loss(self, pred, target):
         """Computes reprojection loss between a batch of predicted and target images
