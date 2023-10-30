@@ -509,8 +509,6 @@ class Trainer_Monodepth:
         
 
         # Reshape the normal image to be [12, 3, 256*320] and rotation matrices to [12, 4, 4]
-        print(target.shape)
-        print(rotation.shape)
         normal_image_reshaped = target.view(12, 3, -1)  # Shape [12, 3, 256*320]
         rotation_matrices_reshaped = rotation.view(12, 4, 4)  # Shape [12, 4, 4]
 
@@ -522,7 +520,7 @@ class Trainer_Monodepth:
 
         abs_diff = torch.abs(pred - rotated_normal_image)
         l1_loss = abs_diff.mean(1, True)
-
+        print(l1_loss)
         return l1_loss
     
     def get_motion_flow_loss(self,motion_map):
