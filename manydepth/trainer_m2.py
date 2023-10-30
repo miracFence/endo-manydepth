@@ -511,6 +511,7 @@ class Trainer_Monodepth:
         batch_size, num_channels, height, width = target.size()
 
         # Reshape the rotation tensor to be of shape (batch_size, 3, 3)
+        rotation = rotation[:,:3,:3]
         rotation_tensor = rotation.view(batch_size, 3, 3)
 
         # Reshape the normal images to be (batch_size, num_channels, height * width)
