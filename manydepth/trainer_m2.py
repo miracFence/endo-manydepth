@@ -506,9 +506,10 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, pose):
-        """Computes reprojection loss between a batch of predicted and target images
-        """
+
         rotation = pose[:, 0]
+        print(rotation.shape)
+        print(target)
         new_target = rotation * target 
         abs_diff = torch.abs(pred - new_target)
         l1_loss = abs_diff.mean(1, True)
@@ -595,8 +596,6 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                print(outputs[("axisangle", 0, frame_id)].shape)
-                print(inputs[("normal",0)].shape)
                 normal_loss += self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], outputs[("axisangle", 0, frame_id)])
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
