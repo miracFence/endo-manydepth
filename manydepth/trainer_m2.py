@@ -485,8 +485,10 @@ class Trainer_Monodepth:
                 
         #Normal prediction
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
+            self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
+            self.models["encoder"].train()
             #print(frame_id)
             #print(outputs[("normal_pred",frame_id,scale)])
 
@@ -618,7 +620,7 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
-            loss += normal_loss / 2.0
+            loss += normal_loss / (2 ** scale)
             loss += 0.40 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
@@ -742,7 +744,7 @@ class Trainer_Monodepth:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_motion", frame_id, s)][j].data)},step=self.step)
                     wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id, s)][j].data)},step=self.step)
-                    #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["b_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
+                    wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(inputs[("normal",0)][j].data)},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
