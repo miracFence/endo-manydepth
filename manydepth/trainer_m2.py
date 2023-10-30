@@ -506,11 +506,11 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation):
+
+        
+        rotation = rotation[:3,:3]
         print(rotation.shape)
         print(target.shape)
-        # Reshape the normal images to be (batch_size, num_channels, height * width)
-        reshaped_images = target.view(12, 3, -1)
-
         # Rotate the normal images using matrix multiplication
         rotated_images = torch.matmul(rotation, reshaped_images)
         rotated_normal_image = torch.matmul(target,rotation)
