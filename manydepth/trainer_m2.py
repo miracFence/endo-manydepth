@@ -508,9 +508,9 @@ class Trainer_Monodepth:
     def norm_loss(self, pred, target, pose):
 
         rotation = pose[:, 0].view(12, 1, 1, 3)
-        print(rotation.shape)
-        print(target.shape)
-        new_target = rotation * target 
+        #print(rotation.shape)
+        #print(target.shape)
+        new_target = torch.matmul(rotation.permute(0, 3, 1, 2),target)
         abs_diff = torch.abs(pred - new_target)
         l1_loss = abs_diff.mean(1, True)
 
