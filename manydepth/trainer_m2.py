@@ -509,6 +509,8 @@ class Trainer_Monodepth:
         
 
         # Reshape the normal image to be [12, 3, 256*320] and rotation matrices to [12, 4, 4]
+        print(target.shape)
+        print(rotation.shape)
         normal_image_reshaped = target.view(12, 3, -1)  # Shape [12, 3, 256*320]
         rotation_matrices_reshaped = rotation.view(12, 4, 4)  # Shape [12, 4, 4]
 
