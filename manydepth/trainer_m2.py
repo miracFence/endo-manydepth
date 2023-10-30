@@ -485,10 +485,10 @@ class Trainer_Monodepth:
                 
         #Normal prediction
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
-            self.models["encoder"].eval()
+            #self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
-            self.models["encoder"].train()
+            #self.models["encoder"].train()
             #print(frame_id)
             #print(outputs[("normal_pred",frame_id,scale)])
 
@@ -620,8 +620,8 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
-            loss += normal_loss / (2 ** scale)
-            loss += 0.40 * loss_ilumination_invariant / 2.0
+            loss += normal_loss / 2.0
+            loss += 0.50 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
