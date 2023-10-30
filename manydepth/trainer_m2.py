@@ -506,12 +506,11 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation):
-        # Reshape the normal image to be [12, 3, 256*320] and transpose it to [12, 3, 256*320]
+       # Reshape the normal image to be [12, 3, 256*320]
         normal_image_reshaped = target.view(12, 3, -1)  # Shape [12, 3, 256*320]
-        rotation_matrices_reshaped = rotation.view(12, 4, 4)  # Shape [12, 4, 4]
 
         # Perform batched matrix multiplication
-        rotated_normal_image = torch.bmm(normal_image_reshaped, rotation_matrices_reshaped.permute(0, 2, 1))
+        rotated_normal_image = torch.bmm(rotation, normal_image_reshaped)
 
         # Reshape the result back to [12, 3, 256, 320]
         rotated_normal_image = rotated_normal_image.view(12, 3, 256, 320)
@@ -601,7 +600,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]))
+                normal_loss += self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], get_translation_matrix(rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])))
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
