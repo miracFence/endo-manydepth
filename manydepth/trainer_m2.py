@@ -513,7 +513,7 @@ class Trainer_Monodepth:
         #reshaped_images = target.view(12, 3, -1)
 
         # Rotate the normal images using matrix multiplication
-        rotated_images = torch.matmul(rotation, reshaped_images)
+        rotated_images = torch.matmul(rotation, target)
 
         # Reshape the rotated images back to the original shape
         #rotated_images = rotated_images.view(12, 3, 256, 320)
