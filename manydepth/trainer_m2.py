@@ -508,7 +508,7 @@ class Trainer_Monodepth:
     def norm_loss(self, pred, target, rotation):
 
         
-        rotation = rotation[:3,:3]
+        rotation = rotation[:,:3,:3]
         print(rotation.shape)
         print(target.shape)
         # Rotate the normal images using matrix multiplication
