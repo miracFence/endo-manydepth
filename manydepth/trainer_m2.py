@@ -507,18 +507,21 @@ class Trainer_Monodepth:
 
     def norm_loss(self, pred, target, rotation):
 
-        
-        rotation = rotation[:,:3,:3]
+        #Get the dimensions of the rotation tensor and normal images
+        batch_size, num_channels, height, width = target.size()
+
+        # Reshape the rotation tensor to be of shape (batch_size, 3, 3)
+        rotation_tensor = rotation.view(batch_size, 3, 3)
+
         # Reshape the normal images to be (batch_size, num_channels, height * width)
-        #reshaped_images = target.view(12, 3, -1)
+        reshaped_images = target.view(batch_size, num_channels, -1)
 
         # Rotate the normal images using matrix multiplication
-        rotated_images = torch.matmul(rotation, target)
+        rotated_images = torch.matmul(rotation_tensor, reshaped_images)
 
         # Reshape the rotated images back to the original shape
-        #rotated_images = rotated_images.view(12, 3, 256, 320)
-        # Rotate the normal images using matrix multiplication
-        #rotated_images = torch.matmul(rotation, reshaped_images)
+        rotated_images = rotated_images.view(batch_size, num_channels, height, width)
+
 
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
