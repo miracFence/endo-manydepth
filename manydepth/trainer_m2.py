@@ -506,7 +506,8 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation):
-        
+        print(rotation.shape)
+
         # Reshape the normal image to be [12, 3, 256*320] and transpose it to [12, 256*320, 3]
         normal_image_reshaped = target.view(12, 3, -1).transpose(1, 2)  # Shape [12, 256*320, 3]
         #rotation_matrices_reshaped = rotation_matrices.view(12, 4, 4)  # Shape [12, 4, 4]
