@@ -82,7 +82,7 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
-        self.models["normal"] = networks.DepthDecoder(
+        self.models["normal"] = networks.NormalDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["normal"].to(self.device)
         self.parameters_to_train += list(self.models["normal"].parameters())
@@ -297,7 +297,7 @@ class Trainer_Monodepth:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
             outputs = self.models["depth"](features)
-            outputs.update(self.models["normal"](features))
+            inputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -486,8 +486,8 @@ class Trainer_Monodepth:
         #Normal prediction
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
-            outputs[("normal_pred",frame_id,scale)] = self.models["normal"](features)
-            print(outputs[("normal_pred",frame_id,scale)])
+            outputs[("normal",frame_id,scale)] = self.models["normal"](features)
+            #print(outputs[("normal_pred",frame_id,scale)])
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -593,7 +593,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += self.norm_loss(outputs[("normal",frame_id,scale)],outputs[("normal",frame_id,scale)], outputs[("axisangle", 0, f_i)])
+                normal_loss += self.norm_loss(outputs[("normal",frame_id,0)],inputs[("normal",frame_id,0)], outputs[("axisangle", 0, frame_id)])
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
