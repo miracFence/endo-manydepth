@@ -295,10 +295,9 @@ class Trainer_Monodepth:
             #outputs.update(self.models["albedo"](features[0]))
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
-            #features = self.models["encoder"](inputs["color_aug", 0, 0])
-            outputs[("normal_input")] = self.models["encoder"](inputs["color_aug", 0, 0])
-            outputs = self.models["depth"](outputs[("normal_input")])
-            
+            features = self.models["encoder"](inputs["color_aug", 0, 0])
+            outputs = self.models["depth"](features)
+            inputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -375,7 +374,6 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs[("normal_input",0,f_i)] = self.models["normal"](outputs[("normal_input")])
                     #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     for scale in self.opt.scales:
@@ -595,7 +593,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += self.norm_loss(outputs[("normal",frame_id,0)],outputs[("normal_input",0,frame_id)], outputs[("axisangle", 0, frame_id)])
+                normal_loss += self.norm_loss(outputs[("normal",frame_id,0)],inputs[("normal",0)], outputs[("axisangle", 0, frame_id)])
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
