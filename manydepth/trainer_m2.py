@@ -717,7 +717,7 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.vis_normal_batch(inputs[("normal",0)][j].data))},step=self.step)
+            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.visualize_normals(inputs[("normal",0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
@@ -854,17 +854,21 @@ class Trainer_Monodepth:
 
         return normal_image_np
 
-    def vis_normal(self,normal):
+    def visualize_normals(self,batch_normals):
         """
-        Visualize surface normal. Transfer surface normal value from [-1, 1] to [0, 255]
-        @para normal: surface normal, [h, w, 3], numpy.array
+        Visualize a batch of normalized normal vectors as RGB images.
+
+        Args:
+            batch_normals (np.ndarray): A batch of normalized normal vectors with shape (batch, channels, height, width).
+
+        Returns:
+            np.ndarray: An array of RGB images representing the normal vectors.
         """
-        n_img_L2 = np.sqrt(np.sum(normal ** 2, axis=2, keepdims=True))
-        n_img_norm = normal / (n_img_L2 + 1e-8)
-        normal_vis = n_img_norm * 127
-        normal_vis += 128
-        normal_vis = normal_vis.astype(np.uint8)
-        return normal_vis
+        # Scale and shift to map the normals to the 0-255 range
+        scaled_normals = ((batch_normals + 1) / 2 * 255).astype(np.uint8)
+        # Convert channels to (height, width, channels)
+        transposed_normals = np.transpose(scaled_normals, (0, 2, 3, 1))
+        return transposed_normals
 
     def vis_normal_batch(self,normal_batch):
         """
@@ -883,6 +887,7 @@ class Trainer_Monodepth:
         normal_vis += 128
         normal_vis = normal_vis.to(torch.uint8)
         return normal_vis
+
         
 
 
