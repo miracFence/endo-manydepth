@@ -514,13 +514,13 @@ class Trainer_Monodepth:
 
         # Reshape the rotation tensor to be of shape (batch_size, 3, 3)
         rotation = rotation[:,:3,:3]
-        #rotation_tensor = rotation.view(batch_size, 3, 3)
+        rotation_tensor = rotation.view(batch_size, 3, 3)
 
         # Reshape the normal images to be (batch_size, num_channels, height * width)
-        #reshaped_images = target.view(batch_size, num_channels, -1)
+        reshaped_images = target.view(batch_size, num_channels, -1)
 
         # Rotate the normal images using matrix multiplication
-        rotated_images = torch.matmul(rotation, target)
+        rotated_images = torch.matmul(rotation_tensor, reshaped_images)
 
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
