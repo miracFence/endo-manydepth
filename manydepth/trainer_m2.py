@@ -535,7 +535,7 @@ class Trainer_Monodepth:
         rotated_images = torch.empty_like(target)
 
         # Iterate over each sample in the batch
-        for i in range(image_batch.size(0)):
+        for i in range(target.size(0)):
             # Apply the rotation matrix to the image
             rotated_image = torch.nn.functional.affine(target[i:i+1], matrix=rotation_matrix[i:i+1, :3, :4], mode='bilinear', align_corners=False)
             
