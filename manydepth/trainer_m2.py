@@ -508,11 +508,13 @@ class Trainer_Monodepth:
 
         return reprojection_loss
 
-    def norm_loss(self, pred, target, rotation):
+    def norm_loss(self, pred, target, rotation_matrix):
         
         print(pred.shape)
         print(target.shape)
-        print(rotation)
+        print(rotation_matrix)
+
+        """
         #Get the dimensions of the rotation tensor and normal images
         batch_size, num_channels, height, width = target.size()
 
@@ -528,7 +530,19 @@ class Trainer_Monodepth:
 
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
+        """
 
+        # Convert the image batch to a format compatible with grid_sample
+        image_batch = target.permute(0, 2, 3, 1)  # Change shape to [12, 256, 320, 3]
+
+        # Reshape the rotation matrix to be of shape [12, 3, 4]
+        rotation_matrix = rotation_matrix[:, :3, :4]
+
+        # Apply the rotation transformation to the image batch using grid_sample
+        rotated_images = torch.nn.functional.grid_sample(image_batch, rotation_matrix)
+
+        # Reshape the rotated images back to the original shape
+        rotated_images = rotated_images.permute(0, 3, 1, 2)  # Change shape back to [12, 3, 256, 320]
 
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
