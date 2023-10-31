@@ -717,7 +717,7 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.visualize_normal_image(inputs[("normal",0)][j].data))},step=self.step)
+            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.vis_normal(inputs[("normal",0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
@@ -853,6 +853,18 @@ class Trainer_Monodepth:
         normal_image_np = 0.5 * normal_image_np + 0.5
 
         return normal_image_np
+
+    def vis_normal(self,normal):
+        """
+        Visualize surface normal. Transfer surface normal value from [-1, 1] to [0, 255]
+        @para normal: surface normal, [h, w, 3], numpy.array
+        """
+        n_img_L2 = np.sqrt(np.sum(normal ** 2, axis=2, keepdims=True))
+        n_img_norm = normal / (n_img_L2 + 1e-8)
+        normal_vis = n_img_norm * 127
+        normal_vis += 128
+        normal_vis = normal_vis.astype(np.uint8)
+        return normal_vis
 
     def rgb_to_hsv(self,rgb_image_tensor):
         # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
