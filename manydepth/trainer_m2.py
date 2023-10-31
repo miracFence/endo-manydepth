@@ -513,15 +513,16 @@ class Trainer_Monodepth:
         batch_size, num_channels, height, width = target.size()
 
         # Reshape the rotation tensor to be of shape (batch_size, 3, 3)
-        rotation = rotation[:,:3,:3]
+        #rotation = rotation[:,:3,:3]
+        print(rotation.shape)
         rotation_tensor = rotation.view(batch_size, 3, 3)
 
         # Reshape the normal images to be (batch_size, num_channels, height * width)
         reshaped_images = target.view(batch_size, num_channels, -1)
 
         # Rotate the normal images using matrix multiplication
-        #rotated_images = torch.matmul(rotation_tensor, reshaped_images)
-        rotated_images = rotation_tensor * reshaped_images
+        rotated_images = torch.matmul(rotation_tensor, reshaped_images)
+        #rotated_images = rotation_tensor * reshaped_images
 
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
@@ -531,24 +532,6 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
     
-    def get_motion_flow_loss(self,motion_map):
-        """A regularizer that encourages sparsity.
-        This regularizer penalizes nonzero values. Close to zero it behaves like an L1
-        regularizer, and far away from zero its strength decreases. The scale that
-        distinguishes "close" from "far" is the mean value of the absolute of
-        `motion_map`.
-        Args:
-            motion_map: A torch.Tensor of shape [B, C, H, W]
-        Returns:
-            A scalar torch.Tensor, the regularizer to be added to the training loss.
-        """
-        tensor_abs = torch.abs(motion_map)
-        mean = torch.mean(tensor_abs, dim=(2, 3), keepdim=True).detach()
-        # We used L0.5 norm here because it's more sparsity encouraging than L1.
-        # The coefficients are designed in a way that the norm asymptotes to L1 in
-        # the small value limit.
-        #return torch.mean(2 * mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
-        return torch.mean(mean * torch.sqrt(tensor_abs / (mean + 1e-24) + 1))
     
     def get_ilumination_invariant_loss(self, pred, target):
         features_p = get_ilumination_invariant_features(pred)
