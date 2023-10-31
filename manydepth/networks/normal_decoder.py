@@ -13,7 +13,7 @@ from layers import ConvBlock, Conv3x3, upsample
 
 
 class NormalDecoder(nn.Module):
-    def __init__(self, num_ch_enc, scales=range(4), num_output_channels=3, use_skips=True):
+    def __init__(self, num_ch_enc, scales=range(1), num_output_channels=3, use_skips=True):
         super(NormalDecoder, self).__init__()
 
         self.num_output_channels = num_output_channels
@@ -39,8 +39,8 @@ class NormalDecoder(nn.Module):
             num_ch_out = self.num_ch_dec[i]
             self.convs[("upconv", i, 1)] = ConvBlock(num_ch_in, num_ch_out)
 
-        for s in self.scales:
-            self.convs[("normconv", s)] = Conv3x3(self.num_ch_dec[s], self.num_output_channels)
+        #for s in self.scales:
+        self.convs[("normconv")] = Conv3x3(self.num_ch_dec[s], self.num_output_channels)
 
         self.decoder = nn.ModuleList(list(self.convs.values()))
         self.sigmoid = nn.Sigmoid()
@@ -57,7 +57,7 @@ class NormalDecoder(nn.Module):
                 x += [input_features[i - 1]]
             x = torch.cat(x, 1)
             x = self.convs[("upconv", i, 1)](x)
-            if i in self.scales:
-                self.outputs[("normal", i)] = self.sigmoid(self.convs[("normconv", i)](x))
+            #if i in self.scales:
+            self.outputs[("normal")] = self.sigmoid(self.convs[("normconv")](x))
 
         return self.outputs

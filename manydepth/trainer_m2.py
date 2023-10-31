@@ -297,7 +297,7 @@ class Trainer_Monodepth:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
             outputs = self.models["depth"](features)
-            inputs.update(self.models["normal"](features))
+            #inputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -374,6 +374,7 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs["normal_inputs"] = self.models["normal"](features)
                     #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     for scale in self.opt.scales:
@@ -486,7 +487,7 @@ class Trainer_Monodepth:
         #Normal prediction
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             #self.models["encoder"].eval()
-            features = self.models["encoder"](outputs[("color", frame_id, 0)].detach())
+            features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
             #self.models["encoder"].train()
             #print(frame_id)
@@ -508,7 +509,10 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation):
-
+        
+        print(pred.shape)
+        print(target.shape)
+        print(rotation.shape)
         #Get the dimensions of the rotation tensor and normal images
         batch_size, num_channels, height, width = target.size()
 
@@ -580,7 +584,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal")],outputs["normal_inputs"], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
