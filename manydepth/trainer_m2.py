@@ -610,7 +610,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]))* reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
@@ -744,7 +744,7 @@ class Trainer_Monodepth:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_motion", frame_id, s)][j].data)},step=self.step)
                     wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id, s)][j].data)},step=self.step)
-                    wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(inputs[("normal",0)][j].data)},step=self.step)
+                    wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(self.visualize_normal_image(inputs[("normal",0)][j].data))},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
@@ -863,6 +863,27 @@ class Trainer_Monodepth:
 
         return vis
     
+    def visualize_normal_image(xyz_image):
+    """
+    Visualize a 3-channel image with X, Y, and Z components of normal vectors.
+    
+    Args:
+        xyz_image (torch.Tensor): The input normal image with shape (3, height, width).
+    """
+    # Ensure the input tensor is on the CPU and in numpy format
+    normal_image_np = xyz_image.cpu().numpy()
+
+    # Normalize the normal vectors to unit length
+    normal_image_np /= np.linalg.norm(normal_image_np, axis=0)
+
+    # Transpose the dimensions to (height, width, channels) for matplotlib
+    normal_image_np = np.transpose(normal_image_np, (1, 2, 0))
+
+    # Shift and scale the normal vectors to the [0, 1] range for visualization
+    normal_image_np = 0.5 * normal_image_np + 0.5
+
+    return normal_image_np
+
     def rgb_to_hsv(self,rgb_image_tensor):
         # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
         if rgb_image_tensor.dim() != 4:
