@@ -866,7 +866,7 @@ class Trainer_Monodepth:
         normal_vis = normal_vis.astype(np.uint8)
         return normal_vis
 
-def vis_normal_batch(normal_batch):
+def vis_normal_batch(self,normal_batch):
     """
     Visualize a batch of surface normals.
     Transfer surface normal values from [-1, 1] to [0, 255].
