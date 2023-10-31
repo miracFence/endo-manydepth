@@ -717,7 +717,7 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.vis_normal(inputs[("normal",0)][j].data))},step=self.step)
+            wandb.log({"normal_{}/{}".format(s, j): wandb.Image(self.vis_normal_batch(inputs[("normal",0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
@@ -865,6 +865,30 @@ class Trainer_Monodepth:
         normal_vis += 128
         normal_vis = normal_vis.astype(np.uint8)
         return normal_vis
+
+    def vis_normal_batch(normal_batch):
+    """
+    Visualize a batch of surface normals.
+    Transfer surface normal values from [-1, 1] to [0, 255].
+    
+    Args:
+        normal_batch: Batch of surface normals with shape (batch_size, height, width, 3).
+
+    Returns:
+        visualized_normals: Batch of visualized normal images with shape (batch_size, height, width, 3).
+    """
+    n_img_L2 = torch.sqrt(torch.sum(normal_batch ** 2, dim=3, keepdim=True)
+    n_img_norm = normal_batch / (n_img_L2 + 1e-8)
+    normal_vis = n_img_norm * 127
+    normal_vis += 128
+    normal_vis = normal_vis.to(torch.uint8)
+    return normal_vis
+
+
+
+
+
+
 
     def rgb_to_hsv(self,rgb_image_tensor):
         # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
