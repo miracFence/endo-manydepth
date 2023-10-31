@@ -532,18 +532,16 @@ class Trainer_Monodepth:
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
         """
 
-        # Reshape the image batch for grid_sample
+        # Reshape the image batch for matmul
         image_batch = target.permute(0, 2, 3, 1)  # Change shape to [12, 256, 320, 3]
 
-        # Prepare an affine grid
-        batch_size, num_channels, height, width = image_batch.size()
-        affine_grid = torch.nn.functional.affine_grid(rotation_matrix[:, :3, :4], size=(batch_size, num_channels, height, width))
-
-        # Apply the grid to the image batch using grid_sample
-        rotated_images = torch.nn.functional.grid_sample(image_batch, affine_grid, align_corners=False)
+        # Apply the rotation matrices to the image batch
+        rotated_images = torch.matmul(rotation_matrix, image_batch.unsqueeze(-1))
+        rotated_images = rotated_images.squeeze(-1)
 
         # Reshape the rotated images back to the original shape
-        rotated_images = rotated_images.permute(0, 3, 1, 2) 
+        rotated_images = rotated_images.permute(0, 3, 1, 2)  # Change shape back to [12, 3, 256, 320]
+
 
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
