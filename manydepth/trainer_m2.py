@@ -314,6 +314,7 @@ class Trainer_Monodepth:
         """Predict poses between input frames for monocular sequences.
         """
         outputs = {}
+        outputs["normal_inputs"] = self.models["normal"](features)
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
             # separate forward pass through the pose network.
@@ -374,7 +375,6 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs["normal_inputs"] = self.models["normal"](features)
                     #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     for scale in self.opt.scales:
@@ -584,7 +584,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal")],outputs["normal_inputs"], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()

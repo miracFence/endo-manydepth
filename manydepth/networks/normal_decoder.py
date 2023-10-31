@@ -39,8 +39,8 @@ class NormalDecoder(nn.Module):
             num_ch_out = self.num_ch_dec[i]
             self.convs[("upconv", i, 1)] = ConvBlock(num_ch_in, num_ch_out)
 
-        #for s in self.scales:
-        self.convs[("normconv")] = Conv3x3(self.num_ch_dec[s], self.num_output_channels)
+        for s in self.scales:
+            self.convs[("normconv", s)] = Conv3x3(self.num_ch_dec[s], self.num_output_channels)
 
         self.decoder = nn.ModuleList(list(self.convs.values()))
         self.sigmoid = nn.Sigmoid()
@@ -57,7 +57,7 @@ class NormalDecoder(nn.Module):
                 x += [input_features[i - 1]]
             x = torch.cat(x, 1)
             x = self.convs[("upconv", i, 1)](x)
-            #if i in self.scales:
-            self.outputs[("normal")] = self.sigmoid(self.convs[("normconv")](x))
+            if i in self.scales:
+                self.outputs[("normal", i)] = self.sigmoid(self.convs[("normconv", i)](x))
 
         return self.outputs
