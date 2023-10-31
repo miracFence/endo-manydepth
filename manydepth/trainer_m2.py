@@ -512,7 +512,7 @@ class Trainer_Monodepth:
         
         print(pred.shape)
         print(target.shape)
-        print(rotation.shape)
+        print(rotation)
         #Get the dimensions of the rotation tensor and normal images
         batch_size, num_channels, height, width = target.size()
 
