@@ -297,7 +297,7 @@ class Trainer_Monodepth:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
             outputs = self.models["depth"](features)
-            inputs.update(self.models["normal"](features))
+            #inputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -376,6 +376,8 @@ class Trainer_Monodepth:
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
                     #outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
+                    inputs.update(self.models["normal"](features))
+                    
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
@@ -388,6 +390,8 @@ class Trainer_Monodepth:
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
+                    features = self.models["encoder"](outputs[("color_refined", f_i, scale)])
+                    outputs[("normal_input",scale,f_i)] = self.models["normal"](features)
 
 
         else:
@@ -487,7 +491,7 @@ class Trainer_Monodepth:
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             #self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)].detach())
-            outputs[("normal",frame_id)] = self.models["normal"](features)
+            outputs[("normal_pred",frame_id)] = self.models["normal"](features)
             #self.models["encoder"].train()
             #print(frame_id)
             #print(outputs[("normal_pred",frame_id,scale)])
@@ -610,7 +614,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal_pred",frame_id)][("normal",0)],outputs[("normal_input",0,f_i)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
