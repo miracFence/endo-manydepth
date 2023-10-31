@@ -868,8 +868,8 @@ class Trainer_Monodepth:
         # Scale and shift to map the normals to the 0-255 range
         scaled_normals = ((batch_normals + 1) / 2 * 255).astype(np.uint8)
         # Convert channels to (height, width, channels)
-        print(scaled_normals.shape)
-        transposed_normals = np.transpose(scaled_normals, (0, 2, 3, 1))
+        #print(scaled_normals.shape)
+        transposed_normals = np.transpose(scaled_normals, (1, 2, 0))
         return transposed_normals
 
     def vis_normal_batch(self,normal_batch):
