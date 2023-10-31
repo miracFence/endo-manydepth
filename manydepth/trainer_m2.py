@@ -531,18 +531,18 @@ class Trainer_Monodepth:
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
         """
-        # Create an empty tensor to store the rotated images
-        rotated_images = torch.empty_like(target)
+        
+        # Expand the 12x4x4 rotation tensor to 12x3x3
+        rotation_matrix = rotation_matrix[:, :3, :3]
 
-        # Iterate over each sample in the batch
-        for i in range(target.size(0)):
-            # Apply the rotation matrix to the image
-               # Apply the rotation matrix to the image
-            rotated_image = torch.nn.functional.grid_sample(target[i:i+1], 
-                                                    rotation_matrix[i:i+1].view(1, 1, 4, 4), 
-                                                    mode='bilinear', align_corners=False)          
-            # Store the rotated image in the result tensor
-            rotated_images[i] = rotated_image
+        # Reshape the normal images to (12, 3, -1) to make them compatible with rotation
+        reshaped_images = target.view(12, 3, -1)
+
+        # Apply the rotation matrix to the reshaped normal images
+        rotated_images = torch.matmul(rotation_matrix, reshaped_images)
+
+        # Reshape the rotated images back to the original shape (12, 3, 256, 320)
+        rotated_images = rotated_images.view(12, 3, 256, 320)
 
 
         abs_diff = torch.abs(pred - rotated_images)
