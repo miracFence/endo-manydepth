@@ -513,16 +513,14 @@ class Trainer_Monodepth:
         batch_size, num_channels, height, width = target.size()
 
         # Reshape the rotation tensor to be of shape (batch_size, 3, 3)
-        #rotation = rotation[:,:3,:3]
-        print(rotation.shape)
-        rotation_tensor = rotation.view(batch_size, 3, 3)
+        rotation = rotation[:,:3,:3]
+        #rotation_tensor = rotation.view(batch_size, 3, 3)
 
         # Reshape the normal images to be (batch_size, num_channels, height * width)
-        reshaped_images = target.view(batch_size, num_channels, -1)
+        #reshaped_images = target.view(batch_size, num_channels, -1)
 
         # Rotate the normal images using matrix multiplication
-        rotated_images = torch.matmul(rotation_tensor, reshaped_images)
-        #rotated_images = rotation_tensor * reshaped_images
+        rotated_images = torch.matmul(rotation, target)
 
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
@@ -582,7 +580,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], outputs[("axisangle", 0, frame_id)][:, 0]) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
