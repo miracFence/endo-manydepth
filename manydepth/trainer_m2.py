@@ -581,15 +581,15 @@ class Trainer_Monodepth:
                 #Normal loss
                 normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
-                target = inputs[("color", 0, 0)]
-                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                #target = inputs[("color", 0, 0)]
+                #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 
             
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
             loss += normal_loss / 2.0
-            loss += 0.50 * loss_ilumination_invariant / 2.0
+            #loss += 0.50 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
@@ -898,18 +898,6 @@ class Trainer_Monodepth:
         norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
         norm_rgb = norm_rgb.astype(np.uint8)
         return norm_rgb
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def rgb_to_hsv(self,rgb_image_tensor):
