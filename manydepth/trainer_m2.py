@@ -864,6 +864,7 @@ class Trainer_Monodepth:
         Returns:
             np.ndarray: An array of RGB images representing the normal vectors.
         """
+        batch_normals = batch_normals.cpu().numpy()
         # Scale and shift to map the normals to the 0-255 range
         scaled_normals = ((batch_normals + 1) / 2 * 255).astype(np.uint8)
         # Convert channels to (height, width, channels)
