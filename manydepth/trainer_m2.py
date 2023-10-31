@@ -520,7 +520,8 @@ class Trainer_Monodepth:
         reshaped_images = target.view(batch_size, num_channels, -1)
 
         # Rotate the normal images using matrix multiplication
-        rotated_images = torch.matmul(rotation_tensor, reshaped_images)
+        #rotated_images = torch.matmul(rotation_tensor, reshaped_images)
+        rotated_images = rotation_tensor * reshaped_images
 
         # Reshape the rotated images back to the original shape
         rotated_images = rotated_images.view(batch_size, num_channels, height, width)
@@ -560,18 +561,6 @@ class Trainer_Monodepth:
 
         return ssim_loss
     
-    def get_albedo_loss(self,pred,target):
-        
-        value_channel = torch.ones(1, self.opt.height, self.opt.width) * 100
-        
-        new_pred = torch.cat((pred, value_channel.unsqueeze(1)), dim=1)
-        new_target = torch.cat((target, value_channel.unsqueeze(1)), dim=1)
-        
-        rgb_pred = self.hsv_to_rgb(new_pred)
-        rgb_target = self.hsv_to_rgb(new_target)
-        abs_diff = torch.abs(rgb_target - rgb_pred)
-        l1_loss = abs_diff.mean(1, True)
-        return l1_loss
 
     def compute_losses(self, inputs, outputs):
 
@@ -610,12 +599,11 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0])) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal",0)],inputs[("normal",0)], outputs[("axisangle", 0, frame_id)][:, 0]) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
-                #Albedo loss
-                #albedo_loss += self.get_albedo_loss(outputs[("albedo_pred", frame_id, scale)],outputs[("albedo", frame_id, scale)])
+                
             
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
