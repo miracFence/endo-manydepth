@@ -883,7 +883,7 @@ class Trainer_Monodepth:
         Returns:
             visualized_normals: Batch of visualized normal images with shape (batch_size, height, width, 3).
         """
-        n_img_L2 = torch.sqrt(torch.sum(normal_batch ** 2, dim=1, keepdim=True))  # Use dim=2
+        n_img_L2 = torch.sqrt(torch.sum(normal_batch ** 2, dim=2, keepdim=True))  # Use dim=2
         n_img_norm = normal_batch / (n_img_L2 + 1e-8)
         normal_vis = n_img_norm * 127
         normal_vis += 128
