@@ -866,23 +866,23 @@ class Trainer_Monodepth:
         normal_vis = normal_vis.astype(np.uint8)
         return normal_vis
 
-def vis_normal_batch(self,normal_batch):
-    """
-    Visualize a batch of surface normals.
-    Transfer surface normal values from [-1, 1] to [0, 255].
-    
-    Args:
-        normal_batch: Batch of surface normals with shape (batch_size, height, width, 3).
+    def vis_normal_batch(self,normal_batch):
+        """
+        Visualize a batch of surface normals.
+        Transfer surface normal values from [-1, 1] to [0, 255].
+        
+        Args:
+            normal_batch: Batch of surface normals with shape (batch_size, height, width, 3).
 
-    Returns:
-        visualized_normals: Batch of visualized normal images with shape (batch_size, height, width, 3).
-    """
-    n_img_L2 = torch.sqrt(torch.sum(normal_batch ** 2, dim=2, keepdim=True))  # Use dim=2
-    n_img_norm = normal_batch / (n_img_L2 + 1e-8)
-    normal_vis = n_img_norm * 127
-    normal_vis += 128
-    normal_vis = normal_vis.to(torch.uint8)
-    return normal_vis
+        Returns:
+            visualized_normals: Batch of visualized normal images with shape (batch_size, height, width, 3).
+        """
+        n_img_L2 = torch.sqrt(torch.sum(normal_batch ** 2, dim=2, keepdim=True))  # Use dim=2
+        n_img_norm = normal_batch / (n_img_L2 + 1e-8)
+        normal_vis = n_img_norm * 127
+        normal_vis += 128
+        normal_vis = normal_vis.to(torch.uint8)
+        return normal_vis
 
 
 
