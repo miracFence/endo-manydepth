@@ -642,7 +642,7 @@ class Trainer_Monodepth:
             losses["loss/{}".format(scale)] = loss
 
         #Orthogonal loss
-        #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
+        total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
@@ -937,7 +937,7 @@ class Trainer_Monodepth:
 
         
     def norm_to_rgb(self,norm):
-        pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (B, H, W, 3)
+        pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
         # norm: (B, H, W, 3)
         norm_rgb = ((pred_norm[...] + 1) * 0.5) * 255
         norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
