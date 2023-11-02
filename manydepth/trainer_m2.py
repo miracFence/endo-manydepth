@@ -520,6 +520,8 @@ class Trainer_Monodepth:
         reshaped_images = target.permute(0,2,3,1)
 
         reshaped_normal_shapes = reshaped_images.view(12, -1, 3)
+        print(reshaped_normal_shapes.shape)
+        print(rotation_matrix.unsqueeze(1))
 
         rotated_images = torch.matmul(reshaped_normal_shapes, rotation_matrix.unsqueeze(1)) 
         print(rotated_images.shape)
