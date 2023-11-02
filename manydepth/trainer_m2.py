@@ -531,7 +531,7 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
     
-    def get_orthonogal_loss(self,depth_data,normal_output,K):
+    def get_orthonogal_loss(self,depth_data,normal_output,K_inv):
         # Define the neighboring pixel positions (pa and pb)
         pa_positions = [(0, -1), (-1, 0)]  # Example: top-left and left neighbors
         pb_positions = [(0, 1), (1, 0)]    # Example: bottom-right and right neighbors
