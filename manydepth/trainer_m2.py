@@ -514,8 +514,8 @@ class Trainer_Monodepth:
         
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
-
-        rotation_matrix = rotation_matrix[:, :3, :3].unsqueeze(0).unsqueeze(0)
+        print(rotation_matrix.shape)
+        rotation_matrix = rotation_matrix[:, :3, :3].squeeze(0).squeeze(0)
         print(rotation_matrix.shape)
         reshaped_images = target.permute(0,2,3,1)
         print(reshaped_images.shape)
