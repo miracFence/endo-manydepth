@@ -541,6 +541,7 @@ class Trainer_Monodepth:
 
         # Calculate the inverse of K
         #K_inv = torch.inverse(K)
+        print(K_inv.shape)
 
         # Iterate over each pair of neighboring positions
         for pa_offset, pb_offset in zip(pa_positions, pb_positions):
