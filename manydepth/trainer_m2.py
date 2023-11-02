@@ -561,8 +561,8 @@ class Trainer_Monodepth:
             pa_depth = pa_depth.permute(0,2,3,1)
             pb_depth = pb_depth.permute(0,2,3,1)
 
-            pa_depth = pa_depth.view(12, -1, 1)
-            pb_depth = pb_depth.view(12, -1, 1)
+            pa_depth = pa_depth.view(12, -1)
+            pb_depth = pb_depth.view(12, -1)
 
             K_inv = K_inv.reshape(12,-1)
 
@@ -572,6 +572,9 @@ class Trainer_Monodepth:
 
             pa_depth = torch.matmul(K_inv, pa_depth)  
             pb_depth = torch.matmul(K_inv, pb_depth) 
+
+            pa_depth = pa_depth.view(12, 1, 256, 320)
+            pb_depth = pb_depth.view(12, 1, 256, 320)
             
             # Calculate V^^(p) based on depth values
             V_hat[:, 0, :, :] += (pa_depth - pb_depth)  # X component
