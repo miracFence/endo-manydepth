@@ -761,7 +761,7 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_target{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
+            wandb.log({"normal_target{}/{}".format(s, j): wandb.Image(self.vis_normal_batch(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
             #wandb.log({"normal_predicted{}/{}".format(s, j): wandb.Image(self.visualize_normals(outputs["normal"][("normal", 0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
