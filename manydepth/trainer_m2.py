@@ -515,10 +515,9 @@ class Trainer_Monodepth:
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
 
-        rotation_matrix = rotation_matrix[:, :3, :3]
-
+        rotation_matrix = rotation_matrix[:, :3, :3].unsqueeze(0).unsqueeze(0)
+        print(rotation_matrix.shape)
         reshaped_images = target.permute(0,2,3,1)
-        reshaped_images.unsqueeze(0).unsqueeze(0)
         print(reshaped_images.shape)
         #reshaped_images = target.view(12, 3, -1)
 
@@ -556,8 +555,8 @@ class Trainer_Monodepth:
             pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
         
             # Apply K^-1 to depth values for each pixel individually
-            print(pa_depth.shape)
-            print(pb_depth.shape)
+            #print(pa_depth.shape)
+            #print(pb_depth.shape)
             pa_depth = torch.matmul(K_inv, pa_depth)  
             pb_depth = torch.matmul(K_inv, pb_depth) 
             
