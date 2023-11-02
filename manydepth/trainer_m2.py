@@ -558,8 +558,10 @@ class Trainer_Monodepth:
             pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
         
             # Apply K^-1 to depth values for each pixel individually
-            #print(pa_depth.shape)
-            #print(pb_depth.shape)
+            print(pa_depth.shape)
+            print(pb_depth.shape)
+            print(K_inv.shape)
+
             pa_depth = torch.matmul(K_inv, pa_depth)  
             pb_depth = torch.matmul(K_inv, pb_depth) 
             
