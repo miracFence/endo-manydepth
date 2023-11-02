@@ -550,7 +550,7 @@ class Trainer_Monodepth:
         print(depth_data.shape)
         print(normal_output.shape)"""
 
-        K_inv = K_inv[:, :3, :]
+        K_inv = K_inv[:, :3, :3]
 
         # Iterate over each pair of neighboring positions
         for pa_offset, pb_offset in zip(pa_positions, pb_positions):
