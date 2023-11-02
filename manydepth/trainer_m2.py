@@ -562,6 +562,10 @@ class Trainer_Monodepth:
             print(pb_depth.shape)
             print(K_inv.shape)
 
+            # Reshape the depth tensor to have a shape of (12, 256, 320, 1)
+            pa_depth = pa_depth.permute(0, 2, 3, 1)
+            pb_depth = pb_depth.permute(0, 2, 3, 1)
+
             pa_depth = torch.matmul(K_inv, pa_depth)  
             pb_depth = torch.matmul(K_inv, pb_depth) 
             
