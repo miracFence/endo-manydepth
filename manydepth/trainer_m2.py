@@ -558,9 +558,9 @@ class Trainer_Monodepth:
             pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
         
             # Reshape the depth tensor to have a shape of (12, 256, 320, 1)
-            pa_depth = pa_depth.permute(0, 2, 3, 1)
-            pb_depth = pb_depth.permute(0, 2, 3, 1)
-
+            pa_depth = pa_depth.view(12, 1, -1)
+            pb_depth = pb_depth.view(12, 1, -1)
+            
             print(pa_depth.shape)
             print(pb_depth.shape)
             print(K_inv.shape)
