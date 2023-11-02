@@ -630,7 +630,7 @@ class Trainer_Monodepth:
             losses["loss/{}".format(scale)] = loss
 
         #Orthogonal loss
-        total_loss += = self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
+        total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
