@@ -541,17 +541,17 @@ class Trainer_Monodepth:
 
         # Calculate the inverse of K
         #K_inv = torch.inverse(K)
-        print(K_inv.shape)
+        #print(K_inv.shape)
 
         # Iterate over each pair of neighboring positions
         for pa_offset, pb_offset in zip(pa_positions, pb_positions):
             pa_depth = torch.roll(depth_data, shifts=pa_offset, dims=(2, 3))
             pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
             
-            # Apply K^-1 to depth values
-            pa_depth = torch.matmul(K_inv, pa_depth)
-            pb_depth = torch.matmul(K_inv, pb_depth)
-            
+            # Apply K^-1 to depth values for each pixel individually
+            pa_depth = torch.matmul(pa_depth.view(12, 4, -1), K_inv.permute(0, 2, 1)).view_as(pa_depth)
+            pb_depth = torch.matmul(pb_depth.view(12, 4, -1), K_inv.permute(0, 2, 1)).view_as(pb_depth)
+    
             # Calculate V^^(p) based on depth values
             V_hat[:, 0, :, :] += (pa_depth - pb_depth)  # X component
             V_hat[:, 1, :, :] += (pa_depth - pb_depth)  # Y component
