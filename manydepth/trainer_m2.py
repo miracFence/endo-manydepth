@@ -524,7 +524,7 @@ class Trainer_Monodepth:
         rotated_images = torch.matmul(rotation_matrix, reshaped_images)
 
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
-        rotated_images = rotated_images.view(opt.batch_size, 3, opt.height, opt.width)
+        rotated_images = rotated_images.view(self.opt.batch_size, 3, self.opt.height, self.opt.width)
 
 
         abs_diff = torch.abs(pred - rotated_images)
