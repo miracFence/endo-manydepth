@@ -272,6 +272,7 @@ class Trainer_Monodepth:
 
             self.step += 1
         self.model_lr_scheduler.step()
+
     def process_batch(self, inputs):
         """Pass a minibatch through the network and generate images and losses
         """
@@ -510,6 +511,7 @@ class Trainer_Monodepth:
 
     def norm_loss(self, pred, target, rotation_matrix,frame_id):
 
+        
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
         # Expand the 12x4x4 rotation tensor to 12x3x3
@@ -522,14 +524,44 @@ class Trainer_Monodepth:
         rotated_images = torch.matmul(rotation_matrix, reshaped_images)
 
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
-        rotated_images = rotated_images.view(12, 3, 256, 320)
+        rotated_images = rotated_images.view(opt.batch_size, 3, opt.height, opt.width)
 
 
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
     
-    
+    def get_orthonogal_loss(self,depth_data,normal_output,K):
+        # Define the neighboring pixel positions (pa and pb)
+        pa_positions = [(0, -1), (-1, 0)]  # Example: top-left and left neighbors
+        pb_positions = [(0, 1), (1, 0)]    # Example: bottom-right and right neighbors
+
+        # Initialize a tensor to store V^^(p)
+        V_hat = torch.zeros_like(normal_output)
+
+        # Calculate the inverse of K
+        #K_inv = torch.inverse(K)
+
+        # Iterate over each pair of neighboring positions
+        for pa_offset, pb_offset in zip(pa_positions, pb_positions):
+            pa_depth = torch.roll(depth_data, shifts=pa_offset, dims=(2, 3))
+            pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
+            
+            # Apply K^-1 to depth values
+            pa_depth = torch.matmul(K_inv, pa_depth)
+            pb_depth = torch.matmul(K_inv, pb_depth)
+            
+            # Calculate V^^(p) based on depth values
+            V_hat[:, 0, :, :] += (pa_depth - pb_depth)  # X component
+            V_hat[:, 1, :, :] += (pa_depth - pb_depth)  # Y component
+
+        # Normalize V^^(p) to get the approximate surface vector
+        V_hat = V_hat / torch.norm(V_hat, dim=1, keepdim=True)
+
+        # Calculate Lorth (orthogonality loss) by dot product between normal and V^^(p)
+        orthogonality_loss = torch.sum(normal_output * V_hat, dim=1)
+        return orthogonality_loss
+
     def get_ilumination_invariant_loss(self, pred, target):
         features_p = get_ilumination_invariant_features(pred)
         features_t = get_ilumination_invariant_features(target)
@@ -548,7 +580,7 @@ class Trainer_Monodepth:
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
-        albedo_loss = 0
+        orthonogal_loss = 0
         normal_loss = 0
 
         for scale in self.opt.scales:
@@ -593,11 +625,12 @@ class Trainer_Monodepth:
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
-
             loss += self.opt.disparity_smoothness * smooth_loss / (2 ** scale)
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
+        #Orthogonal loss
+        total_loss += = self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
@@ -900,81 +933,3 @@ class Trainer_Monodepth:
         return norm_rgb
 
 
-    def rgb_to_hsv(self,rgb_image_tensor):
-        # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
-        if rgb_image_tensor.dim() != 4:
-            raise ValueError("Input tensor should have shape [batch_size, channels, height, width].")
-
-        # Split the input tensor into its components (R, G, B)
-        r, g, b = rgb_image_tensor[:, 0, :, :], rgb_image_tensor[:, 1, :, :], rgb_image_tensor[:, 2, :, :]
-
-        # Calculate the max and min values for each pixel in the batch
-        maxc = torch.max(rgb_image_tensor, dim=1).values
-        minc = torch.min(rgb_image_tensor, dim=1).values
-
-        # Initialize tensors to store the components of the HSV images
-        hue = torch.zeros_like(maxc)
-        saturation = torch.zeros_like(maxc)
-        value = torch.zeros_like(maxc)
-
-        # Calculate the Hue component
-        hue[maxc == r] = ((g - b) / (maxc - minc))[maxc == r]
-        hue[maxc == g] = 2.0 + ((b - r) / (maxc - minc))[maxc == g]
-        hue[maxc == b] = 4.0 + ((r - g) / (maxc - minc))[maxc == b]
-        hue = (hue / 6.0) % 1.0  # Normalize to the range [0, 1]
-
-        # Calculate the Saturation component
-        saturation[maxc != 0] = 1 - (minc[maxc != 0] / maxc[maxc != 0])
-
-        # Calculate the Value component
-        value = maxc
-
-        # Stack the Hue, Saturation, and Value components back together
-        hsv_image_tensor = torch.stack((hue.unsqueeze(1), saturation.unsqueeze(1), value.unsqueeze(1)), dim=1)
-
-        return hsv_image_tensor
-
-    import torch
-
-def hsv_to_rgb(hsv_image_tensor):
-    # Ensure that the input tensor is in the shape [batch_size, channels, height, width]
-    if hsv_image_tensor.dim() != 4:
-        raise ValueError("Input tensor should have shape [batch_size, channels, height, width].")
-
-    # Split the input tensor into its components (Hue, Saturation, Value)
-    hue, saturation, value = hsv_image_tensor[:, 0, :, :], hsv_image_tensor[:, 1, :, :], hsv_image_tensor[:, 2, :, :]
-
-    # Calculate the Chroma (C) and intermediate values (X)
-    c = saturation * value
-    x = c * (1 - torch.abs((hue * 6) % 2 - 1))
-
-    # Initialize tensors to store the components of the RGB images
-    r, g, b = torch.zeros_like(hue), torch.zeros_like(hue), torch.zeros_like(hue)
-
-    # Set the RGB components based on the hue
-    r[(0 <= hue) & (hue < 1/6)] = c[(0 <= hue) & (hue < 1/6)]
-    g[(0 <= hue) & (hue < 1/6)] = x[(0 <= hue) & (hue < 1/6)]
-
-    r[(1/6 <= hue) & (hue < 2/6)] = x[(1/6 <= hue) & (hue < 2/6)]
-    g[(1/6 <= hue) & (hue < 2/6)] = c[(1/6 <= hue) & (hue < 2/6)]
-
-    g[(2/6 <= hue) & (hue < 3/6)] = c[(2/6 <= hue) & (hue < 3/6)]
-    b[(2/6 <= hue) & (hue < 3/6)] = x[(2/6 <= hue) & (hue < 3/6)]
-
-    g[(3/6 <= hue) & (hue < 4/6)] = x[(3/6 <= hue) & (hue < 4/6)]
-    b[(3/6 <= hue) & (hue < 4/6)] = c[(3/6 <= hue) & (hue < 4/6)]
-
-    r[(4/6 <= hue) & (hue < 5/6)] = x[(4/6 <= hue) & (hue < 5/6)]
-    b[(4/6 <= hue) & (hue < 5/6)] = c[(4/6 <= hue) & (hue < 5/6)]
-
-    r[(5/6 <= hue) & (hue <= 1)] = c[(5/6 <= hue) & (hue <= 1)]
-    b[(5/6 <= hue) & (hue <= 1)] = x[(5/6 <= hue) & (hue <= 1)]
-
-    # Add the luminance (value) component and clamp the RGB values to the range [0, 1]
-    r, g, b = r + value - c, g + value - c, b + value - c
-    r, g, b = torch.clamp(r, 0, 1), torch.clamp(g, 0, 1), torch.clamp(b, 0, 1)
-
-    # Stack the RGB components back together
-    rgb_image_tensor = torch.stack((r.unsqueeze(1), g.unsqueeze(1), b.unsqueeze(1)), dim=1)
-
-    return rgb_image_tensor
