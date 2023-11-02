@@ -514,11 +514,11 @@ class Trainer_Monodepth:
         
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
-        # Expand the 12x4x4 rotation tensor to 12x3x3
+
         rotation_matrix = rotation_matrix[:, :3, :3]
 
-        # Reshape the normal images to (12, 3, -1) to make them compatible with rotation
-        reshaped_images = target.view(12, 3, -1)
+        reshaped_images = target.permute(0,2,3,1)
+        #reshaped_images = target.view(12, 3, -1)
 
         # Apply the rotation matrix to the reshaped normal images
         rotated_images = torch.matmul(rotation_matrix, reshaped_images)
@@ -638,7 +638,7 @@ class Trainer_Monodepth:
             losses["loss/{}".format(scale)] = loss
 
         #Orthogonal loss
-        total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
+        #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
