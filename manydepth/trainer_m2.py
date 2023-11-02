@@ -564,7 +564,7 @@ class Trainer_Monodepth:
             pa_depth = pa_depth.view(12, -1, 1)
             pb_depth = pb_depth.view(12, -1, 1)
 
-            K_inv = K_inv.(12,-1)
+            K_inv = K_inv.view(12,-1)
 
             print(pa_depth.shape)
             print(pb_depth.shape)
