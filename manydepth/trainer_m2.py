@@ -546,15 +546,14 @@ class Trainer_Monodepth:
         print(depth_data.shape)
         print(normal_output.shape)"""
 
+        K_inv = K_inv[:, :3, :]
+
+        cam_points = torch.matmul(P, points)
         # Iterate over each pair of neighboring positions
         for pa_offset, pb_offset in zip(pa_positions, pb_positions):
             pa_depth = torch.roll(depth_data, shifts=pa_offset, dims=(2, 3))
             pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
-            print(pa_depth.shape)
-            print(pb_depth.shape)
-            # Expand the camera intrinsic matrix along spatial dimensions
         
-            
             # Apply K^-1 to depth values for each pixel individually
             pa_depth = torch.matmul(K_inv, pa_depth)  
             pb_depth = torch.matmul(K_inv, pb_depth) 
