@@ -561,10 +561,10 @@ class Trainer_Monodepth:
             pa_depth = pa_depth.permute(0,2,3,1)
             pb_depth = pb_depth.permute(0,2,3,1)
 
-            pa_depth = pa_depth.view(12, -1)
-            pb_depth = pb_depth.view(12, -1)
+            pa_depth = pa_depth.view(12, -1,1)
+            pb_depth = pb_depth.view(12, -1,1)
 
-            K_inv = K_inv.reshape(12,-1)
+            K_inv = K_inv.reshape(12,-1,1)
 
             print(pa_depth.shape)
             print(pb_depth.shape)
