@@ -518,7 +518,7 @@ class Trainer_Monodepth:
         rotation_matrix = rotation_matrix[:, :3, :3]
 
         reshaped_images = target.permute(0,2,3,1)
-        reshaped_images.unsqueeze(1)
+        reshaped_images.unsqueeze(0).unsqueeze(0)
         print(reshaped_images.shape)
         #reshaped_images = target.view(12, 3, -1)
 
