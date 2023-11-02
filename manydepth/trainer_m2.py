@@ -548,7 +548,6 @@ class Trainer_Monodepth:
 
         K_inv = K_inv[:, :3, :]
 
-        cam_points = torch.matmul(P, points)
         # Iterate over each pair of neighboring positions
         for pa_offset, pb_offset in zip(pa_positions, pb_positions):
             pa_depth = torch.roll(depth_data, shifts=pa_offset, dims=(2, 3))
