@@ -562,10 +562,19 @@ class Trainer_Monodepth:
     def get_diagonals_depth(self,depth_data):
         # Example pixel locations p_a and p_b (replace with your actual values)
         pa_x,pa_y,pb_x,pb_y = self.get_ps(depth_data)
-        print(pa_x.shape)
+        """print(pa_x.shape)
         print(pa_y.shape)
         print(pb_x.shape)
-        print(pb_y.shape)
+        print(pb_y.shape)"""
+        for i in range(depth_data.shape[0]):
+            # Extract depth values at p_a and p_b
+            depth_pa = depth_data[:, 0, pa_y[i], pa_x[i]]
+            depth_pb = depth_data[:, 0, pb_y[i], pb_x[i]]
+            # Create diagonal matrices D^(pa) and D^(pb)
+            D_pa = torch.diag_embed(depth_pa, offset=0, dim1=-2, dim2=-1)
+            D_pb = torch.diag_embed(depth_pb, offset=0, dim1=-2, dim2=-1)
+            print(D_pa.shape)
+            print(D_pb.shape)
         return 1
 
     def get_ilumination_invariant_loss(self, pred, target):
