@@ -571,9 +571,9 @@ class Trainer_Monodepth:
             depth_pa = depth_data[:, 0, pa_y[i], pa_x[i]]
             depth_pb = depth_data[:, 0, pb_y[i], pb_x[i]]
             # Create diagonal matrices D^(pa) and D^(pb)
-            D_pa = torch.diag_embed(depth_pa, offset=0, dim1=-2, dim2=-1).view(12,4,4)
-            D_pb = torch.diag_embed(depth_pb, offset=0, dim1=-2, dim2=-1).view(12,4,4)
-
+            D_pa = torch.diag_embed(depth_pa, offset=0, dim1=-2, dim2=-1)
+            D_pb = torch.diag_embed(depth_pb, offset=0, dim1=-2, dim2=-1)
+            
             # p_a and p_b are 3D coordinates that can be calculated using the (x, y) pixel coordinates
             p_a = torch.stack([pa_x, pa_y, depth_pa], dim=0)
             p_b = torch.stack([pb_x, pb_y, depth_pb], dim=0)
