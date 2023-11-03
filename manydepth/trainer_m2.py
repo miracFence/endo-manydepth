@@ -534,58 +534,39 @@ class Trainer_Monodepth:
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
+
+    def get_ps(self, depth_data):
+        # Initialize empty lists to store (pa_x, pa_y) and (pb_x, pb_y)
+        pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
+
+        # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
+        batch_size, _, height, width = depth_data.shape
+        for y in range(height):
+            for x in range(width):
+                # Select pa_x, pa_y (top-left/bottom-right combination)
+                pa_x_list.append(x)
+                pa_y_list.append(y)
+
+                # Select pb_x, pb_y (top-right/bottom-left combination)
+                pb_x_list.append(x)
+                pb_y_list.append(y)
+        # Convert the lists to tensors
+        pa_x = torch.tensor(pa_x_list, dtype=torch.long)
+        pa_y = torch.tensor(pa_y_list, dtype=torch.long)
+        pb_x = torch.tensor(pb_x_list, dtype=torch.long)
+        pb_y = torch.tensor(pb_y_list, dtype=torch.long)
+        return pa_x, pa_y, pb_x, pb_y
+
+
     
-    def get_orthonogal_loss(self,depth_data,normal_output,K_inv):
-        # Define the neighboring pixel positions (pa and pb)
-        pa_positions = [(0, -1), (-1, 0)]  # Example: top-left and left neighbors
-        pb_positions = [(0, 1), (1, 0)]    # Example: bottom-right and right neighbors
-
-        # Initialize a tensor to store V^^(p)
-        V_hat = torch.zeros_like(normal_output)
-
-        # Calculate the inverse of K
-        #K_inv = torch.inverse(K)
-        """
-        print(K_inv.shape)
-        print(depth_data.shape)
-        print(normal_output.shape)"""
-
-        K_inv = K_inv[:, :3, :3]
-
-        # Iterate over each pair of neighboring positions
-        for pa_offset, pb_offset in zip(pa_positions, pb_positions):
-            pa_depth = torch.roll(depth_data, shifts=pa_offset, dims=(2, 3))
-            pb_depth = torch.roll(depth_data, shifts=pb_offset, dims=(2, 3))
-        
-            # Reshape the depth tensor to have a shape of (12, 256, 320, 1)
-            pa_depth = pa_depth.permute(0,2,3,1)
-            pb_depth = pb_depth.permute(0,2,3,1)
-
-            pa_depth = pa_depth.view(12, -1,1)
-            pb_depth = pb_depth.view(12, -1,1)
-
-            K_inv = K_inv.reshape(12,-1,1)
-
-            print(pa_depth.shape)
-            print(pb_depth.shape)
-            print(K_inv.shape)
-
-            pa_depth = torch.matmul(K_inv, pa_depth)  
-            pb_depth = torch.matmul(K_inv, pb_depth) 
-
-            pa_depth = pa_depth.view(12, 1, 256, 320)
-            pb_depth = pb_depth.view(12, 1, 256, 320)
-            
-            # Calculate V^^(p) based on depth values
-            V_hat[:, 0, :, :] += (pa_depth - pb_depth)  # X component
-            V_hat[:, 1, :, :] += (pa_depth - pb_depth)  # Y component
-
-        # Normalize V^^(p) to get the approximate surface vector
-        V_hat = V_hat / torch.norm(V_hat, dim=1, keepdim=True)
-
-        # Calculate Lorth (orthogonality loss) by dot product between normal and V^^(p)
-        orthogonality_loss = torch.sum(normal_output * V_hat, dim=1)
-        return orthogonality_loss
+    def get_diagonals_depth(self,depth_data,):
+        # Example pixel locations p_a and p_b (replace with your actual values)
+        pa_x,pa_y,pb_x,pb_y = get_ps(depth_data)
+        print(pa_x.shape)
+        print(pa_y.shape)
+        print(pb_x.shape)
+        print(pb_y.shape)
+        return 1
 
     def get_ilumination_invariant_loss(self, pred, target):
         features_p = get_ilumination_invariant_features(pred)
@@ -655,7 +636,8 @@ class Trainer_Monodepth:
             losses["loss/{}".format(scale)] = loss
 
         #Orthogonal loss
-        total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
+        #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
+        self.get_diagonals_depth(outputs[("disp", 0)])
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
