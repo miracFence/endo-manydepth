@@ -559,7 +559,7 @@ class Trainer_Monodepth:
 
 
     
-    def get_diagonals_depth(self,depth_data,):
+    def get_diagonals_depth(self,depth_data):
         # Example pixel locations p_a and p_b (replace with your actual values)
         pa_x,pa_y,pb_x,pb_y = get_ps(depth_data)
         print(pa_x.shape)
