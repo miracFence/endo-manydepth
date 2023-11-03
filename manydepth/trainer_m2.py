@@ -545,6 +545,7 @@ class Trainer_Monodepth:
         batch_size, _, height, width = depth_data.shape
         for y in range(1,height-1):
             for x in range(1,width-1):
+                print(y,x)
                 pa_x1 = x + offset1[0]
                 pa_y1 = y + offset1[1]
                 pb_x1 = x - offset1[0]
