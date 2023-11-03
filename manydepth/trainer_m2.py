@@ -537,50 +537,31 @@ class Trainer_Monodepth:
 
     def get_ps(self, depth_data):
         # Initialize empty lists to store (pa_x, pa_y) and (pb_x, pb_y)
-        pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
+        #pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
 
+        offset1 = (-1, -1)  # Top-left and bottom-right
+        offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
-        for y in range(height):
-            for x in range(width):
-                # Select pa_x, pa_y (top-left/bottom-right combination)
-                pa_x_list.append(x)
-                pa_y_list.append(y)
+        for y in range(1,height-1):
+            for x in range(1,width-1):
+                pa_x1 = x + offset1[0]
+                pa_y1 = y + offset1[1]
+                pb_x1 = x - offset1[0]
+                pb_y1 = y - offset1[1]
+                self.get_v(depth_data,(pa_y1,pa_x1),(pb_y1,pb_x1))
 
-                # Select pb_x, pb_y (top-right/bottom-left combination)
-                pb_x_list.append(x)
-                pb_y_list.append(y)
-        # Convert the lists to tensors
-        pa_x = torch.tensor(pa_x_list, dtype=torch.long)
-        pa_y = torch.tensor(pa_y_list, dtype=torch.long)
-        pb_x = torch.tensor(pb_x_list, dtype=torch.long)
-        pb_y = torch.tensor(pb_y_list, dtype=torch.long)
         return pa_x, pa_y, pb_x, pb_y
 
 
     
-    def get_diagonals_depth(self,depth_data):
+    def get_v(self,depth_data,pa,pb):
+        pa_y,pa_x = pa
+        pb_y,pb_x = pb
+        print(pa)
+        print(pb)
         # Example pixel locations p_a and p_b (replace with your actual values)
-        pa_x,pa_y,pb_x,pb_y = self.get_ps(depth_data)
-        """print(pa_x.shape)
-        print(pa_y.shape)
-        print(pb_x.shape)
-        print(pb_y.shape)"""
-        for i in range(depth_data.shape[0]):
-            # Extract depth values at p_a and p_b
-            depth_pa = depth_data[:, 0, pa_y[i], pa_x[i]]
-            depth_pb = depth_data[:, 0, pb_y[i], pb_x[i]]
-            # Create diagonal matrices D^(pa) and D^(pb)
-            D_pa = torch.diag_embed(depth_pa, offset=0, dim1=-2, dim2=-1)
-            D_pb = torch.diag_embed(depth_pb, offset=0, dim1=-2, dim2=-1)
-            
-            # p_a and p_b are 3D coordinates that can be calculated using the (x, y) pixel coordinates
-            p_a = torch.stack([pa_x, pa_y, depth_pa], dim=0)
-            p_b = torch.stack([pb_x, pb_y, depth_pb], dim=0)
-            print(D_pa.shape)
-            print(D_pb.shape)
-            print(p_a.shape)
-            print(p_b.shape)
+        
         return 1
 
     def get_ilumination_invariant_loss(self, pred, target):
@@ -652,7 +633,7 @@ class Trainer_Monodepth:
 
         #Orthogonal loss
         #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
-        self.get_diagonals_depth(outputs[("disp", 0)])
+        self.get_ps(outputs[("disp", 0)])
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
