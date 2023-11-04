@@ -559,7 +559,7 @@ class Trainer_Monodepth:
 
 
     
-    def get_v(self,depth_data,pa,pb,k):
+    def get_v(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
         #print(pa)
