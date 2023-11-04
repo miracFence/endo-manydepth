@@ -571,6 +571,11 @@ class Trainer_Monodepth:
         #print(depth_data.shape)
         Da = depth_data[0,pa_y,pa_x] #Value depth shape(1)
         Db = depth_data[0,pb_y,pb_x] #Value depth shape(1)
+        print(Da.shape)
+        print(Db.shape)
+        print(K.shape)
+        print(pa.shape)
+        print(pb.shape)
         Vp = (torch.matmul(Da, torch.matmul(K,pa))) - (torch.matmul(Db, torch.matmul(K,pb))) 
         return Vp
 
