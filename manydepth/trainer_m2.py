@@ -551,7 +551,7 @@ class Trainer_Monodepth:
                     pa_y1 = y + offset1[1]
                     pb_x1 = x - offset1[0]
                     pb_y1 = y - offset1[1]
-                    V = self.get_v(depth_data,(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
+                    V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
         #return pa_x, pa_y, pb_x, pb_y
