@@ -562,8 +562,8 @@ class Trainer_Monodepth:
     def get_v(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
-        pa = torch.tensor(pa)
-        pb = torch.tensor(pb)
+        pa = torch.tensor(pa).to(device=depth_data.device)
+        pb = torch.tensor(pb).to(device=depth_data.device)
         
         #print(pa)
         #print(pb)
