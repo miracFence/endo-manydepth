@@ -543,7 +543,7 @@ class Trainer_Monodepth:
         offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
-        for b in batch_size
+        for b in range(batch_size):
             for y in range(1,height-1):
                 for x in range(1,width-1):
                     #print(y,x)
