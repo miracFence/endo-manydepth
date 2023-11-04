@@ -535,7 +535,7 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def get_ps(self, depth_data):
+    def get_ps(self, depth_data,k):
         # Initialize empty lists to store (pa_x, pa_y) and (pb_x, pb_y)
         #pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
 
@@ -543,27 +543,29 @@ class Trainer_Monodepth:
         offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
-        for y in range(1,height-1):
-            for x in range(1,width-1):
-                print(y,x)
-                pa_x1 = x + offset1[0]
-                pa_y1 = y + offset1[1]
-                pb_x1 = x - offset1[0]
-                pb_y1 = y - offset1[1]
-                self.get_v(depth_data,(pa_y1,pa_x1),(pb_y1,pb_x1))
+        for b in batch_size
+            for y in range(1,height-1):
+                for x in range(1,width-1):
+                    #print(y,x)
+                    pa_x1 = x + offset1[0]
+                    pa_y1 = y + offset1[1]
+                    pb_x1 = x - offset1[0]
+                    pb_y1 = y - offset1[1]
+                    V = self.get_v(depth_data,(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
+                    #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
-        return pa_x, pa_y, pb_x, pb_y
+        #return pa_x, pa_y, pb_x, pb_y
+        return V
 
 
     
-    def get_v(self,depth_data,pa,pb):
+    def get_v(self,depth_data,pa,pb,k):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
-        print(pa)
-        print(pb)
-        # Example pixel locations p_a and p_b (replace with your actual values)
-        
-        return 1
+        Da = depth_data(pa_y,pa_x) #Value depth shape(1)
+        Db = depth_data(pb_y,pb_x) #Value depth shape(1)
+        Vp = (Da * (K,pa)) - (Db * (K,pb)) 
+        return Vp
 
     def get_ilumination_invariant_loss(self, pred, target):
         features_p = get_ilumination_invariant_features(pred)
@@ -634,7 +636,7 @@ class Trainer_Monodepth:
 
         #Orthogonal loss
         #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
-        self.get_ps(outputs[("disp", 0)])
+        self.get_ps(outputs[("disp", 0)],inputs[("inv_K", 0)])
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
