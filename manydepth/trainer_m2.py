@@ -562,9 +562,9 @@ class Trainer_Monodepth:
     def get_v(self,depth_data,pa,pb,k):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
-        Da = depth_data(pa_y,pa_x) #Value depth shape(1)
-        Db = depth_data(pb_y,pb_x) #Value depth shape(1)
-        Vp = (Da * (K,pa)) - (Db * (K,pb)) 
+        Da = depth_data[pa_y,pa_x] #Value depth shape(1)
+        Db = depth_data[pb_y,pb_x] #Value depth shape(1)
+        Vp = (torch.matmul(Da, torch.matmul(K,pa))) - (torch.matmul(Db, torch.matmul(K,pb))) 
         return Vp
 
     def get_ilumination_invariant_loss(self, pred, target):
