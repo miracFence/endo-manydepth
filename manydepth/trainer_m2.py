@@ -562,6 +562,8 @@ class Trainer_Monodepth:
     def get_v(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
+        pa = torch.stack(list(pa), dim=0)
+        pb = torch.stack(list(pb), dim=0)
         #print(pa)
         #print(pb)
         #print(pa_y)
