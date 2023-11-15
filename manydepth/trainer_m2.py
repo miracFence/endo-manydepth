@@ -566,10 +566,10 @@ class Trainer_Monodepth:
         pb_3d = torch.tensor([pb_x, pb_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
 
         #print(depth_data.shape)
-        #print(pa_y)
-        #print(pa_x)
-        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor) #Value depth shape(1)
-        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor) #Value depth shape(1)
+        print(pa_3d.shape)
+        print(pb_3d.shape)
+        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
+        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
         K = K[:3,:3]
         print(Da.shape)
         print(Db.shape)
