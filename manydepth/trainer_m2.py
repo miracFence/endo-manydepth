@@ -568,8 +568,8 @@ class Trainer_Monodepth:
         #print(depth_data.shape)
         #print(pa_y)
         #print(pa_x)
-        Da = torch.tensor(depth_data[0,pa_y,pa_x]) #Value depth shape(1)
-        Db = torch.tensor(depth_data[0,pb_y,pb_x]) #Value depth shape(1)
+        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device) #Value depth shape(1)
+        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device) #Value depth shape(1)
         K = K[:3,:3]
         print(Da.shape)
         print(Db.shape)
