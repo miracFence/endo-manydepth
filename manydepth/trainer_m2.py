@@ -562,14 +562,14 @@ class Trainer_Monodepth:
     def get_v(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
-        pa_3d = torch.tensor([pa_x, pa_y, 1]).to(device=K.device)
-        pb_3d = torch.tensor([pb_x, pb_y, 1]).to(device=K.device)
+        pa_3d = torch.tensor([pa_x, pa_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
+        pb_3d = torch.tensor([pb_x, pb_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
 
         #print(depth_data.shape)
         #print(pa_y)
         #print(pa_x)
-        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device) #Value depth shape(1)
-        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device) #Value depth shape(1)
+        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor) #Value depth shape(1)
+        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor) #Value depth shape(1)
         K = K[:3,:3]
         print(Da.shape)
         print(Db.shape)
