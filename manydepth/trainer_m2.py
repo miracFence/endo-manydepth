@@ -574,7 +574,8 @@ class Trainer_Monodepth:
         print(Da.shape)
         print(Db.shape)
         #print(K.shape)
-
+        ka = torch.matmul(K,pa_3d)
+        kb = torch.matmul(K,pb_3d)
         Vp = (torch.matmul(Da, torch.matmul(K,pa_3d))) - (torch.matmul(Db, torch.matmul(K,pb_3d))) 
         return Vp
 
