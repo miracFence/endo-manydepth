@@ -545,9 +545,9 @@ class Trainer_Monodepth:
         batch_size, _, height, width = depth_data.shape
         normal_data = normal_data.permute(0,2,3,1)
         #v = 0
-        for b in enumerate(batch_size):
-            for y in enumerate(1,height-1):
-                for x in enumerate(1,width-1):
+        for b in range(batch_size):
+            for y in range(1,height-1):
+                for x in range(1,width-1):
                     #print(y,x)
                     pa_x1 = x + offset1[0]
                     pa_y1 = y + offset1[1]
@@ -555,6 +555,9 @@ class Trainer_Monodepth:
                     pb_y1 = y - offset1[1]
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
                     print(normal_data.shape)
+                    print(b)
+                    print(y)
+                    print(x)
                     x = normal_data[b][y][x]
                     y = normal_data[b][y][x]
                     z = normal_data[b][y][x]
