@@ -558,8 +558,8 @@ class Trainer_Monodepth:
                     N = normal_data[b,y,x]
                     #print(V.shape)
                     #
-                    print(V)
-                    print(N)
+                    #print(V)
+                    #print(N)
                     Loss += V*N
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
