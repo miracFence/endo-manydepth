@@ -535,14 +535,15 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def get_ps(self, depth_data,k):
+    def get_loss_ort(self,normal_data,depth_data,k):
         # Initialize empty lists to store (pa_x, pa_y) and (pb_x, pb_y)
         #pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
-
+        Loss = 0
         offset1 = (-1, -1)  # Top-left and bottom-right
         offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
+        v = 0
         for b in range(batch_size):
             for y in range(1,height-1):
                 for x in range(1,width-1):
@@ -552,14 +553,16 @@ class Trainer_Monodepth:
                     pb_x1 = x - offset1[0]
                     pb_y1 = y - offset1[1]
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
+                    N = normal_data[b][y,x]
+                    Loss += torch.dot(V,N)
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
         #return pa_x, pa_y, pb_x, pb_y
-        return V
+        return Loss
 
 
     
-    def get_v(self,depth_data,pa,pb,K):
+    def get_lorth(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
         pa_3d = torch.tensor([pa_x, pa_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
@@ -571,13 +574,13 @@ class Trainer_Monodepth:
         Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
         Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
         K = K[:3,:3]
-        print(Da.shape)
-        print(Db.shape)
+        #print(Da.shape)
+        #print(Db.shape)
         #print(K.shape)
         ka = torch.matmul(K,pa_3d).unsqueeze(0)
         kb = torch.matmul(K,pb_3d).unsqueeze(0)
-        print(ka.shape)
-        print(kb.shape)
+        #print(ka.shape)
+        #print(kb.shape)
         Vp = (torch.matmul(Da,ka)) - (torch.matmul(Db,kb)) 
         return Vp
 
@@ -650,7 +653,8 @@ class Trainer_Monodepth:
 
         #Orthogonal loss
         #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
-        self.get_ps(outputs[("disp", 0)],inputs[("inv_K", 0)])
+        orthonogal_loss += self.get_loss_ort(outputs["normal_inputs"][("normal", 0)],outputs[("disp", 0)],inputs[("inv_K", 0)])
+        total_loss += orthonogal_loss
         total_loss /= self.num_scales
         losses["loss"] = total_loss
         return losses
