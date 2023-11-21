@@ -543,6 +543,7 @@ class Trainer_Monodepth:
         offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
+        normal_data = normal_data.permute(0,2,3,1)
         #v = 0
         for b in range(batch_size):
             for y in range(1,height-1):
@@ -554,9 +555,9 @@ class Trainer_Monodepth:
                     pb_y1 = y - offset1[1]
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
                     print(normal_data.shape)
-                    x = normal_data[b][0.long()][y][x]
-                    y = normal_data[b][1.long()][y][x]
-                    z = normal_data[b][2.long()][y][x]
+                    x = normal_data[b][y][x]
+                    y = normal_data[b][y][x]
+                    z = normal_data[b][y][x]
                     print(V.shape)
                     print(x.shape)
                     Loss += torch.dot(V,N)
