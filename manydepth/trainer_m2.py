@@ -558,11 +558,11 @@ class Trainer_Monodepth:
                     print(b)
                     print(y)
                     print(x)
-                    x = normal_data[b][y][x]
-                    y = normal_data[b][y][x]
-                    z = normal_data[b][y][x]
+                    xx = normal_data[b,y,x]
+                    yy = normal_data[b,y,x]
+                    zz = normal_data[b,y,x]
                     print(V.shape)
-                    print(x.shape)
+                    print(xx.shape)
                     Loss += torch.dot(V,N)
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
