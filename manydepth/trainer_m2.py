@@ -562,7 +562,7 @@ class Trainer_Monodepth:
 
 
     
-    def get_lorth(self,depth_data,pa,pb,K):
+    def get_v(self,depth_data,pa,pb,K):
         pa_y,pa_x = pa
         pb_y,pb_x = pb
         pa_3d = torch.tensor([pa_x, pa_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
