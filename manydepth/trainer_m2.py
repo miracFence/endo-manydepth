@@ -543,7 +543,7 @@ class Trainer_Monodepth:
         offset2 = (-1, 1)   # Top-right and bottom-left
         # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
         batch_size, _, height, width = depth_data.shape
-        v = 0
+        #v = 0
         for b in range(batch_size):
             for y in range(1,height-1):
                 for x in range(1,width-1):
@@ -553,7 +553,7 @@ class Trainer_Monodepth:
                     pb_x1 = x - offset1[0]
                     pb_y1 = y - offset1[1]
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
-                    #print(normal_data.shape)
+                    print(normal_data.shape)
                     x = normal_data[b][0][y][x]
                     y = normal_data[b][1][y][x]
                     z = normal_data[b][2][y][x]
