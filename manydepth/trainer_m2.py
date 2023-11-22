@@ -572,7 +572,7 @@ class Trainer_Monodepth:
         # Iterate over pixels
         for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
             for j in range(D.size(1)):
-                p = torch.tensor([i, j, 1.0], dtype=torch.float32)  # Homogeneous coordinates
+                p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
 
                 # Calculate X~(p) = K_inv * p
                 X_tilde_p = torch.matmul(K_inv, p)
