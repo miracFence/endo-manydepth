@@ -594,7 +594,7 @@ class Trainer_Monodepth:
                     # Update LDN loss
                     LDN_loss += G_p[i, j] * torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
 
-    return LDN_loss
+        return LDN_loss
 
     
     def get_v(self,depth_data,pa,pb,K):
