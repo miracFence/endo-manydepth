@@ -556,8 +556,8 @@ class Trainer_Monodepth:
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
                     #print(normal_data.shape)
                     N = normal_data[b,y,x]
-                    #print(V.shape)
-                    #print(xx.shape)
+                    print(V.shape)
+                    print(N.shape)
                     Loss += torch.dot(V,N)
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
@@ -578,13 +578,13 @@ class Trainer_Monodepth:
         Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
         Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
         K = K[:3,:3]
-        print(Da.shape)
-        print(Db.shape)
+        #print(Da.shape)
+        #print(Db.shape)
         #print(K.shape)
         ka = K*pa_3d
         kb = K*pb_3d
-        print(ka.shape)
-        print(kb.shape)
+        #print(ka.shape)
+        #print(kb.shape)
         Vp = (Da * ka) - (Db * kb) 
         #Vp = (Da * ka) - (Db * kb)
         return Vp
