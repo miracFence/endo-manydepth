@@ -556,14 +556,45 @@ class Trainer_Monodepth:
                     V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
                     #print(normal_data.shape)
                     N = normal_data[b,y,x]
-                    print(V.shape)
-                    print(N.shape)
+                    #print(V.shape)
+                    #print(xx.shape)
                     Loss += torch.dot(V,N)
                     #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
 
         #return pa_x, pa_y, pb_x, pb_y
         return Loss
 
+    def compute_ldn_loss(D, N_hat, K_inv, alpha=1.0, beta=1.0):
+    
+    # Compute LDN loss
+    LDN_loss = 0.0
+
+    # Iterate over pixels
+    for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
+        for j in range(D.size(1)):
+            p = torch.tensor([i, j, 1.0], dtype=torch.float32)  # Homogeneous coordinates
+
+            # Calculate X~(p) = K_inv * p
+            X_tilde_p = torch.matmul(K_inv, p)
+
+            # Calculate dot products
+            cpp = torch.dot(N_hat[i, j], X_tilde_p)
+            
+            # Iterate over neighboring pixels
+            for neighbor_offset in [(0, 1), (1, 0)]:
+                ni, nj = i + neighbor_offset[0], j + neighbor_offset[1]
+                q = torch.tensor([ni, nj, 1.0], dtype=torch.float32)  # Homogeneous coordinates
+
+                # Calculate X~(q) = K_inv * q
+                X_tilde_q = torch.matmul(K_inv, q)
+
+                # Calculate dot products
+                cpq = torch.dot(N_hat[i, j], X_tilde_q)
+
+                # Update LDN loss
+                LDN_loss += G_p[i, j] * torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
+
+    return LDN_loss
 
     
     def get_v(self,depth_data,pa,pb,K):
@@ -581,11 +612,11 @@ class Trainer_Monodepth:
         #print(Da.shape)
         #print(Db.shape)
         #print(K.shape)
-        ka = K*pa_3d
-        kb = K*pb_3d
+        ka = torch.matmul(K,pa_3d).unsqueeze(0)
+        kb = torch.matmul(K,pb_3d).unsqueeze(0)
         #print(ka.shape)
         #print(kb.shape)
-        Vp = (Da * ka) - (Db * kb) 
+        Vp = (torch.matmul(Da,ka)) - (torch.matmul(Db,kb)) 
         #Vp = (Da * ka) - (Db * kb)
         return Vp
 
@@ -658,7 +689,8 @@ class Trainer_Monodepth:
 
         #Orthogonal loss
         #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
-        orthonogal_loss += self.get_loss_ort(outputs["normal_inputs"][("normal", 0)],outputs[("disp", 0)],inputs[("inv_K", 0)])
+        #orthonogal_loss += self.get_loss_ort(outputs["normal_inputs"][("normal", 0)],outputs[("disp", 0)],inputs[("inv_K", 0)])
+        orthonogal_loss += += compute_ldn_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         total_loss += orthonogal_loss
         total_loss /= self.num_scales
         losses["loss"] = total_loss
