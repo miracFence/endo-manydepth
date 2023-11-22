@@ -690,7 +690,7 @@ class Trainer_Monodepth:
         #Orthogonal loss
         #total_loss += self.get_orthonogal_loss(outputs[("disp", 0)],outputs["normal_inputs"][("normal", 0)],inputs[("inv_K", scale)]) / (2 ** scale)
         #orthonogal_loss += self.get_loss_ort(outputs["normal_inputs"][("normal", 0)],outputs[("disp", 0)],inputs[("inv_K", 0)])
-        orthonogal_loss += += compute_ldn_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        orthonogal_loss += compute_ldn_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         total_loss += orthonogal_loss
         total_loss /= self.num_scales
         losses["loss"] = total_loss
