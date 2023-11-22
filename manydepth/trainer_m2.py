@@ -566,33 +566,33 @@ class Trainer_Monodepth:
 
     def compute_ldn_loss(D, N_hat, K_inv, alpha=1.0, beta=1.0):
     
-    # Compute LDN loss
-    LDN_loss = 0.0
+        # Compute LDN loss
+        LDN_loss = 0.0
 
-    # Iterate over pixels
-    for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
-        for j in range(D.size(1)):
-            p = torch.tensor([i, j, 1.0], dtype=torch.float32)  # Homogeneous coordinates
+        # Iterate over pixels
+        for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
+            for j in range(D.size(1)):
+                p = torch.tensor([i, j, 1.0], dtype=torch.float32)  # Homogeneous coordinates
 
-            # Calculate X~(p) = K_inv * p
-            X_tilde_p = torch.matmul(K_inv, p)
-
-            # Calculate dot products
-            cpp = torch.dot(N_hat[i, j], X_tilde_p)
-            
-            # Iterate over neighboring pixels
-            for neighbor_offset in [(0, 1), (1, 0)]:
-                ni, nj = i + neighbor_offset[0], j + neighbor_offset[1]
-                q = torch.tensor([ni, nj, 1.0], dtype=torch.float32)  # Homogeneous coordinates
-
-                # Calculate X~(q) = K_inv * q
-                X_tilde_q = torch.matmul(K_inv, q)
+                # Calculate X~(p) = K_inv * p
+                X_tilde_p = torch.matmul(K_inv, p)
 
                 # Calculate dot products
-                cpq = torch.dot(N_hat[i, j], X_tilde_q)
+                cpp = torch.dot(N_hat[i, j], X_tilde_p)
+                
+                # Iterate over neighboring pixels
+                for neighbor_offset in [(0, 1), (1, 0)]:
+                    ni, nj = i + neighbor_offset[0], j + neighbor_offset[1]
+                    q = torch.tensor([ni, nj, 1.0], dtype=torch.float32)  # Homogeneous coordinates
 
-                # Update LDN loss
-                LDN_loss += G_p[i, j] * torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
+                    # Calculate X~(q) = K_inv * q
+                    X_tilde_q = torch.matmul(K_inv, q)
+
+                    # Calculate dot products
+                    cpq = torch.dot(N_hat[i, j], X_tilde_q)
+
+                    # Update LDN loss
+                    LDN_loss += G_p[i, j] * torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
 
     return LDN_loss
 
