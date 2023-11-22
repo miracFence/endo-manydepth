@@ -568,7 +568,7 @@ class Trainer_Monodepth:
     
         # Compute LDN loss
         LDN_loss = 0.0
-
+        k_inv = K_inv[:3,:3]
         # Iterate over pixels
         for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
             for j in range(D.size(1)):
