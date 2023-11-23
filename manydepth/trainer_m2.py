@@ -580,8 +580,8 @@ class Trainer_Monodepth:
                     X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
 
                     # Calculate dot products
-                    print(N_hat[b, i, j].shape)
-                    cpp = torch.dot(N_hat[b, i, j], X_tilde_p)
+                    #print(N_hat[b, i, j].shape)
+                    cpp = torch.dot(N_hat[b, i, j].squeeze(), X_tilde_p)
                     
                     # Iterate over neighboring pixels
                     for neighbor_offset in [(0, 1), (1, 0)]:
@@ -592,7 +592,7 @@ class Trainer_Monodepth:
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
 
                         # Calculate dot products
-                        cpq = torch.dot(N_hat[i, j], X_tilde_q)
+                        cpq = torch.dot(N_hat[b ,i, j].squeeze(), X_tilde_q)
 
                         # Update LDN loss
                         LDN_loss += torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
