@@ -579,29 +579,6 @@ class Trainer_Monodepth:
         return LDN_loss
 
     
-    def get_v(self,depth_data,pa,pb,K):
-        pa_y,pa_x = pa
-        pb_y,pb_x = pb
-        pa_3d = torch.tensor([pa_x, pa_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
-        pb_3d = torch.tensor([pb_x, pb_y, 1]).to(device=K.device).type(torch.cuda.FloatTensor)
-
-        #print(depth_data.shape)
-        #print(pa_3d.shape)
-        #print(pb_3d.shape)
-        Da = torch.tensor(depth_data[0,pa_y,pa_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
-        Db = torch.tensor(depth_data[0,pb_y,pb_x]).to(device=K.device).type(torch.cuda.FloatTensor).unsqueeze(0) #Value depth shape(1)
-        K = K[:3,:3]
-        #print(Da.shape)
-        #print(Db.shape)
-        #print(K.shape)
-        ka = torch.matmul(K,pa_3d).unsqueeze(0)
-        kb = torch.matmul(K,pb_3d).unsqueeze(0)
-        #print(ka.shape)
-        #print(kb.shape)
-        Vp = (torch.matmul(Da,ka)) - (torch.matmul(Db,kb)) 
-        #Vp = (Da * ka) - (Db * kb)
-        return Vp
-
     def get_ilumination_invariant_loss(self, pred, target):
         features_p = get_ilumination_invariant_features(pred)
         features_t = get_ilumination_invariant_features(target)
@@ -658,8 +635,7 @@ class Trainer_Monodepth:
                 
                 #total_loss += orthonogal_loss
             #Orthogonal loss
-            orthonogal_loss += self.compute_ldn_loss(outputs[("disp", scale)].detach(), outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
-            loss += orthonogal_loss 
+            loss += = self.compute_ldn_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             loss += loss_reprojection / 2.0
             #Normal loss
             #loss += 0.50 * loss_ilumination_invariant / 2.0
