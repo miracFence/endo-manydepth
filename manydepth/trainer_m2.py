@@ -598,10 +598,10 @@ class Trainer_Monodepth:
                         cpq = torch.dot(N_hat[b ,i, j], X_tilde_q)
 
                         # Update LDN loss
-                        print(D_inv.shape)
-                        print(ni,nj)
-                        print(i,j)
-                        LDN_loss += torch.abs(D_inv[b,i,j] * cpq - D_inv[b,ni,nj] * cpp)
+                        #print(D_inv.shape)
+                        #print(ni,nj)
+                        #print(i,j)
+                        LDN_loss += torch.abs(D_inv[b,0,i,j] * cpq - D_inv[b,0,ni,nj] * cpp)
 
         return LDN_loss
 
