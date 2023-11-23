@@ -662,7 +662,7 @@ class Trainer_Monodepth:
             loss += orthonogal_loss 
             loss += loss_reprojection / 2.0
             #Normal loss
-            loss += 0.50 * loss_ilumination_invariant / 2.0
+            #loss += 0.50 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
