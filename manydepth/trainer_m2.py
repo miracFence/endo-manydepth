@@ -580,7 +580,8 @@ class Trainer_Monodepth:
                     X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
 
                     # Calculate dot products
-                    #print(N_hat[b, i, j].shape)
+                    print(N_hat[b, i, j].shape)
+                    print(X_tilde_p.shape)
                     cpp = torch.dot(N_hat[b, i, j].squeeze(), X_tilde_p)
                     
                     # Iterate over neighboring pixels
