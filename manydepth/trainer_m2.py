@@ -568,7 +568,7 @@ class Trainer_Monodepth:
     
         # Compute LDN loss
         LDN_loss = 0.0
-        k_inv = K_inv[:3,:3]
+        #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
         for b in range(batch_size):
@@ -577,7 +577,7 @@ class Trainer_Monodepth:
                     p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
 
                     # Calculate X~(p) = K_inv * p
-                    X_tilde_p = torch.matmul(K_inv[b], p)
+                    X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
 
                     # Calculate dot products
                     cpp = torch.dot(N_hat[b, i, j], X_tilde_p)
@@ -588,7 +588,7 @@ class Trainer_Monodepth:
                         q = torch.tensor([ni, nj, 1.0], dtype=torch.float32)  # Homogeneous coordinates
 
                         # Calculate X~(q) = K_inv * q
-                        X_tilde_q = torch.matmul(K_inv[b], q)
+                        X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
 
                         # Calculate dot products
                         cpq = torch.dot(N_hat[i, j], X_tilde_q)
