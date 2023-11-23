@@ -571,9 +571,10 @@ class Trainer_Monodepth:
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
+        D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
         for b in range(batch_size):
-            for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
+            for i in range(D_inv.size(0)):  # Assuming D is a 2D tensor representing the image
                 for j in range(D.size(1)):
                     p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
 
@@ -596,11 +597,8 @@ class Trainer_Monodepth:
                         # Calculate dot products
                         cpq = torch.dot(N_hat[b ,i, j], X_tilde_q)
 
-                        print(D[i, j])
-                        print(ni, nj)
-                        print(D[ni, nj])
                         # Update LDN loss
-                        LDN_loss += torch.abs(D[i, j] * cpq - D[ni, nj] * cpp)
+                        LDN_loss += torch.abs(D_inv[b,i,j] * cpq - D_inv[b,ni,nj] * cpp)
 
         return LDN_loss
 
