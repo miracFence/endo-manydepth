@@ -571,6 +571,7 @@ class Trainer_Monodepth:
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
+        N_hat = N_hat.permute(0,2,3,1)
         for b in range(batch_size):
             for i in range(D.size(0)):  # Assuming D is a 2D tensor representing the image
                 for j in range(D.size(1)):
