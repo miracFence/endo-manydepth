@@ -316,7 +316,7 @@ class Trainer_Monodepth:
         """
         outputs = {}
         outputs["normal_inputs"] = self.models["normal"](features)
-        print(len(outputs["normal_inputs"]))
+        #print(len(outputs["normal_inputs"]))
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
             # separate forward pass through the pose network.
@@ -491,7 +491,7 @@ class Trainer_Monodepth:
             #self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
-            print(len(outputs[("normal",frame_id)]))
+            
             #self.models["encoder"].train()
             #print(frame_id)
             #print(outputs[("normal_pred",frame_id,scale)])
@@ -656,7 +656,7 @@ class Trainer_Monodepth:
                 #Normal loss
                 #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Orthogonal loss
-                loss += self.compute_ldn_loss(outputs[("disp", 0)].detach(), outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
+                loss += self.compute_ldn_loss(outputs[("disp", frame_id)].detach(), outputs["normal_inputs"][("normal", frame_id)], inputs[("inv_K", frame_id)].detach())
                 #total_loss += orthonogal_loss
             
             loss += loss_reprojection / 2.0
