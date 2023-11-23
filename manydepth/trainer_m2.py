@@ -648,18 +648,15 @@ class Trainer_Monodepth:
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
-                #Normal loss
-                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
-                
+                #Normal loss
+                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
             
             loss += loss_reprojection / 2.0
-            #loss += albedo_loss / 2.0
-            #print(loss_ilumination_invariant)
-            #loss += normal_loss / 2.0
-            #loss += 0.50 * loss_ilumination_invariant / 2.0
+            #Normal loss
+            loss += 0.50 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
@@ -667,11 +664,13 @@ class Trainer_Monodepth:
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
-        #Orthogonal loss
-        #orthonogal_loss += self.compute_ldn_loss(outputs[("disp", 0)].detach(), outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
-        #total_loss += orthonogal_loss
+        
         total_loss /= self.num_scales
+        #Orthogonal loss
+        orthonogal_loss += self.compute_ldn_loss(outputs[("disp", 0)].detach(), outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
+        total_loss += orthonogal_loss
         losses["loss"] = total_loss
+        
         return losses
 
     @staticmethod
