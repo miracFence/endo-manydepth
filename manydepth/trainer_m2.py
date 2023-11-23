@@ -661,14 +661,14 @@ class Trainer_Monodepth:
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
             loss += self.opt.disparity_smoothness * smooth_loss / (2 ** scale)
+            #Orthogonal loss
+            loss += self.compute_ldn_loss(outputs[("disp", 0)].detach(), outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
+
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
         
         total_loss /= self.num_scales
-        #Orthogonal loss
-        orthonogal_loss += self.compute_ldn_loss(outputs[("disp", 0)].detach(), outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
-        total_loss += orthonogal_loss
         losses["loss"] = total_loss
         
         return losses
