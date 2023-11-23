@@ -535,35 +535,6 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def get_loss_ort(self,normal_data,depth_data,k):
-        # Initialize empty lists to store (pa_x, pa_y) and (pb_x, pb_y)
-        #pa_x_list, pa_y_list, pb_x_list, pb_y_list = [], [], [], []
-        Loss = 0
-        offset1 = (-1, -1)  # Top-left and bottom-right
-        offset2 = (-1, 1)   # Top-right and bottom-left
-        # Iterate over the depth data to select (pa_x, pa_y) and (pb_x, pb_y)
-        batch_size, _, height, width = depth_data.shape
-        normal_data = normal_data.permute(0,2,3,1)
-        #v = 0
-        for b in range(batch_size):
-            for y in range(1,height-1):
-                for x in range(1,width-1):
-                    #print(y,x)
-                    pa_x1 = x + offset1[0]
-                    pa_y1 = y + offset1[1]
-                    pb_x1 = x - offset1[0]
-                    pb_y1 = y - offset1[1]
-                    V = self.get_v(depth_data[b],(pa_y1,pa_x1),(pb_y1,pb_x1),k[b])
-                    #print(normal_data.shape)
-                    N = normal_data[b,y,x]
-                    #print(V.shape)
-                    #print(xx.shape)
-                    Loss += torch.dot(V,N)
-                    #self.get_v(depth_data,(pa_y2,pa_x1),(pb_y1,pb_x1),k[b])
-
-        #return pa_x, pa_y, pb_x, pb_y
-        return Loss
-
     def compute_ldn_loss(self,D, N_hat, K_inv, alpha=1.0, beta=1.0):
     
         # Compute LDN loss
@@ -678,7 +649,7 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
@@ -687,7 +658,7 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0
             #loss += albedo_loss / 2.0
             #print(loss_ilumination_invariant)
-            loss += normal_loss / 2.0
+            #loss += normal_loss / 2.0
             #loss += 0.50 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
