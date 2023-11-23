@@ -535,7 +535,7 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def compute_ldn_loss(self,D, N_hat, K_inv, alpha=1.0, beta=1.0):
+    def compute_ldn_loss(self,D, N_hat, K_inv):
     
         # Compute LDN loss
         LDN_loss = 0.0
