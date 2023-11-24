@@ -928,6 +928,7 @@ class Trainer_Monodepth:
 
         
     def norm_to_rgb(self,norm):
+        print(norm.reshaped_normal_shapes)
         pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
         # norm: (B, H, W, 3)
         norm_rgb = ((pred_norm[...] + 1) * 0.5) * 255
