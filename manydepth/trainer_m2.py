@@ -560,7 +560,7 @@ class Trainer_Monodepth:
                         # Calculate X~(p) = K_inv * p
                         X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
-                        Vp += D[b,0,i+p[0],j+p[1]] * X_tilde_p - D[b,0,i+p2[0],j+p2[1]] * X_tilde_q
+                        Vp += D[b,0,p[0],p[1]] * X_tilde_p - D[b,0,q[0],q[1]] * X_tilde_q
                         
                     # Update LDN loss
                     LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
