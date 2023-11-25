@@ -561,15 +561,7 @@ class Trainer_Monodepth:
     
                         Vp = D[b,0,i+p[0],j+p[1]] * X_tilde_p - D[b,0,i+p2[0],j+p2[1]] * X_tilde_q
                         
-
-                        # Calculate X~(q) = K_inv * q
-                        
-
-                        # Calculate dot products
-                        cpq = torch.dot(N_hat[b ,i, j], X_tilde_q)
-
                         # Update LDN loss
-                        #LDN_loss += torch.abs(D_inv[b,0,i,j] * cpq - D_inv[b,0,ni,nj] * cpp)
                         LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
 
         return LDN_loss
