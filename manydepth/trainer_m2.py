@@ -626,7 +626,7 @@ class Trainer_Monodepth:
             #Normal loss
             #loss += 0.005 * normal_loss
             #Orthogonal loss
-            loss += 0.5 * self.compute_ldn_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += 0.1 * self.compute_ldn_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             loss += loss_reprojection / 2.0
             #Normal loss
             #loss += 0.50 * loss_ilumination_invariant / 2.0
