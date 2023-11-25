@@ -71,6 +71,18 @@ class MonodepthOptions:
                                  type=float,
                                  help="disparity smoothness weight",
                                  default=1e-3)
+        self.parser.add_argument("--illumination_invariant",
+                                 type=float,
+                                 help="illumination invariant weight",
+                                 default=0.5)
+        self.parser.add_argument("--orthogonal",
+                                 type=float,
+                                 help="orthogonal weight",
+                                 default=0.5)
+        self.parser.add_argument("--normal",
+                                 type=float,
+                                 help="normal loss weight",
+                                 default=0.01)
         self.parser.add_argument("--scales",
                                  nargs="+",
                                  type=int,
@@ -102,7 +114,7 @@ class MonodepthOptions:
         self.parser.add_argument("--num_epochs",
                                  type=int,
                                  help="number of epochs",
-                                 default=20)
+                                 default=50)
         self.parser.add_argument("--scheduler_step_size",
                                  type=int,
                                  help="step size of the scheduler",

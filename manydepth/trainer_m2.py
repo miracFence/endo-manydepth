@@ -72,11 +72,7 @@ class Trainer_Monodepth:
             self.opt.num_layers, self.opt.weights_init == "pretrained")
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
-        """
-        self.models["ii_encoder"] = networks.ResnetEncoderIIF(
-            self.opt.num_layers, pretrained = False, num_input_images=2)  # 18
-        self.models["ii_encoder"].to(self.device)"""
-
+ 
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["depth"].to(self.device)
@@ -86,17 +82,6 @@ class Trainer_Monodepth:
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["normal"].to(self.device)
         self.parameters_to_train += list(self.models["normal"].parameters())
-
-        """
-        self.models["albedo"] = networks.DepthDecoder(
-            self.models["encoder"].num_ch_enc, self.opt.scales)
-        self.models["albedo"].to(self.device)
-        self.parameters_to_train += list(self.models["albedo"].parameters())
-        """
-        """
-        self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
-        self.models["motion_flow"].to(self.device)
-        self.parameters_to_train += list(self.models["motion_flow"].parameters())"""
 
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
@@ -214,6 +199,27 @@ class Trainer_Monodepth:
 
         self.save_opts()
 
+    def freeze_models(self):
+        # Freeze all layers
+        for param in self.models["encoder"].parameters():
+            param.requires_grad = False
+        for param in self.models["depth"].parameters():
+            param.requires_grad = False
+        for param self.models["pose_encoder"].parameters():
+            param.requires_grad = False
+        for param in self.models["lighting"].parameters():
+            param.requires_grad = False
+    
+    def unfreeze_models(self):
+        for param in self.models["encoder"].parameters():
+            param.requires_grad = True
+        for param in self.models["depth"].parameters():
+            param.requires_grad = True
+        for param self.models["pose_encoder"].parameters():
+            param.requires_grad = True
+        for param in self.models["lighting"].parameters():
+            param.requires_grad = True
+
     def set_train(self):
         """Convert all models to training mode
         """
@@ -239,8 +245,19 @@ class Trainer_Monodepth:
 
     def run_epoch(self):
         """Run a single epoch of training and validation
-        """
-        
+        """        
+        if self.epoch < 20:
+            self.opt.normal = 0
+            self.opt.orthogonal = 0
+        if self.epoch == 20:
+            self.freeze_models()
+            self.opt.normal = 0.01
+            self.opt.orthogonal = 0.5
+        if self.epoch == 40:
+            self.unfreeze_models()
+            self.opt.normal = 0.005
+            self.opt.orthogonal = 0.001
+
 
         print("Training")
         self.set_train()
@@ -487,15 +504,10 @@ class Trainer_Monodepth:
                     padding_mode="border",align_corners=True)
                 
         #Normal prediction
-        """
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
-            #self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
             
-            #self.models["encoder"].train()
-            #print(frame_id)
-            #print(outputs[("normal_pred",frame_id,scale)])"""
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -538,9 +550,9 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def compute_ldn_loss(self,D,N_hat,K_inv):
+    def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
-        LDN_loss = 0.0
+        orth_loss = 0.0
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
@@ -563,9 +575,9 @@ class Trainer_Monodepth:
                         Vp += D[b,0,p[0],p[1]] * X_tilde_p - D[b,0,q[0],q[1]] * X_tilde_q
                         
                     # Update LDN loss
-                    LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
+                    orth_loss += torch.dot(N_hat[b ,i, j], Vp)
 
-        return LDN_loss
+        return orth_loss
 
     
     def get_ilumination_invariant_loss(self, pred, target):
@@ -611,25 +623,23 @@ class Trainer_Monodepth:
                 rep_identity = self.compute_reprojection_loss(pred, target)
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
-                #reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
+                reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
                 #Losses
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
-                #target = inputs[("color", 0, 0)]
-                #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                target = inputs[("color", 0, 0)]
+                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
-                #total_loss += orthonogal_loss
+            loss += loss_reprojection / 2.0    
             #Normal loss
-            #loss += 0.005 * normal_loss
+            loss += self.opt.normal * normal_loss
             #Orthogonal loss
-            loss += 0.1 * self.compute_ldn_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
-            loss += loss_reprojection / 2.0
-            #Normal loss
-            #loss += 0.50 * loss_ilumination_invariant / 2.0
+            loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
