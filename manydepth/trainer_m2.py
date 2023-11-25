@@ -205,10 +205,11 @@ class Trainer_Monodepth:
             param.requires_grad = False
         for param in self.models["depth"].parameters():
             param.requires_grad = False
-        for param self.models["pose_encoder"].parameters():
+        for param in self.models["pose_encoder"].parameters():
             param.requires_grad = False
         for param in self.models["lighting"].parameters():
             param.requires_grad = False
+        
     
     def unfreeze_models(self):
         for param in self.models["encoder"].parameters():
