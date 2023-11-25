@@ -487,6 +487,7 @@ class Trainer_Monodepth:
                     padding_mode="border",align_corners=True)
                 
         #Normal prediction
+        """
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             #self.models["encoder"].eval()
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
@@ -494,7 +495,7 @@ class Trainer_Monodepth:
             
             #self.models["encoder"].train()
             #print(frame_id)
-            #print(outputs[("normal_pred",frame_id,scale)])
+            #print(outputs[("normal_pred",frame_id,scale)])"""
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -537,44 +538,39 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    def compute_ldn_loss(self,D, N_hat, K_inv):
-    
+    def compute_ldn_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         LDN_loss = 0.0
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
-        D_inv = 1.0 / D
+        #D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
+        p = [(-1,-1),(1,1)]
+        p2 = [(1,1),(-1,1)]
         for b in range(batch_size):
-            for i in range(D_inv.size(0)):  # Assuming D is a 2D tensor representing the image
-                for j in range(D.size(1)):
-                    p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
-
-                    # Calculate X~(p) = K_inv * p
-                    X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
-
-                    # Calculate dot products
-                    #print(N_hat.shape)
-                    #print(X_tilde_p.shape)
-                    cpp = torch.dot(N_hat[b, i, j],X_tilde_p)
-                    
+            for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
+                for j in range(1,D.size(1)-1):
                     # Iterate over neighboring pixels
-                    for neighbor_offset in [(0, 1), (1, 0)]:
-                        ni, nj = i + neighbor_offset[0], j + neighbor_offset[1]
-                        q = torch.tensor([ni, nj, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                    for i in range(2):
+                        p = torch.tensor([i+p[0], j+p[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                        q = torch.tensor([i+p2[0], j+p2[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                        # Calculate X~(p) = K_inv * p
+                        X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
+                        X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
+    
+                        Vp = D[b,0,i+p[0],j+p[1]] * X_tilde_p - D[b,0,i+p2[0],j+p2[1]] * X_tilde_q
+                        
 
                         # Calculate X~(q) = K_inv * q
-                        X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
+                        
 
                         # Calculate dot products
                         cpq = torch.dot(N_hat[b ,i, j], X_tilde_q)
 
                         # Update LDN loss
-                        #print(D_inv.shape)
-                        #print(ni,nj)
-                        #print(i,j)
-                        LDN_loss += torch.abs(D_inv[b,0,i,j] * cpq - D_inv[b,0,ni,nj] * cpp)
+                        #LDN_loss += torch.abs(D_inv[b,0,i,j] * cpq - D_inv[b,0,ni,nj] * cpp)
+                        LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
 
         return LDN_loss
 
@@ -928,7 +924,6 @@ class Trainer_Monodepth:
 
         
     def norm_to_rgb(self,norm):
-        print(norm.shape)
         pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
         # norm: (B, H, W, 3)
         norm_rgb = ((pred_norm[...] + 1) * 0.5) * 255
