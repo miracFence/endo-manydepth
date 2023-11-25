@@ -546,15 +546,16 @@ class Trainer_Monodepth:
         batch_size, _, height, width = D.shape
         #D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
-        p = [(-1,-1),(1,1)]
+        p1 = [(-1,-1),(1,1)]
         p2 = [(1,1),(-1,1)]
+        ps = p1.append(p1)
         for b in range(batch_size):
             for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
                 for j in range(1,D.size(1)-1):
                     # Iterate over neighboring pixels
-                    for i in range(2):
-                        p = torch.tensor([i+p[0], j+p[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
-                        q = torch.tensor([i+p2[0], j+p2[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                    for ii in ps:
+                        p = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                        q = torch.tensor([i+ii[1][0], j+p2[1][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         # Calculate X~(p) = K_inv * p
                         X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
