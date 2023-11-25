@@ -216,10 +216,10 @@ class Trainer_Monodepth:
             param.requires_grad = True
         for param in self.models["depth"].parameters():
             param.requires_grad = True
-        for param self.models["pose_encoder"].parameters():
-            param.requires_grad = True
+        for param in self.models["pose_encoder"].parameters():
+            param.requires_grad = False
         for param in self.models["lighting"].parameters():
-            param.requires_grad = True
+            param.requires_grad = False
 
     def set_train(self):
         """Convert all models to training mode
