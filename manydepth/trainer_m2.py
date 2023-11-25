@@ -547,8 +547,8 @@ class Trainer_Monodepth:
         #D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
         p1 = [(-1,-1),(1,1)]
-        p2 = [(1,1),(-1,1)]
-        ps = p1.append(p1)
+        p2 = [(-1,1),(1,-1)]
+        ps = p1.append(p2)
         for b in range(batch_size):
             for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
                 for j in range(1,D.size(1)-1):
