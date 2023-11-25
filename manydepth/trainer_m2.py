@@ -553,17 +553,17 @@ class Trainer_Monodepth:
             for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
                 for j in range(1,D.size(1)-1):
                     # Iterate over neighboring pixels
+                    Vp = 0.0
                     for ii in ps:
                         p = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         q = torch.tensor([i+ii[1][0], j+p2[1][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         # Calculate X~(p) = K_inv * p
                         X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
-    
-                        Vp = D[b,0,i+p[0],j+p[1]] * X_tilde_p - D[b,0,i+p2[0],j+p2[1]] * X_tilde_q
+                        Vp += D[b,0,i+p[0],j+p[1]] * X_tilde_p - D[b,0,i+p2[0],j+p2[1]] * X_tilde_q
                         
-                        # Update LDN loss
-                        LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
+                    # Update LDN loss
+                    LDN_loss += torch.dot(N_hat[b ,i, j], Vp)
 
         return LDN_loss
 
