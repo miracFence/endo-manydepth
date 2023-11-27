@@ -897,10 +897,11 @@ class Trainer_Monodepth:
         
     def norm_to_rgb(self,norm):
         
-        pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
+        pred_norm = norm.permute(1, 2, 0)  # (H, W, 3)
         # norm: (B, H, W, 3)
         outputs_n = F.normalize(pred_norm)
         norm_rgb = ((pred_norm[...] + 1) * 0.5)
+
         """
         norm_rgb = ((pred_norm[...] + 1) * 0.5) * 255
         norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
