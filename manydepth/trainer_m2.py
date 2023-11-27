@@ -542,9 +542,9 @@ class Trainer_Monodepth:
 
         rotation_matrix = rotation_matrix[:, :3, :3]
 
-        reshaped_images = target.permute(0,2,3,1)
         reshaped_images =  torch.nn.functional.normalize(reshaped_images, p=2, dim=1)
-        reshaped_normal_shapes = reshaped_images.view(12, -1, 3)
+        reshaped_images = target.permute(0,2,3,1)
+        #reshaped_normal_shapes = reshaped_images.view(12, -1, 3)
         #print(reshaped_normal_shapes.shape)
         #print(rotation_matrix.unsqueeze(1).shape)
 
@@ -552,7 +552,7 @@ class Trainer_Monodepth:
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
         rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
-        rotated_images = rotated_images.permute(0,3,1,2)
+        #rotated_images = rotated_images.permute(0,3,1,2)
         #result.view(12, 256, 320, 3)
         #pred = pred.permute(0,2,3,1)
 
@@ -567,8 +567,12 @@ class Trainer_Monodepth:
         # Iterate over pixels
         batch_size, _, height, width = D.shape
         #D_inv = 1.0 / D
-        N_hat = N_hat.permute(0,2,3,1)
+        #N_hat = N_hat.permute(0,2,3,1)
+        #N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        # Normalized predictions are between -1 and 1. Get to range 0 to 255
+        N_hat = N_hat.permute(0,2,3,1)
         p1 = [(-1,-1),(1,1)]
         p2 = [(-1,1),(1,-1)]
         ps = p1.append(p2)
@@ -624,7 +628,7 @@ class Trainer_Monodepth:
             color = inputs[("color", 0, scale)]
             #Losses & compute mask
             for frame_id in self.opt.frame_ids[1:]:
-                # Mask
+                ############# Mask #################
                 target = inputs[("color", 0, 0)]
                 pred = outputs[("color", frame_id, scale)]
 
@@ -635,7 +639,7 @@ class Trainer_Monodepth:
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
-                #Losses
+                ##############Losses################
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
@@ -643,14 +647,14 @@ class Trainer_Monodepth:
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
             loss += self.opt.normal * normal_loss
-            print(outputs[("normal",frame_id)][("normal", 0)])
+            #print(outputs[("normal",frame_id)][("normal", 0)])
             #Orthogonal loss
-            loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach()) / (2 ** scale)
+            loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)]) 
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
