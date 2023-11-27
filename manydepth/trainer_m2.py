@@ -896,11 +896,27 @@ class Trainer_Monodepth:
 
         
     def norm_to_rgb(self,norm):
+        """
         pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
         # norm: (B, H, W, 3)
         norm_rgb = ((pred_norm[...] + 1) * 0.5) * 255
         norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
         norm_rgb = norm_rgb.astype(np.uint8)
-        return norm_rgb
+        return norm_rgb"""
+
+        #def norm_imsave(outputs):
+        # outputs_s = np.squeeze(outputs.data.cpu().numpy(), axis=0)
+        # outputs_s = outputs_s.transpose(1, 2, 0)
+        # outputs_s = outputs_s.reshape(-1,3)
+        # outputs_norm = sk.normalize(outputs_s, norm='l2', axis=1)
+        # outputs_norm = outputs_norm.reshape(orig_size[0], orig_size[1], 3)
+        # outputs_norm = 0.5*(outputs_norm+1)
+        bz, ch, img_rows, img_cols = norm.size()# bz should be one for imsave
+        outputs = norm.permute(0,2,3,1).contiguous().view(-1,ch)
+        outputs_n = F.normalize(outputs,p=2)
+        outputs_n = 0.5*(outputs_n+1)                
+        outputs_n = outputs_n.view(-1, img_rows, img_cols, ch)
+        return outputs_n
+        # outputs_n = outputs_n.permute(0,3,1,2)
 
 
