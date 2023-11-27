@@ -334,8 +334,8 @@ class Trainer_Monodepth:
         """
         outputs = {}
         outputs["normal_inputs"] = self.models["normal"](features)
-        print(outputs["normal_inputs"][("normal", 0)].shape)
-        print(outputs["normal_inputs"][("normal", 0)])
+        #print(outputs["normal_inputs"][("normal", 0)].shape)
+        #print(outputs["normal_inputs"][("normal", 0)])
         #print(len(outputs["normal_inputs"]))
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
