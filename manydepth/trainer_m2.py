@@ -48,10 +48,9 @@ class Trainer_Monodepth:
         self.opt = options
         self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name)
 
-        #self.normal_weight = 0
-        #self.orthogonal_weight = 0
-        self.normal_weight = 0.01
-        self.orthogonal_weight = 0.5
+        self.normal_weight = 0.0
+        self.orthogonal_weight = 0.0
+
 
         # checking height and width are multiples of 32
         assert self.opt.height % 32 == 0, "'height' must be a multiple of 32"
@@ -253,7 +252,7 @@ class Trainer_Monodepth:
         """Run a single epoch of training and validation
         """       
         
-        """ 
+        
         if self.epoch < 20:
             self.normal_weight = 0.0
             self.orthogonal_weight = 0.0
@@ -264,7 +263,7 @@ class Trainer_Monodepth:
         if self.epoch == 40:
             self.unfreeze_models()
             self.normal_weight = 0.005
-            self.orthogonal_weight = 0.001"""
+            self.orthogonal_weight = 0.001
 
 
         print("Training")
@@ -551,10 +550,10 @@ class Trainer_Monodepth:
         rotated_images = torch.matmul(reshaped_normal_shapes, rotation_matrix) 
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
-        rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
-        #rotated_images = rotated_images.permute(0,3,1,2)
+        #rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
+        rotated_images = rotated_images.permute(0,3,1,2)
         #result.view(12, 256, 320, 3)
-        #pred = pred.permute(0,2,3,1)
+        pred = pred.permute(0,2,3,1)
 
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
@@ -654,7 +653,7 @@ class Trainer_Monodepth:
             #loss += self.opt.normal * normal_loss
             #print(outputs[("normal",frame_id)][("normal", 0)])
             #Orthogonal loss
-            loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)]) 
+            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
@@ -909,6 +908,7 @@ class Trainer_Monodepth:
 
         
     def norm_to_rgb(self,norm):
+        
         pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
         norm_rgb = ((pred_norm[...] + 1)) / 2 * 255
         norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
