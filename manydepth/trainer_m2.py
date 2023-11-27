@@ -48,6 +48,9 @@ class Trainer_Monodepth:
         self.opt = options
         self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name)
 
+        self.normal_weight = 0
+        self.orthogonal_weight = 0
+
         # checking height and width are multiples of 32
         assert self.opt.height % 32 == 0, "'height' must be a multiple of 32"
         assert self.opt.width % 32 == 0, "'width' must be a multiple of 32"
@@ -248,16 +251,16 @@ class Trainer_Monodepth:
         """Run a single epoch of training and validation
         """        
         if self.epoch < 20:
-            self.opt.normal = 0
-            self.opt.orthogonal = 0
+            self.normal_weight = 0
+            self.orthogonal_weight = 0
         if self.epoch == 20:
             self.freeze_models()
-            self.opt.normal = 0.01
-            self.opt.orthogonal = 0.5
+            self.normal_weight = 0.01
+            self.orthogonal_weight = 0.5
         if self.epoch == 40:
             self.unfreeze_models()
-            self.opt.normal = 0.005
-            self.opt.orthogonal = 0.001
+            self.normal_weight = 0.005
+            self.orthogonal_weight = 0.001
 
 
         print("Training")
@@ -642,7 +645,6 @@ class Trainer_Monodepth:
             #Normal loss
             loss += self.opt.normal * normal_loss
             #Orthogonal loss
-            print(self.opt.orthogonal)
             loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach()) / (2 ** scale)
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
