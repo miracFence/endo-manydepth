@@ -911,7 +911,7 @@ class Trainer_Monodepth:
         # outputs_norm = sk.normalize(outputs_s, norm='l2', axis=1)
         # outputs_norm = outputs_norm.reshape(orig_size[0], orig_size[1], 3)
         # outputs_norm = 0.5*(outputs_norm+1)
-        bz, ch, img_rows, img_cols = norm.shape# bz should be one for imsave
+        ch, img_rows, img_cols = norm.shape# bz should be one for imsave
         outputs = norm.permute(0,2,3,1).contiguous().view(-1,ch)
         outputs_n = F.normalize(outputs,p=2)
         outputs_n = 0.5*(outputs_n+1)                
