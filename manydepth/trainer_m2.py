@@ -911,11 +911,11 @@ class Trainer_Monodepth:
         # outputs_norm = sk.normalize(outputs_s, norm='l2', axis=1)
         # outputs_norm = outputs_norm.reshape(orig_size[0], orig_size[1], 3)
         # outputs_norm = 0.5*(outputs_norm+1)
-        ch, img_rows, img_cols = norm.shape# bz should be one for imsave
+        ch, img_rows, img_cols = norm.shape # bz should be one for imsave
         outputs = norm.permute(1,2,0)
         outputs_n = F.normalize(outputs)
         outputs_n = 0.5*(outputs_n+1)                
-        outputs_n = outputs_n.view(-1, img_rows, img_cols, ch)
+        outputs_n = outputs_n.view(img_rows, img_cols, ch)
         return outputs_n
         # outputs_n = outputs_n.permute(0,3,1,2)
 
