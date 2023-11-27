@@ -642,6 +642,7 @@ class Trainer_Monodepth:
             #Normal loss
             loss += self.opt.normal * normal_loss
             #Orthogonal loss
+            print(self.opt.orthogonal)
             loss += self.opt.orthogonal * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach()) / (2 ** scale)
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
