@@ -564,6 +564,9 @@ class Trainer_Monodepth:
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
+        print(batch_size)
+        print(height)
+        print(width)
         #D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
