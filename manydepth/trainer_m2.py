@@ -572,9 +572,9 @@ class Trainer_Monodepth:
         p2 = [(-1,1),(1,-1)]
         ps = p1.append(p2)
         for b in range(batch_size):
-            for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
+            for i in range(1,height-1):  # Assuming D is a 2D tensor representing the image
                 print("i"+str(i))
-                for j in range(1,D.size(1)-1):
+                for j in range(1,width-1):
                     # Iterate over neighboring pixels
                     print("j"+str(j))
                     Vp = 0.0
