@@ -564,15 +564,16 @@ class Trainer_Monodepth:
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
-        print(batch_size)
-        print(height)
-        print(width)
+
         #D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
         p1 = [(-1,-1),(1,1)]
         p2 = [(-1,1),(1,-1)]
         ps = p1.append(p2)
+        print(batch_size)
+        print(height)
+        print(width)
         for b in range(batch_size):
             print(b)
             for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
