@@ -508,10 +508,10 @@ class Trainer_Monodepth:
                     padding_mode="border",align_corners=True)
                 
         #Normal prediction
-        """
+        
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
-            outputs[("normal",frame_id)] = self.models["normal"](features)"""
+            outputs[("normal",frame_id)] = self.models["normal"](features)
             
 
 
