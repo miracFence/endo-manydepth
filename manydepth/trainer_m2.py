@@ -570,13 +570,15 @@ class Trainer_Monodepth:
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
         p1 = [(-1,-1),(1,1)]
         p2 = [(-1,1),(1,-1)]
-        ps = p1.append(p2)
+        ps = []
+        ps.append(p1)
+        ps.append(p2)
         for b in range(batch_size):
             for i in range(1,height-1):  # Assuming D is a 2D tensor representing the image
-                print("i"+str(i))
+                #print("i"+str(i))
                 for j in range(1,width-1):
                     # Iterate over neighboring pixels
-                    print("j"+str(j))
+                    #print("j"+str(j))
                     Vp = 0.0
                     for ii in ps:
                         p = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
