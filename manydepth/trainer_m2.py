@@ -560,6 +560,7 @@ class Trainer_Monodepth:
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         orth_loss = 0.0
+        print("compute_orth_loss")
         #k_inv = K_inv[:3,:3]
         # Iterate over pixels
         batch_size, _, height, width = D.shape
@@ -581,12 +582,12 @@ class Trainer_Monodepth:
                         X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
                         Vp += torch.matmul(D[b,0,p[0],p[1]] , X_tilde_p) - torch.matmul(D[b,0,q[0],q[1]] , X_tilde_q)
-                        print(Vp)
+                        #print(Vp)
                         
                     # Update LDN loss
                     #print(N_hat[b ,i, j])
                     orth_loss += torch.dot(N_hat[b ,i, j], Vp)
-                    print(orth_loss)
+                    #print(orth_loss)
 
         return orth_loss
 
