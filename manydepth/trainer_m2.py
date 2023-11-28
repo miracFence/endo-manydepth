@@ -574,6 +574,7 @@ class Trainer_Monodepth:
             for i in range(1,D.size(0)-1):  # Assuming D is a 2D tensor representing the image
                 for j in range(1,D.size(1)-1):
                     # Iterate over neighboring pixels
+                    print(j)
                     Vp = 0.0
                     for ii in ps:
                         p = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
