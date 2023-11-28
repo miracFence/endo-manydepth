@@ -592,7 +592,7 @@ class Trainer_Monodepth:
                     # Update LDN loss
                     #print(N_hat[b ,i, j])
                     orth_loss += torch.dot(N_hat[b ,i, j], Vp)
-                    #print(orth_loss)
+                    print(orth_loss)
 
         return orth_loss
 
@@ -653,10 +653,10 @@ class Trainer_Monodepth:
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
-            loss += self.normal_weight * normal_loss
+            #loss += self.normal_weight * normal_loss
             #Orthogonal loss
-            #loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
-            loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            #loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
