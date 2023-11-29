@@ -662,7 +662,7 @@ class Trainer_Monodepth:
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
-            loss += self.normal_weight * normal_loss
+            #loss += self.normal_weight * normal_loss
             #Orthogonal loss
             """
             if self.normal_flag == 1:
