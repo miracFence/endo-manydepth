@@ -246,7 +246,9 @@ class Trainer_Monodepth:
 
     def run_epoch(self):
         """Run a single epoch of training and validation
-        """       
+        """  
+
+        """     
         self.normal_flag = 0
         if self.epoch < 20:
             self.normal_weight = 0.0
@@ -261,7 +263,7 @@ class Trainer_Monodepth:
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
             self.normal_flag = 1
-
+        """
 
         print("Training")
         self.set_train()
@@ -662,8 +664,10 @@ class Trainer_Monodepth:
             #Normal loss
             loss += self.normal_weight * normal_loss
             #Orthogonal loss
+            """
             if self.normal_flag == 1:
-                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())"""
+            loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             #loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
