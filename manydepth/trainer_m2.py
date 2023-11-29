@@ -585,23 +585,20 @@ class Trainer_Monodepth:
                     #Vp = 0.0
                     p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                     X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
-                    Cpq = torch.dot(N_hat[b ,i, j],X_tilde_p)
+                    Cpp = torch.dot(N_hat[b ,i, j],X_tilde_p)
                     for ii in ps:
-                        print(ii)
-                        print(ii[0])
-                        print(ii[1])
-                        q = torch.tensor([i+ii[0], j+ii[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                        print(ii[0][0])
+                        print(ii[0][1])
+                        q = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         # Calculate X~(p) = K_inv * p
-                        
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
-                        
-                        Cpp = torch.dot(N_hat[b ,i, j],X_tilde_p)
+                        Cpq = torch.dot(N_hat[b ,i, j],X_tilde_q)
 
-                        Vp += D[b,0,int(p[0]),int(p[1])] * X_tilde_p - D[b,0,int(q[0]),int(q[1])] * X_tilde_q
+                        orth_loss += torch.abs(D_inv[b,0,i,j] * Cpq - D_inv[b,0,int(q[0]),int(q[1])] * X_tilde_p)
                         #print(Vp)
                         
                     # Update LDN loss
-                    orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
+                    #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
                     #print(orth_loss)
 
         return orth_loss
