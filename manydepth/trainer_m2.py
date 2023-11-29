@@ -587,6 +587,7 @@ class Trainer_Monodepth:
                     X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                     Cpq = torch.dot(N_hat[b ,i, j],X_tilde_p)
                     for ii in ps:
+                        print(ii)
                         print(ii[0])
                         print(ii[1])
                         q = torch.tensor([i+ii[0], j+ii[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
