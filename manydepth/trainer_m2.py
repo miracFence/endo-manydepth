@@ -562,37 +562,42 @@ class Trainer_Monodepth:
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         orth_loss = 0.0
-        #print("compute_orth_loss")
-        #k_inv = K_inv[:3,:3]
-        # Iterate over pixels
         batch_size, _, height, width = D.shape
 
-        #D_inv = 1.0 / D
+        D_inv = 1.0 / D
         N_hat = N_hat.permute(0,2,3,1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
-        p1 = [(-1,-1),(1,1)]
-        p2 = [(-1,1),(1,-1)]
+        #p1 = [(-1,-1),(1,1)]
+        #p2 = [(-1,1),(1,-1)]
+        p1 = [(0,1)]
+        p2 = [(1,0)]
         ps = []
         ps.append(p1)
+        ps.append(p1)
+        ps.append(p2)
         ps.append(p2)
         for b in range(batch_size):
             for i in range(1,height-1):  # Assuming D is a 2D tensor representing the image
-                #print("i"+str(i))
                 for j in range(1,width-1):
                     # Iterate over neighboring pixels
-                    #print("j"+str(j))
-                    Vp = 0.0
+                    #Vp = 0.0
+                    p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                    X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
+                    Cpq = torch.dot(N_hat[b ,i, j],X_tilde_p)
                     for ii in ps:
-                        p = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
-                        q = torch.tensor([i+ii[1][0], j+p2[1][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                        print(ii[0])
+                        print(ii[1])
+                        q = torch.tensor([i+ii[0], j+ii[1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         # Calculate X~(p) = K_inv * p
-                        X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
+                        
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
+                        
+                        Cpp = torch.dot(N_hat[b ,i, j],X_tilde_p)
+
                         Vp += D[b,0,int(p[0]),int(p[1])] * X_tilde_p - D[b,0,int(q[0]),int(q[1])] * X_tilde_q
                         #print(Vp)
                         
                     # Update LDN loss
-                    #print(N_hat[b ,i, j])
                     orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
                     #print(orth_loss)
 
