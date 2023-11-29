@@ -587,8 +587,8 @@ class Trainer_Monodepth:
                     X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
                     Cpp = torch.dot(N_hat[b ,i, j],X_tilde_p)
                     for ii in ps:
-                        print(ii[0][0])
-                        print(ii[0][1])
+                        #print(ii[0][0])
+                        #print(ii[0][1])
                         q = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                         # Calculate X~(p) = K_inv * p
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
