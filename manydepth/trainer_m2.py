@@ -587,7 +587,7 @@ class Trainer_Monodepth:
                 # Iterate over neighboring pixels
                 #Vp = 0.0
                 #print(i,j)
-                p = torch.tensor([:,i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
+                p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
                 X_tilde_p = torch.matmul(K_inv[:,:3,:3], p)
                 Cpp = torch.dot(N_hat[: ,i, j],X_tilde_p)
                 for ii in ps:
