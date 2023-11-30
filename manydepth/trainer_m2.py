@@ -567,10 +567,10 @@ class Trainer_Monodepth:
         batch_size, _, height, width = D.shape
 
         D_inv = 1.0 / D
-        print(D_inv.shape)
+        #print(D_inv.shape)
         N_hat = N_hat.permute(0,2,3,1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
-        print(N_hat.shape)
+        #print(N_hat.shape)
         #p1 = [(-1,-1),(1,1)]
         #p2 = [(-1,1),(1,-1)]
         p1 = [(0,1)]
@@ -583,8 +583,8 @@ class Trainer_Monodepth:
         ps.append(p2)
         ps.append(p2)
         for b in range(batch_size):
-            for i in range(1,height-2):  # Assuming D is a 2D tensor representing the image
-                for j in range(1,width-2):
+            for i in range(1,height-3):  # Assuming D is a 2D tensor representing the image
+                for j in range(1,width-3):
                     # Iterate over neighboring pixels
                     #Vp = 0.0
                     #print(i,j)
@@ -600,7 +600,7 @@ class Trainer_Monodepth:
                         Cpq = torch.dot(N_hat[b ,i, j],X_tilde_q)
 
                         orth_loss += torch.abs(D_inv[b,0,i,j] * Cpq - D_inv[b,0,int(q[0]),int(q[1])] * Cpp)
-                        print(orth_loss)
+                        #print(orth_loss)
                         
                     # Update LDN loss
                     #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
