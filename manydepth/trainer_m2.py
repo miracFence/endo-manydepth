@@ -567,7 +567,7 @@ class Trainer_Monodepth:
         batch_size, _, height, width = D.shape
 
         D_inv = 1.0 / D
-        print(D_inv.shape)
+        #print(D_inv.shape)
         N_hat = N_hat.permute(0,2,3,1)
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
         #p1 = [(-1,-1),(1,1)]
