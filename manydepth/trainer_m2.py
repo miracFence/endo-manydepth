@@ -564,12 +564,14 @@ class Trainer_Monodepth:
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         orth_loss = 0.0
-        batch_size, _, height, width = D.shape
-
+        
+        D = D.permute(0,2,3,1)
         D_inv = 1.0 / D
         #print(D_inv.shape)
         N_hat = N_hat.permute(0,2,3,1)
+        
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
+        batch_size, height, width,_ = D.shape
         print(N_hat.shape)
         print(D.shape)
         #p1 = [(-1,-1),(1,1)]
