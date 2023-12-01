@@ -602,7 +602,7 @@ class Trainer_Monodepth:
                         X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
                         Cpq = torch.dot(N_hat[b ,i, j],X_tilde_q)
 
-                        orth_loss += torch.abs(D_inv[b,0,i,j] * Cpq - D_inv[b,0,int(q[0]),int(q[1])] * Cpp)
+                        orth_loss += torch.abs(D_inv[b,i,j] * Cpq - D_inv[b,int(q[0]),int(q[1])] * Cpp)
                         #print(orth_loss)
                         
                     # Update LDN loss
