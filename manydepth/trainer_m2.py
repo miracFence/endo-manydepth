@@ -641,8 +641,8 @@ class Trainer_Monodepth:
         print(K_inv.shape)
         #print(P)
         # Adjusted the dimension for tensor multiplication
-        X_tilde_p = torch.matmul(K_inv[:, :3, :3].unsqueeze(2), P.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
-        
+        X_tilde_p = torch.matmul(K_inv[:, :3, :3], P).squeeze(-1).permute(0, 2, 3, 1)
+        print(X_tilde_p.shape)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
         
         for p_idx in [p1, p2, p3, p4]:
