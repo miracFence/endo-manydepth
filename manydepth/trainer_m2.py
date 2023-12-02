@@ -636,9 +636,10 @@ class Trainer_Monodepth:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+        
         print(P.shape)
         print(P)
-        X_tilde_p = torch.matmul(K_inv[:, :3, :3].unsqueeze(1), P.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
+        X_tilde_p = torch.matmul(K_inv[:, :3, :3].unsqueeze(2), P.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
         
         for p_idx in [p1, p2, p3, p4]:
