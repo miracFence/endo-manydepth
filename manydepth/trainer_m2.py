@@ -560,7 +560,7 @@ class Trainer_Monodepth:
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
-    """
+    
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         orth_loss = 0.0
@@ -572,22 +572,22 @@ class Trainer_Monodepth:
         
         N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
         batch_size, height, width,_ = D.shape
-        print(N_hat.shape)
-        print(D.shape)
+        #print(N_hat.shape)
+        #print(D.shape)
         #p1 = [(-1,-1),(1,1)]
         #p2 = [(-1,1),(1,-1)]
         p1 = [(0,1)]
-        #p2 = [(0,2)]
+        p2 = [(0,2)]
         p3 = [(1,0)]
-        #p4 = [(2,0)]
+        p4 = [(2,0)]
         ps = []
         ps.append(p1)
-        #ps.append(p1)
+        ps.append(p2)
         ps.append(p3)
-        #ps.append(p2)
+        ps.append(p4)
         for b in range(batch_size):
-            for i in range(1,height-3):  # Assuming D is a 2D tensor representing the image
-                for j in range(1,width-3):
+            for i in range(1,height-2):  # Assuming D is a 2D tensor representing the image
+                for j in range(1,width-2):
                     # Iterate over neighboring pixels
                     #Vp = 0.0
                     #print(i,j)
@@ -608,9 +608,10 @@ class Trainer_Monodepth:
                     # Update LDN loss
                     #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
                     #print(orth_loss)
-        print(orth_loss)
-        return orth_loss"""
-
+        #print(orth_loss)
+        return orth_loss.sum()
+        
+    """
     def compute_orth_loss(self, D, N_hat, K_inv):
         # Compute orthogonality loss
         orth_loss = 0.0
@@ -648,7 +649,7 @@ class Trainer_Monodepth:
         orth_loss = orth_loss.sum()
 
         print(orth_loss)
-        return orth_loss
+        return orth_loss"""
 
 
     
