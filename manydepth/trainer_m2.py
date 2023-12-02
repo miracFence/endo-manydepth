@@ -627,14 +627,15 @@ class Trainer_Monodepth:
         p3 = torch.tensor([1, 0], dtype=torch.int32).to(device=K_inv.device)
         p4 = torch.tensor([2, 0], dtype=torch.int32).to(device=K_inv.device)
         
+ 
         # Homogeneous coordinates
-        p = torch.arange(height, dtype=torch.float32).view(height, 1).to(device=K_inv.device)
-        q = torch.arange(width, dtype=torch.float32).view(1, width).to(device=K_inv.device)
+        p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
+        q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
         
-        p = p.expand(height, width, 2)
-        q = q.expand(height, width, 2)
+        p = p.expand(batch_size, height, width).unsqueeze(-1)
+        q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        P = torch.stack([p, q, torch.ones_like(p)], dim=-1)
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3].unsqueeze(1), P.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
