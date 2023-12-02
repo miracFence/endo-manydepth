@@ -608,7 +608,7 @@ class Trainer_Monodepth:
                     # Update LDN loss
                     #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
                     #print(orth_loss)
-
+        print(orth_loss)
         return orth_loss
 
     
