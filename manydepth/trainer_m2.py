@@ -636,7 +636,7 @@ class Trainer_Monodepth:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        
+        P = torch.transpose(P, -1, -2).reshape(12, 256, 960)
         print(P.shape)
         print(K_inv.shape)
         #print(P)
