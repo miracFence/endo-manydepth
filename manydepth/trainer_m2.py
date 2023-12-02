@@ -631,8 +631,8 @@ class Trainer_Monodepth:
         p = torch.arange(height, dtype=torch.float32).view(height, 1).to(device=K_inv.device)
         q = torch.arange(width, dtype=torch.float32).view(1, width).to(device=K_inv.device)
         
-        p = p.expand(height, width, 2)
-        q = q.expand(height, width, 2)
+        p = p.expand(width, height, 2)
+        q = q.expand(width, height, 2)
         
         P = torch.stack([p, q, torch.ones_like(p)], dim=-1)
         
