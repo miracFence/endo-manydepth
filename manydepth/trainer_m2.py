@@ -560,7 +560,7 @@ class Trainer_Monodepth:
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
-
+    """
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
         orth_loss = 0.0
@@ -609,7 +609,47 @@ class Trainer_Monodepth:
                     #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
                     #print(orth_loss)
         print(orth_loss)
-        return orth_loss
+        return orth_loss"""
+
+    def compute_orth_loss(self, D, N_hat, K_inv):
+    # Compute orthogonality loss
+    orth_loss = 0.0
+    
+    D = D.permute(0, 2, 3, 1)
+    D_inv = 1.0 / D
+    N_hat = N_hat.permute(0, 2, 3, 1)
+    N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
+    
+    batch_size, height, width, _ = D.shape
+    p1 = torch.tensor([0, 1], dtype=torch.int32).to(device=K_inv.device)
+    p2 = torch.tensor([0, 2], dtype=torch.int32).to(device=K_inv.device)
+    p3 = torch.tensor([1, 0], dtype=torch.int32).to(device=K_inv.device)
+    p4 = torch.tensor([2, 0], dtype=torch.int32).to(device=K_inv.device)
+    
+    # Homogeneous coordinates
+    p = torch.arange(height, dtype=torch.float32).view(height, 1).to(device=K_inv.device)
+    q = torch.arange(width, dtype=torch.float32).view(1, width).to(device=K_inv.device)
+    
+    p = p.expand(height, width, 2)
+    q = q.expand(height, width, 2)
+    
+    P = torch.stack([p, q, torch.ones_like(p)], dim=-1)
+    
+    X_tilde_p = torch.matmul(K_inv[:, :3, :3].unsqueeze(1), P.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
+    Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
+    
+    for p_idx in [p1, p2, p3, p4]:
+        q = P.roll(p_idx.item(), -1, dims=-1)
+        X_tilde_q = torch.matmul(K_inv[:, :3, :3].unsqueeze(1), q.permute(0, 3, 1, 2).unsqueeze(-1)).squeeze(-1).permute(0, 2, 3, 1)
+        Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q)
+
+        orth_loss += torch.abs(D_inv * Cpq - torch.gather(D_inv, -1, q.long()) * Cpp)
+
+    orth_loss = orth_loss.sum()
+
+    print(orth_loss)
+    return orth_loss
+
 
     
     def get_ilumination_invariant_loss(self, pred, target):
