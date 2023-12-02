@@ -582,9 +582,9 @@ class Trainer_Monodepth:
         #p4 = [(2,0)]
         ps = []
         ps.append(p1)
-        ps.append(p1)
-        ps.append(p2)
-        ps.append(p2)
+        #ps.append(p1)
+        ps.append(p3)
+        #ps.append(p2)
         for b in range(batch_size):
             for i in range(1,height-3):  # Assuming D is a 2D tensor representing the image
                 for j in range(1,width-3):
