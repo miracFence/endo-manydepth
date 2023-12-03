@@ -660,7 +660,7 @@ class Trainer_Monodepth:
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
         #print(Cpp.shape)
         
-        print(P)
+        print(P.shape)
         
         for p_idx in [p1, p2, p3, p4]:
             #print(p_idx.item())
