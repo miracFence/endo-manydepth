@@ -647,7 +647,7 @@ class Trainer_Monodepth:
         #P = torch.unsqueeze(torch.stack([self.id_coords[0].view(-1), self.id_coords[1].view(-1)], 0), 0)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
         print(X_tilde_p.shape)
-        print(N_hat..shape)
+        print(N_hat.shape)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
         
         for p_idx in [p1, p2, p3, p4]:
