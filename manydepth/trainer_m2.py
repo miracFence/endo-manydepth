@@ -622,11 +622,15 @@ class Trainer_Monodepth:
         N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
         
         batch_size, height, width, _ = D.shape
-        p1 = torch.tensor([0, 1], dtype=torch.int32).to(device=K_inv.device)
+        """p1 = torch.tensor([0, 1], dtype=torch.int32).to(device=K_inv.device)
         p2 = torch.tensor([0, 2], dtype=torch.int32).to(device=K_inv.device)
         p3 = torch.tensor([1, 0], dtype=torch.int32).to(device=K_inv.device)
-        p4 = torch.tensor([2, 0], dtype=torch.int32).to(device=K_inv.device)
-        
+        p4 = torch.tensor([2, 0], dtype=torch.int32).to(device=K_inv.device)"""
+        #ps = []
+        p1 = (0,1)
+        p2 = (0,2)
+        p3 = (1,0)
+        p4 = (2,0)
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
