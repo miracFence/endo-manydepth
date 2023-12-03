@@ -631,16 +631,20 @@ class Trainer_Monodepth:
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
+
+        print(p)
+        print(q)
         
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        P = torch.transpose(P, -1, -2).reshape(12, 256, 960)
+        
         print(P.shape)
         print(K_inv.shape)
         #print(P)
         # Adjusted the dimension for tensor multiplication
+        P = torch.unsqueeze(torch.stack([self.id_coords[0].view(-1), self.id_coords[1].view(-1)], 0), 0)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
         print(X_tilde_p.shape)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
