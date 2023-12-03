@@ -654,6 +654,7 @@ class Trainer_Monodepth:
         #P = P.permute(0,3,1,2)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
         print(Cpp.shape)
+        print(Cpp)
         
         for p_idx in [p1, p2, p3, p4]:
             q = P.roll(p_idx.item(), -1, dims=-1)[:, :, :2]  # Keep only the first two dimensions
