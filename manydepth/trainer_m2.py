@@ -648,7 +648,7 @@ class Trainer_Monodepth:
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
         X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
         print("View",X_tilde_p.shape)
-        X_tilde_p.permute(0,2,3,1)
+        X_tilde_p = X_tilde_p.permute(0,2,3,1)
         print("Permute",X_tilde_p.shape)
         print(N_hat.shape)
         #P = P.permute(0,3,1,2)
