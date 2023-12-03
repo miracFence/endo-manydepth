@@ -657,7 +657,7 @@ class Trainer_Monodepth:
         print(Cpp)
         
         for p_idx in [p1, p2, p3, p4]:
-            print(p_idx.item())
+            #print(p_idx.item())
             print(p_idx)
             q = P.roll(p_idx.item(), -1, dims=-1)  # Keep only the first two dimensions
             print(q)
