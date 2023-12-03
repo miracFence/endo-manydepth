@@ -651,13 +651,13 @@ class Trainer_Monodepth:
         # Adjusted the dimension for tensor multiplication
         #P = torch.unsqueeze(torch.stack([self.id_coords[0].view(-1), self.id_coords[1].view(-1)], 0), 0)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
-        X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
+        #X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
         #print("View",X_tilde_p.shape)
-        X_tilde_p = X_tilde_p.permute(0,2,3,1)
+        #X_tilde_p = X_tilde_p.permute(0,2,3,1)
         #print("Permute",X_tilde_p.shape)
         #print(N_hat.shape)
         #P = P.permute(0,3,1,2)
-        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
+        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,3,1,2))
         #print(Cpp.shape)
         
         print(P.shape)
@@ -668,7 +668,7 @@ class Trainer_Monodepth:
             q = P.roll(shifts=p_idx, dims=(0,1))  # Keep only the first two dimensions
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q)
+            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,3,1,2))
             orth_loss += torch.abs(D_inv * Cpq - torch.gather(D_inv, -1, q.long()) * Cpp)
 
         orth_loss = orth_loss.sum()
