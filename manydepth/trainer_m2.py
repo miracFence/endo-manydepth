@@ -560,6 +560,7 @@ class Trainer_Monodepth:
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
+
     """
     def compute_orth_loss(self,D,N_hat,K_inv):
         # Compute LDN loss
@@ -622,11 +623,6 @@ class Trainer_Monodepth:
         N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
         
         batch_size, height, width, _ = D.shape
-        """p1 = torch.tensor([0, 1], dtype=torch.int32).to(device=K_inv.device)
-        p2 = torch.tensor([0, 2], dtype=torch.int32).to(device=K_inv.device)
-        p3 = torch.tensor([1, 0], dtype=torch.int32).to(device=K_inv.device)
-        p4 = torch.tensor([2, 0], dtype=torch.int32).to(device=K_inv.device)"""
-        #ps = []
         p1 = (0,1)
         p2 = (0,2)
         p3 = (1,0)
@@ -642,30 +638,17 @@ class Trainer_Monodepth:
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
-        #X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
-        #X_tilde_p = X_tilde_p.permute(0,2,3,1)
+
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
-        #Cpp = torch.unsqueeze(Cpp,0).permute(1,2,3,0)
-        #print(P.shape)
         
         for p_idx in [p1, p2, p3, p4]:
             q = P.roll(shifts=p_idx, dims=(0,1))  # Keep only the first two dimensions
-            print(P)
-            print(q)
-            #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            #X_tilde_q = X_tilde_q.view(batch_size,3,height, width)
-            #X_tilde_q = X_tilde_q.permute(0,2,3,1)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            #Cpq = torch.unsqueeze(Cpq,0).permute(1,2,3,0)
-            #print(Cpq.shape)
-            #print(Cpp.shape)
-            #print(D_inv.shape)
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
-        #print(orth_loss)
         return orth_loss
 
 
