@@ -248,7 +248,7 @@ class Trainer_Monodepth:
         """Run a single epoch of training and validation
         """  
 
-          
+        """
         self.normal_flag = 0
         if self.epoch < 20:
             self.normal_weight = 0.0
@@ -262,7 +262,7 @@ class Trainer_Monodepth:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1
+            self.normal_flag = 1"""
         
 
         print("Training")
@@ -315,13 +315,10 @@ class Trainer_Monodepth:
 
             outputs = self.models["depth"](features[0])
             
-            #Albedo outputs
-            #outputs.update(self.models["albedo"](features[0]))
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
             features = self.models["encoder"](inputs["color_aug", 0, 0])
             outputs = self.models["depth"](features)
-            #inputs.update(self.models["normal"](features))
 
         if self.opt.predictive_mask:
             outputs["predictive_mask"] = self.models["predictive_mask"](features)
@@ -339,9 +336,6 @@ class Trainer_Monodepth:
         """
         outputs = {}
         outputs["normal_inputs"] = self.models["normal"](features)
-        #print(outputs["normal_inputs"][("normal", 0)].shape)
-        #print(outputs["normal_inputs"][("normal", 0)])
-        #print(len(outputs["normal_inputs"]))
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
             # separate forward pass through the pose network.
