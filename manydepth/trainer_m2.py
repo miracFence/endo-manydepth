@@ -726,8 +726,8 @@ class Trainer_Monodepth:
 
         
         total_loss /= self.num_scales
-        if self.normal_flag == 1:
-            total_loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
+        #if self.normal_flag == 1:
+        #    total_loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
         losses["loss"] = total_loss
         
         return losses
