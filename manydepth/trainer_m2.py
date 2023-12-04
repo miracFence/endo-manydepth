@@ -656,14 +656,14 @@ class Trainer_Monodepth:
             X_tilde_q = X_tilde_q.permute(0,2,3,1)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q)
             Cpq = torch.unsqueeze(Cpq,0).permute(1,2,3,0)
-            print(Cpq.shape)
-            print(Cpp.shape)
-            print(D_inv.shape)
+            #print(Cpq.shape)
+            #print(Cpp.shape)
+            #print(D_inv.shape)
             orth_loss += torch.abs(D_inv * Cpq - D_inv * Cpp)
 
         orth_loss = orth_loss.sum()
 
-        print(orth_loss)
+        #print(orth_loss)
         return orth_loss
 
 
