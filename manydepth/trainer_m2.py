@@ -48,6 +48,9 @@ class Trainer_Monodepth:
         self.opt = options
         self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name)
 
+        self.normal_flag = 0
+        self.normal_weight = 0.0
+        self.orthogonal_weight = 0.0
         # checking height and width are multiples of 32
         assert self.opt.height % 32 == 0, "'height' must be a multiple of 32"
         assert self.opt.width % 32 == 0, "'width' must be a multiple of 32"
@@ -248,7 +251,7 @@ class Trainer_Monodepth:
         """Run a single epoch of training and validation
         """  
 
-        """
+        
         self.normal_flag = 0
         if self.epoch < 20:
             self.normal_weight = 0.0
@@ -262,7 +265,7 @@ class Trainer_Monodepth:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1"""
+            self.normal_flag = 1
         
 
         print("Training")
