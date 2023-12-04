@@ -661,7 +661,7 @@ class Trainer_Monodepth:
             #print(Cpq.shape)
             #print(Cpp.shape)
             #print(D_inv.shape)
-            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0), - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
