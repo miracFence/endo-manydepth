@@ -645,7 +645,7 @@ class Trainer_Monodepth:
         X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
         X_tilde_p = X_tilde_p.permute(0,2,3,1)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
-        
+        Cpp = torch.unsqueeze(Cpp,0).permute(1,2,3,0)
         #print(P.shape)
         
         for p_idx in [p1, p2, p3, p4]:
