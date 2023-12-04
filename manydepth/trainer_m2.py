@@ -249,9 +249,12 @@ class Trainer_Monodepth:
 
     def run_epoch(self):
         """Run a single epoch of training and validation
-        """  
+        """          
 
-        
+        print("Training",self.epoch)
+        self.set_train()
+
+                
         self.normal_flag = 0
         if self.epoch < 20:
             self.normal_weight = 0.0
@@ -266,10 +269,6 @@ class Trainer_Monodepth:
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
             self.normal_flag = 1
-        
-
-        print("Training")
-        self.set_train()
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
