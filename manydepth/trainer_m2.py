@@ -254,7 +254,7 @@ class Trainer_Monodepth:
         print("Training",self.epoch)
         self.set_train()
 
-                
+        """    
         self.normal_flag = 0
         if self.epoch < 20:
             self.normal_weight = 0.0
@@ -268,7 +268,7 @@ class Trainer_Monodepth:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1
+            self.normal_flag = 1"""
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -507,8 +507,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
-        #Normal prediction
-        
+        #Normal prediction        
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
@@ -530,22 +529,21 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation_matrix,frame_id):
-
         
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
 
-        rotation_matrix = rotation_matrix[:, :3, :3]
+        #rotation_matrix = rotation_matrix[:, :3, :3]
 
         target = target.permute(0,2,3,1)
-        target = torch.nn.functional.normalize(target, p=2, dim=1)
+        #target = torch.nn.functional.normalize(target, p=2, dim=1)
 
         pred = target.permute(0,2,3,1)
-        pred = torch.nn.functional.normalize(pred, p=2, dim=1)
+        #pred = torch.nn.functional.normalize(pred, p=2, dim=1)
         #print(reshaped_normal_shapes.shape)
         #print(rotation_matrix.unsqueeze(1).shape)
 
-        rotated_images = torch.matmul(target, rotation_matrix) 
+        rotated_images = torch.matmul(target.permute(0, 2, 3, 1), rotation_matrix[:, :3, :3]) 
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
         rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
@@ -557,68 +555,17 @@ class Trainer_Monodepth:
         l1_loss = abs_diff.mean(1, True)
         return l1_loss
 
-    """
-    def compute_orth_loss(self,D,N_hat,K_inv):
-        # Compute LDN loss
-        orth_loss = 0.0
-        
-        D = D.permute(0,2,3,1)
-        D_inv = 1.0 / D
-        #print(D_inv.shape)
-        N_hat = N_hat.permute(0,2,3,1)
-        
-        N_hat =  torch.nn.functional.normalize(N_hat, p=2, dim=1)
-        batch_size, height, width,_ = D.shape
-        #print(N_hat.shape)
-        #print(D.shape)
-        #p1 = [(-1,-1),(1,1)]
-        #p2 = [(-1,1),(1,-1)]
-        p1 = [(0,1)]
-        p2 = [(0,2)]
-        p3 = [(1,0)]
-        p4 = [(2,0)]
-        ps = []
-        ps.append(p1)
-        ps.append(p2)
-        ps.append(p3)
-        ps.append(p4)
-        for b in range(batch_size):
-            for i in range(1,height-2):  # Assuming D is a 2D tensor representing the image
-                for j in range(1,width-2):
-                    # Iterate over neighboring pixels
-                    #Vp = 0.0
-                    #print(i,j)
-                    p = torch.tensor([i, j, 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
-                    X_tilde_p = torch.matmul(K_inv[b][:3,:3], p)
-                    Cpp = torch.dot(N_hat[b ,i, j],X_tilde_p)
-                    for ii in ps:
-                        #print(ii[0][0])
-                        #print(ii[0][1])
-                        q = torch.tensor([i+ii[0][0], j+ii[0][1], 1.0], dtype=torch.float32).to(device=K_inv.device)  # Homogeneous coordinates
-                        # Calculate X~(p) = K_inv * p
-                        X_tilde_q = torch.matmul(K_inv[b][:3,:3], q)
-                        Cpq = torch.dot(N_hat[b ,i, j],X_tilde_q)
-
-                        orth_loss += torch.abs(D_inv[b,i,j] * Cpq - D_inv[b,int(q[0]),int(q[1])] * Cpp)
-                        #print(orth_loss)
-                        
-                    # Update LDN loss
-                    #orth_loss += torch.abs(torch.dot(N_hat[b ,i, j], Vp))
-                    #print(orth_loss)
-        #print(orth_loss)
-        return orth_loss.sum()"""
-
     
     def compute_orth_loss(self, D, N_hat, K_inv):
         # Compute orthogonality loss
         orth_loss = 0.0
         
-        D = D.permute(0, 2, 3, 1)
-        D_inv = 1.0 / D
-        N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
+        #D = D.permute(0, 2, 3, 1)
+        D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        #N_hat = N_hat.permute(0, 2, 3, 1)
+        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
         
-        batch_size, height, width, _ = D.shape
+        batch_size, height, width, channels = D_inv.shape
         p1 = (0,1)
         p2 = (0,2)
         p3 = (1,0)
@@ -635,12 +582,12 @@ class Trainer_Monodepth:
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
 
-        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
+        Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         
         for p_idx in [p1, p2, p3, p4]:
             q = P.roll(shifts=p_idx, dims=(0,1))  # Keep only the first two dimensions
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
+            Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
@@ -701,11 +648,11 @@ class Trainer_Monodepth:
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", 0)],outputs["normal_inputs"][("normal", 0)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
-            #loss += self.normal_weight * normal_loss
+            loss += normal_loss
             #Orthogonal loss
             """
             if self.normal_flag == 1:
@@ -722,8 +669,8 @@ class Trainer_Monodepth:
 
         
         total_loss /= self.num_scales
-        if self.normal_flag == 1:
-            total_loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
+        #if self.normal_flag == 1:
+        total_loss += self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"], inputs[("inv_K", 0)].detach())
         losses["loss"] = total_loss
         
         return losses
