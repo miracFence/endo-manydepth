@@ -642,24 +642,26 @@ class Trainer_Monodepth:
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
-        X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
-        X_tilde_p = X_tilde_p.permute(0,2,3,1)
-        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
-        Cpp = torch.unsqueeze(Cpp,0).permute(1,2,3,0)
+        #X_tilde_p = X_tilde_p.view(batch_size,3,height, width)
+        #X_tilde_p = X_tilde_p.permute(0,2,3,1)
+        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
+        #Cpp = torch.unsqueeze(Cpp,0).permute(1,2,3,0)
         #print(P.shape)
         
         for p_idx in [p1, p2, p3, p4]:
             q = P.roll(shifts=p_idx, dims=(0,1))  # Keep only the first two dimensions
+            print(P)
+            print(q)
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            X_tilde_q = X_tilde_q.view(batch_size,3,height, width)
-            X_tilde_q = X_tilde_q.permute(0,2,3,1)
-            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q)
-            Cpq = torch.unsqueeze(Cpq,0).permute(1,2,3,0)
+            #X_tilde_q = X_tilde_q.view(batch_size,3,height, width)
+            #X_tilde_q = X_tilde_q.permute(0,2,3,1)
+            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
+            #Cpq = torch.unsqueeze(Cpq,0).permute(1,2,3,0)
             #print(Cpq.shape)
             #print(Cpp.shape)
             #print(D_inv.shape)
-            orth_loss += torch.abs(D_inv * Cpq - D_inv * Cpp)
+            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0), - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
