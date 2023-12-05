@@ -254,6 +254,7 @@ class Trainer_Monodepth:
         print("Training",self.epoch)
         self.set_train()
 
+        """
         self.normal_flag = 0
         if self.epoch < 10:
             self.normal_weight = 0.0
@@ -268,7 +269,7 @@ class Trainer_Monodepth:
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
             self.normal_flag = 1
-        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)
+        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)"""
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -661,16 +662,16 @@ class Trainer_Monodepth:
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                if self.normal_flag == 1:
-                    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #if self.normal_flag == 1:
+                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
-            if self.normal_flag == 1:
-                loss += self.normal_weight * normal_loss / 2.0
+            #if self.normal_flag == 1:
+            loss += self.normal_weight * normal_loss / 2.0
             #Orthogonal loss
-            if self.normal_flag == 1:
-                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            #if self.normal_flag == 1:
+            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
