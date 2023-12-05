@@ -570,9 +570,10 @@ class Trainer_Monodepth:
         return l1_loss.sum()
 
     
-    def compute_orth_loss(self, D, N_hat, K_inv):
-        print(D.shape)
-        print(N_hat.shape)
+    def compute_orth_loss(self, disp, N_hat, K_inv):
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        #print(D.shape)
+        #print(N_hat.shape)
         # Compute orthogonality loss
         orth_loss = 0.0
         
@@ -675,7 +676,7 @@ class Trainer_Monodepth:
             loss += self.normal_weight * normal_loss / 2.0
             #Orthogonal loss
             #if self.normal_flag == 1:
-            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
