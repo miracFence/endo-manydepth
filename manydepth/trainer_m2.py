@@ -587,7 +587,9 @@ class Trainer_Monodepth:
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
+        print(p)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
+        print(q)
      
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
