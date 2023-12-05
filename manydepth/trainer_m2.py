@@ -673,7 +673,7 @@ class Trainer_Monodepth:
         loss_ilumination_invariant = 0
         total_loss = 0
         #orthonogal_loss = 0
-        normal_loss = 0
+        #normal_loss = 0
 
         for scale in self.opt.scales:
             loss = 0
@@ -706,8 +706,9 @@ class Trainer_Monodepth:
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
+                """
                 if self.normal_flag == 1: 
-                    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()"""
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
