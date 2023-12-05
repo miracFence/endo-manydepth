@@ -658,7 +658,7 @@ class Trainer_Monodepth:
         V = D * pa_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
         print(V.shape)
         print(N_hat.shape)
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V.view(batch_size,3,height, width).permute(0,2,3,1))
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V)
                
         print (orth_loss.shape)
 
