@@ -265,8 +265,8 @@ class Trainer_Monodepth:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1"""
-        #print(self.normal_weight,self.orthogonal_weight,self.normal_flag)
+            self.normal_flag = 1
+        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)"""
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -670,7 +670,7 @@ class Trainer_Monodepth:
 
         losses = {}
         loss_reprojection = 0
-        loss_ilumination_invariant = 0
+        #loss_ilumination_invariant = 0
         total_loss = 0
         #orthonogal_loss = 0
         #normal_loss = 0
