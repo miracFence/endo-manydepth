@@ -639,13 +639,18 @@ class Trainer_Monodepth:
         pa_tl, pb_br = P, P_tl_br
         pa_tr, pb_bl = P, P_tr_bl
 
+        print(pa_tl.shape)
+        print(pb_br.shape)
+        print(pa_tr.shape)
+        print(pb_bl.shape)
+
         print(pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         print(pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         print(pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         print(pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         
         V = 0
-        V += D * torch.matmul(K_inv[:, :3, :3], pa_tl.view(batch_size,-1,3)) - D * torch.matmul(K_inv[:, :3, :3], pb_br.view(batch_size,-1,3))
+        V += D * torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,-1,3)) - D * torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,-1,3))
         V += D * torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - D * torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
 
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V.view(batch_size,3,height, width).permute(0,2,3,1))
