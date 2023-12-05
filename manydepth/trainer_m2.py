@@ -601,7 +601,7 @@ class Trainer_Monodepth:
         Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         
         for p_idx in [p1, p2, p3, p4]:
-            q = P.roll(shifts=p_idx, dims=(0,1))  # Keep only the first two dimensions
+            q = P.roll(shifts=p_idx,dims=(-2, -1))  # Keep only the first two dimensions
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
             Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
@@ -715,7 +715,7 @@ class Trainer_Monodepth:
             loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
             #if self.normal_flag == 1:
-            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
