@@ -564,8 +564,8 @@ class Trainer_Monodepth:
         #print(rotated_images.shape)
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
-        print(l1_loss)
-        return l1_loss
+        #print(l1_loss)
+        return l1_loss.sum()
 
     
     def compute_orth_loss(self, D, N_hat, K_inv):
