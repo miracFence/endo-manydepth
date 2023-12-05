@@ -543,6 +543,7 @@ class Trainer_Monodepth:
         pred = pred.permute(0,2,3,1)
         batch_size, height, width, channels = pred.shape
         print(target.permute(0,3,1,2).view(batch_size,channels,-1).shape)
+        print(rotation_matrix[:, :3, :3].shape)
         #print(batch_size, height, width, channels)
         #pred = torch.nn.functional.normalize(pred, p=2, dim=1)
         #print(reshaped_normal_shapes.shape)
