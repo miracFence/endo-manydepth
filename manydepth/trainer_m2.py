@@ -571,6 +571,8 @@ class Trainer_Monodepth:
 
     
     def compute_orth_loss(self, D, N_hat, K_inv):
+        print(D.shape)
+        print(N_hat.shape)
         # Compute orthogonality loss
         orth_loss = 0.0
         
@@ -587,9 +589,9 @@ class Trainer_Monodepth:
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
-        print(p)
+        #print(p)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
-        print(q)
+        #print(q)
      
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
