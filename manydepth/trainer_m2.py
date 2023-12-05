@@ -609,7 +609,7 @@ class Trainer_Monodepth:
         orth_loss = orth_loss.sum()
 
         return orth_loss"""
-        
+
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         orth_loss = 0.0
@@ -681,7 +681,7 @@ class Trainer_Monodepth:
 
         losses = {}
         loss_reprojection = 0
-        #loss_ilumination_invariant = 0
+        loss_ilumination_invariant = 0
         total_loss = 0
         #orthonogal_loss = 0
         normal_loss = 0
