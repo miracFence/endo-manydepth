@@ -251,7 +251,7 @@ class Trainer_Monodepth:
         print("Training",self.epoch)
         self.set_train()
 
-        
+        """
         self.normal_flag = 0
         if self.epoch < 10:
             self.normal_weight = 1e-9
@@ -265,8 +265,8 @@ class Trainer_Monodepth:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1
-        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)
+            self.normal_flag = 1"""
+        #print(self.normal_weight,self.orthogonal_weight,self.normal_flag)
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -711,11 +711,13 @@ class Trainer_Monodepth:
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
+            """
             if self.normal_flag == 1:
                 loss += self.normal_weight * normal_loss / 2.0
             #Orthogonal loss
             if self.normal_flag == 1:
                 loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+                """
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
