@@ -582,8 +582,8 @@ class Trainer_Monodepth:
         batch_size, height, width, channels = D_inv.shape
         p1 = (0,1)
         p2 = (0,2)
-        p3 = (1,0)
-        p4 = (2,0)
+        #p3 = (1,0)
+        #p4 = (2,0)
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
@@ -599,9 +599,10 @@ class Trainer_Monodepth:
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
-        
+        print(P.shape)
         for p_idx in [p1, p2, p3, p4]:
             q = P.roll(shifts=p_idx,dims=(-2, -1))  # Keep only the first two dimensions
+            print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
             Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
@@ -612,43 +613,38 @@ class Trainer_Monodepth:
 
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        #print(D.shape)
-        #print(N_hat.shape)
-        # Compute orthogonality loss
         orth_loss = 0.0
         
-        #D = D.permute(0, 2, 3, 1)
-        D_inv = 1.0 / D.permute(0, 2, 3, 1)
-        #N_hat = N_hat.permute(0, 2, 3, 1)
-        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
-        
-        batch_size, height, width, channels = D_inv.shape
+        D = D.permute(0, 2, 3, 1)
+
+        roll_offsets = []
+        roll_offsets.append((-1, -1))
+        roll_offsets.append((-1, 1))
+
+
+        batch_size, height, width, channels = D.shape
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
-        #print(p)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
-        #print(q)
      
         p = p.expand(batch_size, height, width).unsqueeze(-1)
-        #print(p)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
-        #print(q)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
                 
-        for p_idx in [(0, 1), (1, 0)]:
-            pa = P.roll(shifts=p_idx[0], dims=(-2, -1))  # Keep only the first two dimensions
-            pb = P.roll(shifts=p_idx[1], dims=(-2, -1))
-            print(pa.shape)
-            print(pb.shape)
-            V += D * torch.matmul(K_inv[:, :3, :3], pa.permute(0, 3, 1, 2).view(batch_size,3,-1)) - D * torch.matmul(K_inv[:, :3, :3], pb.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            #V_top_right_bottom_left = D_hat * torch.matmul(K_inv, pa_top_right) - D_hat * torch.matmul(K_inv, pb_bottom_left)
-            #X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
-            #Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            #orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+        P_tl_br = torch.roll(P, shifts=roll_offsets[0], dims=(1, 2))
+        P_tr_bl = torch.roll(P, shifts=roll_offsets[1], dims=(1, 2))
 
-        print (V)
+        pa_tl, pb_br = P, P_tl_br
+        pa_tr, pb_bl = P, P_tr_bl
+        V = 0
+        V += D * torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) - D * torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        V += D * torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - D * torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
+
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V.view(batch_size,3,height, width).permute(0,2,3,1))
+               
+        print (orth_loss.shape)
 
         return orth_loss
 
@@ -714,11 +710,11 @@ class Trainer_Monodepth:
             #Normal loss
             """
             if self.normal_flag == 1:
-                loss += self.normal_weight * normal_loss / 2.0
+                loss += self.normal_weight * normal_loss / 2.0"""
             #Orthogonal loss
-            if self.normal_flag == 1:
-                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
-                """
+            #if self.normal_flag == 1:
+            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+                
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
