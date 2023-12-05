@@ -560,10 +560,11 @@ class Trainer_Monodepth:
         #print(rotated_images.shape)
         #result.view(12, 256, 320, 3)
         #pred = pred.permute(0,2,3,1)
-        print(pred.shape)
-        print(rotated_images.shape)
+        #print(pred.shape)
+        #print(rotated_images.shape)
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
+        print(l1_loss)
         return l1_loss
 
     
