@@ -254,8 +254,8 @@ class Trainer_Monodepth:
         
         self.normal_flag = 0
         if self.epoch < 10:
-            self.normal_weight = 0.0
-            self.orthogonal_weight = 0.0
+            self.normal_weight = 1e-9
+            self.orthogonal_weight = 1e-9
         if self.epoch >= 10:
             self.freeze_models()
             self.normal_weight = 0.01
