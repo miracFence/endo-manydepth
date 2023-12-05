@@ -529,7 +529,8 @@ class Trainer_Monodepth:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation_matrix,frame_id):
-
+        print(pred.shape)
+        print(target.shape)
         
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
