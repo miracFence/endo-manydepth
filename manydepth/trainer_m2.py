@@ -537,11 +537,12 @@ class Trainer_Monodepth:
         #rotation_matrix = rotation_matrix[:, :3, :3]
 
         target = target.permute(0,2,3,1)
+        print(target.shape)
         #target = torch.nn.functional.normalize(target, p=2, dim=1)
 
         pred = pred.permute(0,2,3,1)
         batch_size, height, width, channels = pred.shape
-        print(batch_size, height, width, channels)
+        #print(batch_size, height, width, channels)
         #pred = torch.nn.functional.normalize(pred, p=2, dim=1)
         #print(reshaped_normal_shapes.shape)
         #print(rotation_matrix.unsqueeze(1).shape)
@@ -549,7 +550,7 @@ class Trainer_Monodepth:
         #print(rotation_matrix.shape)
         #print(channels)
         #print(target.permute(0, 3, 1, 2).shape)
-        rotated_images = torch.matmul(target.permute(0, 3, 1, 2).view(batch_size,channels,-1), rotation_matrix[:, :3, :3]) 
+        rotated_images = torch.matmul(target.permute(0,3,1,2).view(batch_size,channels,-1), rotation_matrix[:, :3, :3]) 
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
         #rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
