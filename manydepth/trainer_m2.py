@@ -610,6 +610,48 @@ class Trainer_Monodepth:
 
         return orth_loss
 
+    def compute_orth_loss2(self, disp, N_hat, K_inv):
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        #print(D.shape)
+        #print(N_hat.shape)
+        # Compute orthogonality loss
+        orth_loss = 0.0
+        
+        #D = D.permute(0, 2, 3, 1)
+        D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        #N_hat = N_hat.permute(0, 2, 3, 1)
+        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
+        
+        batch_size, height, width, channels = D_inv.shape
+ 
+        # Homogeneous coordinates
+        p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
+        #print(p)
+        q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
+        #print(q)
+     
+        p = p.expand(batch_size, height, width).unsqueeze(-1)
+        #print(p)
+        q = q.expand(batch_size, height, width).unsqueeze(-1)
+        #print(q)
+        
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+                
+        for p_idx in [(0, 1), (1, 0)]:
+            pa = P.roll(shifts=p_idx[0], dims=(-2, -1))  # Keep only the first two dimensions
+            pb = P.roll(shifts=p_idx[1], dims=(-2, -1))
+            print(pa.shape)
+            print(pb.shape)
+            V += D * torch.matmul(K_inv[:, :3, :3], pa.permute(0, 3, 1, 2).view(batch_size,3,-1)) - D * torch.matmul(K_inv[:, :3, :3], pb.permute(0, 3, 1, 2).view(batch_size,3,-1))
+            #V_top_right_bottom_left = D_hat * torch.matmul(K_inv, pa_top_right) - D_hat * torch.matmul(K_inv, pb_bottom_left)
+            #X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
+            #Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
+            #orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+
+        print (V)
+
+        return orth_loss
+
 
     
     def get_ilumination_invariant_loss(self, pred, target):
