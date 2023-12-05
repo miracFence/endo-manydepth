@@ -670,10 +670,10 @@ class Trainer_Monodepth:
             loss += loss_reprojection / 2.0    
             #Normal loss
             #if self.normal_flag == 1:
-            loss += self.normal_weight * normal_loss / 2.0
+            loss += normal_loss / 2.0
             #Orthogonal loss
             #if self.normal_flag == 1:
-            loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            loss += self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
