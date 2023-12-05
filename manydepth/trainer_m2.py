@@ -546,6 +546,7 @@ class Trainer_Monodepth:
         #print(rotation_matrix.unsqueeze(1).shape)
         #print(target.shape)
         #print(rotation_matrix.shape)
+        print(channels)
         print(target.permute(0, 3, 1, 2).shape)
         rotated_images = torch.matmul(target.permute(0, 3, 1, 2).view(batch_size,channels,-1), rotation_matrix[:, :3, :3]) 
         #print(rotated_images.shape)
