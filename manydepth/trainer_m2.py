@@ -78,10 +78,11 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
+        """
         self.models["normal"] = networks.NormalDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
         self.models["normal"].to(self.device)
-        self.parameters_to_train += list(self.models["normal"].parameters())
+        self.parameters_to_train += list(self.models["normal"].parameters())"""
 
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
@@ -334,7 +335,7 @@ class Trainer_Monodepth:
         """Predict poses between input frames for monocular sequences.
         """
         outputs = {}
-        outputs["normal_inputs"] = self.models["normal"](features)
+        #outputs["normal_inputs"] = self.models["normal"](features)
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
             # separate forward pass through the pose network.
@@ -504,10 +505,11 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
-        #Normal prediction        
+        #Normal prediction
+        """        
         for i, frame_id in enumerate(self.opt.frame_ids[1:]):
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
-            outputs[("normal",frame_id)] = self.models["normal"](features)
+            outputs[("normal",frame_id)] = self.models["normal"](features)"""
             
 
 
@@ -825,7 +827,7 @@ class Trainer_Monodepth:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
+            #wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
             #wandb.log({"normal_predicted{}/{}".format(s, j): wandb.Image(self.visualize_normals(outputs["normal"][("normal", 0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
