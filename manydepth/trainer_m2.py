@@ -531,7 +531,7 @@ class Trainer_Monodepth:
     def norm_loss(self, pred, target, rotation_matrix,frame_id):
         #print(pred.shape)
         #print(target.shape)
-        batch_size, height, width, channels = pred.shape
+        
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
 
@@ -542,7 +542,7 @@ class Trainer_Monodepth:
         #target = torch.nn.functional.normalize(target, p=2, dim=1)
 
         pred = pred.permute(0,2,3,1)
-        
+        batch_size, height, width, channels = pred.shape
         #print(target.permute(0,3,1,2).view(batch_size,channels,-1).shape)
         #print(rotation_matrix[:, :3, :3].shape)
         #print(batch_size, height, width, channels)
@@ -556,7 +556,7 @@ class Trainer_Monodepth:
         rotated_images = torch.matmul(target.view(batch_size,-1,3), rotation_matrix[:, :3, :3]) 
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
-        rotated_images = rotated_images.view(batch_size, height, width,channels)
+        rotated_images = rotated_images.view(batch_size,height,width,channels)
         #rotated_images = rotated_images.permute(0,3,1,2)
         #print(rotated_images.shape)
         #result.view(12, 256, 320, 3)
