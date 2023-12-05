@@ -254,21 +254,20 @@ class Trainer_Monodepth:
         print("Training",self.epoch)
         self.set_train()
 
-        """    
         self.normal_flag = 0
-        if self.epoch < 20:
+        if self.epoch < 10:
             self.normal_weight = 0.0
             self.orthogonal_weight = 0.0
-        if self.epoch == 20:
+        if self.epoch >= 10:
             self.freeze_models()
             self.normal_weight = 0.01
             self.orthogonal_weight = 0.5
             self.normal_flag = 1
-        if self.epoch == 40:
+        if self.epoch >= 20:
             self.unfreeze_models()
             self.normal_weight = 0.005
             self.orthogonal_weight = 0.001
-            self.normal_flag = 1"""
+            self.normal_flag = 1
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -627,7 +626,7 @@ class Trainer_Monodepth:
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
-        orthonogal_loss = 0
+        #orthonogal_loss = 0
         normal_loss = 0
 
         for scale in self.opt.scales:
@@ -661,17 +660,17 @@ class Trainer_Monodepth:
                 #target = inputs[("color", 0, 0)]
                 #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                if self.normal_flag == 1:
+                    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0]),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
-            loss += normal_loss
-            #Orthogonal loss
-            """
             if self.normal_flag == 1:
-                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())"""
-            #loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
-            #loss += self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+                loss += self.normal_weight * normal_loss
+            #Orthogonal loss
+            if self.normal_flag == 1:
+                loss += self.orthogonal_weight * self.compute_orth_loss(outputs[("depth", 0, scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)].detach())
+            #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
@@ -682,8 +681,6 @@ class Trainer_Monodepth:
 
         
         total_loss /= self.num_scales
-        #if self.normal_flag == 1:
-        total_loss += self.compute_orth_loss(outputs[("depth", 0, 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)].detach())
         losses["loss"] = total_loss
         
         return losses
