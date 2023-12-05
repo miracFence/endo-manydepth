@@ -650,12 +650,13 @@ class Trainer_Monodepth:
         print(pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         print(pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
         """
-        print(D.shape)
-        print(torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)).shape)
+        #print(D.shape)
+        #print(torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)).shape)
         V = 0
-        V += torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V += torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-
+        pa_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        pa_pb2 = torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        V = D * pa_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
+        print(V.shape)
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V.view(batch_size,3,height, width).permute(0,2,3,1))
                
         print (orth_loss.shape)
