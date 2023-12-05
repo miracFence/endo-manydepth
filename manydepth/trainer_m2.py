@@ -543,7 +543,8 @@ class Trainer_Monodepth:
         #pred = torch.nn.functional.normalize(pred, p=2, dim=1)
         #print(reshaped_normal_shapes.shape)
         #print(rotation_matrix.unsqueeze(1).shape)
-
+        print(target.shape)
+        prnit(rotation_matrix.shape)
         rotated_images = torch.matmul(target.permute(0, 2, 3, 1), rotation_matrix[:, :3, :3]) 
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
