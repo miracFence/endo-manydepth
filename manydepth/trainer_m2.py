@@ -48,9 +48,6 @@ class Trainer_Monodepth:
         self.opt = options
         self.log_path = os.path.join(self.opt.log_dir, self.opt.model_name)
 
-        self.normal_flag = 0
-        self.normal_weight = 0.0
-        self.orthogonal_weight = 0.0
         # checking height and width are multiples of 32
         assert self.opt.height % 32 == 0, "'height' must be a multiple of 32"
         assert self.opt.width % 32 == 0, "'width' must be a multiple of 32"
