@@ -556,7 +556,8 @@ class Trainer_Monodepth:
         #print(rotated_images.shape)
         # Reshape the rotated images back to the original shape (12, 3, 256, 320)
         #rotated_images = rotated_images.view(self.opt.batch_size, self.opt.height, self.opt.width,3)
-        rotated_images = rotated_images.permute(0,3,1,2)
+        #rotated_images = rotated_images.permute(0,3,1,2)
+        print(rotated_images.shape)
         #result.view(12, 256, 320, 3)
         #pred = pred.permute(0,2,3,1)
 
