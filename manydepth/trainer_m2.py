@@ -251,22 +251,7 @@ class Trainer_Monodepth:
 
         print("Training",self.epoch)
         self.set_train()
-        """
-        self.normal_flag = 0
-        if self.epoch < 5:
-            self.normal_weight = 1e-9
-            self.orthogonal_weight = 1e-9
-        if self.epoch >= 5 and self.epoch < 10:
-            self.freeze_models()
-            self.normal_weight = 0.01
-            self.orthogonal_weight = 0.5
-            self.normal_flag = 1
-        if self.epoch >= 10:
-            self.unfreeze_models()
-            self.normal_weight = 0.005
-            self.orthogonal_weight = 0.001
-            self.normal_flag = 1
-        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)"""
+       
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
