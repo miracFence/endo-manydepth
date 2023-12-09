@@ -871,7 +871,7 @@ class Trainer_Monodepth2:
             pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
             model_dict.update(pretrained_dict)
             self.models[n].load_state_dict(model_dict)
-
+        """
         # loading adam state
         optimizer_load_path = os.path.join(self.opt.load_weights_folder, "adam.pth")
         if os.path.isfile(optimizer_load_path):
@@ -879,7 +879,7 @@ class Trainer_Monodepth2:
             optimizer_dict = torch.load(optimizer_load_path)
             self.model_optimizer.load_state_dict(optimizer_dict)
         else:
-            print("Cannot find Adam weights so Adam is randomly initialized")
+            print("Cannot find Adam weights so Adam is randomly initialized")"""
 
     def flow2rgb(self,flow_map, max_value):
         flow_map_np = flow_map.detach().cpu().numpy()
