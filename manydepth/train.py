@@ -32,5 +32,5 @@ opts = options.parse()
 seed_all(opts.pytorch_random_seed)
 
 if __name__ == "__main__":
-    trainer = Trainer_Monodepth(opts)
+    trainer = Trainer_Monodepth2(opts)
     trainer.train()
