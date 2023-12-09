@@ -131,6 +131,7 @@ class Trainer_Monodepth2:
 
         #if self.opt.load_weights_folder is not None:
         self.load_model()
+        self.freeze_models()
 
         print("Training model named:\n  ", self.opt.model_name)
         print("Models and tensorboard events files are saved to:\n  ", self.opt.log_dir)
@@ -709,9 +710,9 @@ class Trainer_Monodepth2:
             #if self.normal_flag == 1:
             #self.normal_weight = 0.005
             #self.orthogonal_weight = 0.001
-            loss += self.normal_weight * normal_loss / 2.0
+            loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += self.orthogonal_weight * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
                 
             #Illumination invariant loss
             #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
