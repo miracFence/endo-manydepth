@@ -8,6 +8,7 @@ import random
 import numpy as np
 #from trainer import Trainer
 from trainer_m2 import Trainer_Monodepth
+from trainer_m2_normals import Trainer_Monodepth2
 from options import MonodepthOptions
 import datasets
 import networks
