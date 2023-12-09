@@ -249,12 +249,7 @@ class Trainer_Monodepth:
         """          
 
         print("Training",self.epoch)
-        self.set_train()
-        self.freeze_models()
-        
-        self.normal_weight = 0.01
-        self.orthogonal_weight = 0.5
-        self.normal_flag = 1
+        #self.set_train()
         
 
         for batch_idx, inputs in enumerate(self.train_loader):
@@ -862,8 +857,8 @@ class Trainer_Monodepth:
     def load_model(self):
         """Load model(s) from disk
         """
-        self.opt.load_weights_folder = os.path.expanduser(self.opt.load_weights_folder)
-
+        #self.opt.load_weights_folder = os.path.expanduser(self.opt.load_weights_folder)
+        self.opt.load_weights_folder = "/workspace/monodepth/weights/ENDOVIS/iil/models/weights_19"
         assert os.path.isdir(self.opt.load_weights_folder), \
             "Cannot find folder {}".format(self.opt.load_weights_folder)
         print("loading model from folder {}".format(self.opt.load_weights_folder))
