@@ -604,7 +604,7 @@ class Trainer_Monodepth2:
 
         roll_offsets = []
         roll_offsets.append((-1, -1))
-        roll_offsets.append((-1, 1))
+        roll_offsets.append((1, 1))
 
 
         batch_size, height, width, channels = D.shape
