@@ -613,9 +613,10 @@ class Trainer_Monodepth2:
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
-        print(p)
-        print(q)
+        
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+
+        print(P.shape)
                 
         P_tl_br = torch.roll(P, shifts=roll_offsets[0], dims=(1, 2))
         P_tr_bl = torch.roll(P, shifts=roll_offsets[1], dims=(1, 2))
