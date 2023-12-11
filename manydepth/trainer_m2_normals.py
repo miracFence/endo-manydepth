@@ -621,16 +621,18 @@ class Trainer_Monodepth2:
         print(P[0,:3,:3])
                 
         Pa = torch.roll(P, shifts=1, dims=1)
-
-        print("Pa")
-        print(Pa.shape)
-        print(Pa[0,:3,:3])
-
         Pa = torch.roll(Pa, shifts=1, dims=2)
-
+        
         print("Pa")
         print(Pa.shape)
         print(Pa[0,:3,:3])
+
+        Pb = torch.roll(P, shifts=-1, dims=1)
+        Pb = torch.roll(Pb, shifts=-1, dims=2)
+
+        print("Pb")
+        print(Pb.shape)
+        print(Pb[0,:3,:3])
 
         pa_tl, pb_br = P, P_tl_br
         pa_tr, pb_bl = P, P_tr_bl
