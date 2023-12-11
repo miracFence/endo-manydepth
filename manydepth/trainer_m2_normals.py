@@ -626,7 +626,7 @@ class Trainer_Monodepth2:
         print(P_tl_br.shape)
         print(P_tl_br[0,:3,:3])
 
-        P_tr_bl = torch.roll(P, shifts=1, dims=1)
+        P_tr_bl = torch.roll(P, shifts=1, dims=2)
 
         print("P_tr_bl")
         print(P_tr_bl.shape)
