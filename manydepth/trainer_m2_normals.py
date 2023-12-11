@@ -601,7 +601,7 @@ class Trainer_Monodepth2:
         D = D.permute(0, 2, 3, 1)
 
         roll_offsets = []
-        roll_offsets.append((-1, -1))
+        roll_offsets.append((-1, -1)) #abajo derecha
         roll_offsets.append((1, 1))
 
 
@@ -620,13 +620,13 @@ class Trainer_Monodepth2:
         print(P.shape)
         print(P[0,:3,:3])
                 
-        P_tl_br = torch.roll(P, shifts=roll_offsets[0], dims=(1, 2))
+        P_tl_br = torch.roll(P, shifts=1, dims=1)
 
         print("P_tl_br")
         print(P_tl_br.shape)
         print(P_tl_br[0,:3,:3])
 
-        P_tr_bl = torch.roll(P, shifts=roll_offsets[1], dims=(1, 2))
+        P_tr_bl = torch.roll(P, shifts=1, dims=1)
 
         print("P_tr_bl")
         print(P_tr_bl.shape)
