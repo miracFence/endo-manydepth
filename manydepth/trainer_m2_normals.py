@@ -609,12 +609,12 @@ class Trainer_Monodepth2:
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
-        print(p)
+        
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
-        print(q)
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
-        
+        print(p)
+        print(q)
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
                 
         P_tl_br = torch.roll(P, shifts=roll_offsets[0], dims=(1, 2))
