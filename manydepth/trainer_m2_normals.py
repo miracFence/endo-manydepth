@@ -637,15 +637,15 @@ class Trainer_Monodepth2:
         print(Pb_br[0,:3,:3])
 
         #####################################
-        Pa_tr = torch.roll(P, shifts=1, dims=2)
-        Pa_tr = torch.roll(Pa_tr, shifts=-1, dims=1)
+        Pa_tr = torch.roll(P, shifts=1, dims=1)
+        Pa_tr = torch.roll(Pa_tr, shifts=-1, dims=2)
                 
         print("Pa_tr")
         print(Pa_tr.shape)
         print(Pa_tr[0,:3,:3])
 
-        Pb_bl = torch.roll(P, shifts=1, dims=1)
-        Pb_bl = torch.roll(Pb_bl, shifts=1, dims=1)
+        Pb_bl = torch.roll(P, shifts=-1, dims=1)
+        Pb_bl = torch.roll(Pb_bl, shifts=1, dims=2)
 
         print("Pb_bl")
         print(Pb_bl.shape)
