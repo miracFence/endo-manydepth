@@ -611,7 +611,7 @@ class Trainer_Monodepth2:
         #print(N_hat[0,:3,:3])
         #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        print(N_hat[0,:3,:3])
+        #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D.shape
  
         # Homogeneous coordinates
