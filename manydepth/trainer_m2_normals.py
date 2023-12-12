@@ -561,9 +561,9 @@ class Trainer_Monodepth2:
         
         #D = D.permute(0, 2, 3, 1)
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
-        #N_hat = N_hat.permute(0, 2, 3, 1)
+        N_hat = N_hat.permute(0, 2, 3, 1)
         print(N_hat.shape)
-        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=-1)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         
         batch_size, height, width, channels = D_inv.shape
         #p1 = (0,1)
@@ -579,7 +579,7 @@ class Trainer_Monodepth2:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        
+        print(P[0,:3,:3])
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
@@ -587,10 +587,12 @@ class Trainer_Monodepth2:
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
                 q = P.roll(shifts=p_idx,dims=2)
+                
                 #pa_tl = torch.roll(P, shifts=1, dims=1)
                   # Keep only the first two dimensions
             else:
                 q = P.roll(shifts=p_idx,dims=1)
+            print(q[0,:3,:3])
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
             Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
