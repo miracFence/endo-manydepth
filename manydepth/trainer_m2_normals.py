@@ -611,6 +611,7 @@ class Trainer_Monodepth2:
         #print(N_hat[0,:3,:3])
         #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
+        D = torch.nn.functional.normalize(D, dim=-1)
         #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D.shape
  
@@ -680,10 +681,10 @@ class Trainer_Monodepth2:
         pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
         pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
         #torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V = torch.abs(D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1))
+        V = D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
         pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
         pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V += torch.abs(D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1))
+        V += D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
         #V = torch.abs(V)
         #print(V)
         #¿print(N_hat.shape)
