@@ -969,51 +969,28 @@ class Trainer_Monodepth2:
 
         return vis
     
-    def visualize_normal_image(self, xyz_image):
-        """
-        Visualize a 3-channel image with X, Y, and Z components of normal vectors.
-        
-        Args:
-            xyz_image (torch.Tensor): The input normal image with shape (3, height, width).
-        """
-        # Ensure the input tensor is on the CPU and in numpy format
-        normal_image_np = xyz_image.cpu().numpy()
+    def normal2rgb(self, normal):
+    """It maps a 3D normal map into an RGB image.
 
-        # Normalize the normal vectors to unit length
-        normal_image_np /= np.linalg.norm(normal_image_np, axis=0)
+    It maps the input 3D normal map into an RGB image. Since a normal vector has unitary norm, the set of all the
+    possible normals describes a unitary sphere. This function maps each point `(X, Y, Z)` on the sphere, hence each
+    normal vector, to an RGB value. All non zero normals are assumed valid and no check is performed on them.
 
-        # Transpose the dimensions to (height, width, channels) for matplotlib
-        normal_image_np = np.transpose(normal_image_np, (1, 2, 0))
+    Args:
+        normal: normal map, arranged as an `(H, W, 3)` array.
 
-        # Shift and scale the normal vectors to the [0, 1] range for visualization
-        normal_image_np = 0.5 * normal_image_np + 0.5
+    Returns:
+        An RGB image, arranged as an `(H, W, 3)` array, that encodes the normals.
+    """
 
-        return normal_image_np
+    # Detect the entries of the grid where the 3D normals are available.
+    mask = (np.sum(normal != 0, axis=2) != 0)
 
-    def visualize_normals(self,batch_normals):
-        """
-        Visualize a batch of normalized normal vectors as RGB images.
+    # Allocate the RGB representation of the normals.
+    normal_rgb = np.zeros_like(normal, dtype=np.uint8)
 
-        Args:
-            batch_normals (np.ndarray): A batch of normalized normal vectors with shape (batch, channels, height, width).
+    # Map the X, Y and Z coordinates from [-1, 1] to [0, 255].
+    normal_rgb[mask] = np.round(((normal.astype(np.float64, copy=False)[mask] + 1.0) / 2.0) * 255).astype(np.uint8)
 
-        Returns:
-            np.ndarray: An array of RGB images representing the normal vectors.
-        """
-        batch_normals = batch_normals.cpu().numpy()
-        # Scale and shift to map the normals to the 0-255 range
-        scaled_normals = ((batch_normals + 1) / 2 * 255).astype(np.uint8)
-        # Convert channels to (height, width, channels)
-        #print(scaled_normals.shape)
-        transposed_normals = np.transpose(scaled_normals, (1, 2, 0))
-        return transposed_normals
+    return normal_rgb
 
-
-
-        
-    def norm_to_rgb(self,norm):
-        pred_norm = norm.detach().cpu().permute(1, 2, 0).numpy()  # (H, W, 3)
-        norm_rgb = ((pred_norm[...] + 1)) / 2 * 255
-        norm_rgb = np.clip(norm_rgb, a_min=0, a_max=255)
-        norm_rgb = norm_rgb.astype(np.uint8)
-        return norm_rgb
