@@ -605,7 +605,6 @@ class Trainer_Monodepth2:
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         orth_loss = 0.0
-        print(K_inv)
         D = D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
         #print(N_hat[0,:3,:3])
@@ -622,72 +621,31 @@ class Trainer_Monodepth2:
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+        #P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+        P = nn.Parameter(torch.cat([p, q, torch.ones_like(p)], dim=-1),
+                                       requires_grad=False)
 
-        """print("P")
-        print(P.shape)
-        print(P[0,:3,:3])"""
-
-        #####################################
-               
+              
         pa_tl = torch.roll(P, shifts=1, dims=1)
         pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
-
-        """print("Pa_tl")
-        print(Pa_tl.shape)
-        print(Pa_tl[0,:3,:3])"""
     
         pb_br = torch.roll(P, shifts=-1, dims=1)
         pb_br = torch.roll(pb_br, shifts=-1, dims=2)
 
-
-        """print("Pb_br")
-        print(Pb_br.shape)
-        print(Pb_br[0,:3,:3])"""
-
-        #####################################
         pa_tr = torch.roll(P, shifts=1, dims=1)
         pa_tr = torch.roll(pa_tr, shifts=-1, dims=2)
-                
-        """print("Pa_tr")
-        print(Pa_tr.shape)
-        print(Pa_tr[0,:3,:3])"""
 
         pb_bl = torch.roll(P, shifts=-1, dims=1)
         pb_bl = torch.roll(pb_bl, shifts=1, dims=2)
         
-        """
-        print("Pb_bl")
-        print(Pb_bl.shape)
-        print(Pb_bl[0,:3,:3])"""
-
-        #pa_tl, pb_br = P, P_tl_br
-        #pa_tr, pb_bl = P, P_tr_bl
-
-        """
-        print(pa_tl.shape)
-        print(pb_br.shape)
-        print(pa_tr.shape)
-        print(pb_bl.shape)
-
-        print(pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
-        print(pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
-        print(pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
-        print(pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1).shape)
-        """
-        #print(D.shape)
-        #print(torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)).shape)
         V = 0
         pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
         pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        #torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V = D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
+
+        V = D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1)
         pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
         pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V += D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
-        #V = torch.abs(V)
-        #print(V)
-        #¿print(N_hat.shape)
+        V += D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1)
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V)
                
         #print (orth_loss.shape)
