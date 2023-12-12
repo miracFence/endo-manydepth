@@ -668,9 +668,13 @@ class Trainer_Monodepth2:
         #print(D.shape)
         #print(torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)).shape)
         V = 0
-        pa_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        pa_pb2 = torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
-        V = D * pa_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
+        pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
+        pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        #torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) - torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        V = D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
+        pa1_pb1 = torch.matmul(K_inv[:, :3, :3], pa_tr.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
+        pa2_pb2 = torch.matmul(K_inv[:, :3, :3], pb_bl.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        V += D * pa1_pb1.view(batch_size,3,height,width).permute(0,2,3,1) - D * pa2_pb2.view(batch_size,3,height,width).permute(0,2,3,1)
         #V = torch.abs(V)
         #print(V)
         #¿print(N_hat.shape)
@@ -678,7 +682,7 @@ class Trainer_Monodepth2:
                
         #print (orth_loss.shape)
 
-        return torch.abs(orth_loss.sum())
+        return orth_loss.sum()
 
 
     
@@ -743,7 +747,7 @@ class Trainer_Monodepth2:
             #self.orthogonal_weight = 0.001
             loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
                 
             #Illumination invariant loss
             loss += 0.1 * loss_ilumination_invariant / 2.0
