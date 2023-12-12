@@ -621,9 +621,8 @@ class Trainer_Monodepth2:
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        #P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        P = nn.Parameter(torch.cat([p, q, torch.ones_like(p)], dim=-1),
-                                       requires_grad=False)
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+        #P = nn.Parameter(torch.cat([p, q, torch.ones_like(p)], dim=-1), requires_grad=False)
 
               
         pa_tl = torch.roll(P, shifts=1, dims=1)
