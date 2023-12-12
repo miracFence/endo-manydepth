@@ -607,6 +607,9 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         
         D = D.permute(0, 2, 3, 1)
+        N_hat = N_hat.permute(0, 2, 3, 1)
+        #print(N_hat.shape)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
 
         batch_size, height, width, channels = D.shape
  
@@ -683,7 +686,7 @@ class Trainer_Monodepth2:
         #V = torch.abs(V)
         #print(V)
         #¿print(N_hat.shape)
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), V)
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V)
                
         #print (orth_loss.shape)
 
