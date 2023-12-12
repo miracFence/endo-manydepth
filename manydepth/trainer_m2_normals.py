@@ -562,7 +562,8 @@ class Trainer_Monodepth2:
         #D = D.permute(0, 2, 3, 1)
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
+        print(N_hat.shape)
+        #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=-1)
         
         batch_size, height, width, channels = D_inv.shape
         #p1 = (0,1)
@@ -585,7 +586,9 @@ class Trainer_Monodepth2:
         #print(P.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
-                q = P.roll(shifts=p_idx,dims=2)  # Keep only the first two dimensions
+                q = P.roll(shifts=p_idx,dims=2)
+                #pa_tl = torch.roll(P, shifts=1, dims=1)
+                  # Keep only the first two dimensions
             else:
                 q = P.roll(shifts=p_idx,dims=1)
             #print(q.shape)
