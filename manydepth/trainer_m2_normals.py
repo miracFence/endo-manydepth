@@ -984,13 +984,13 @@ class Trainer_Monodepth2:
         """
 
         # Detect the entries of the grid where the 3D normals are available.
-        mask = (np.sum(normal != 0, axis=2) != 0)
+        #mask = (np.sum(normal != 0, axis=2) != 0)
 
         # Allocate the RGB representation of the normals.
         normal_rgb = np.zeros_like(normal, dtype=np.uint8)
 
         # Map the X, Y and Z coordinates from [-1, 1] to [0, 255].
-        normal_rgb[mask] = np.round(((normal.astype(np.float64, copy=False)[mask] + 1.0) / 2.0) * 255).astype(np.uint8)
+        normal_rgb = np.round(((normal.astype(np.float64, copy=False)[mask] + 1.0) / 2.0) * 255).astype(np.uint8)
 
         return normal_rgb
 
