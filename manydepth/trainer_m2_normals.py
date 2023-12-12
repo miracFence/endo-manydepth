@@ -583,7 +583,7 @@ class Trainer_Monodepth2:
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
-        for idx,p_idx in enumerate[-1,-2,-1,-2]:
+        for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
                 q = P.roll(shifts=p_idx,dims=2)  # Keep only the first two dimensions
             else:
