@@ -852,7 +852,7 @@ class Trainer_Monodepth2:
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["c_"+str(frame_id)+"_"+str(s)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
+            wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.normal2rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
             #wandb.log({"normal_predicted{}/{}".format(s, j): wandb.Image(self.visualize_normals(outputs["normal"][("normal", 0)][j].data))},step=self.step)
             """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
@@ -970,27 +970,27 @@ class Trainer_Monodepth2:
         return vis
     
     def normal2rgb(self, normal):
-    """It maps a 3D normal map into an RGB image.
+        """It maps a 3D normal map into an RGB image.
 
-    It maps the input 3D normal map into an RGB image. Since a normal vector has unitary norm, the set of all the
-    possible normals describes a unitary sphere. This function maps each point `(X, Y, Z)` on the sphere, hence each
-    normal vector, to an RGB value. All non zero normals are assumed valid and no check is performed on them.
+        It maps the input 3D normal map into an RGB image. Since a normal vector has unitary norm, the set of all the
+        possible normals describes a unitary sphere. This function maps each point `(X, Y, Z)` on the sphere, hence each
+        normal vector, to an RGB value. All non zero normals are assumed valid and no check is performed on them.
 
-    Args:
-        normal: normal map, arranged as an `(H, W, 3)` array.
+        Args:
+            normal: normal map, arranged as an `(H, W, 3)` array.
 
-    Returns:
-        An RGB image, arranged as an `(H, W, 3)` array, that encodes the normals.
-    """
+        Returns:
+            An RGB image, arranged as an `(H, W, 3)` array, that encodes the normals.
+        """
 
-    # Detect the entries of the grid where the 3D normals are available.
-    mask = (np.sum(normal != 0, axis=2) != 0)
+        # Detect the entries of the grid where the 3D normals are available.
+        mask = (np.sum(normal != 0, axis=2) != 0)
 
-    # Allocate the RGB representation of the normals.
-    normal_rgb = np.zeros_like(normal, dtype=np.uint8)
+        # Allocate the RGB representation of the normals.
+        normal_rgb = np.zeros_like(normal, dtype=np.uint8)
 
-    # Map the X, Y and Z coordinates from [-1, 1] to [0, 255].
-    normal_rgb[mask] = np.round(((normal.astype(np.float64, copy=False)[mask] + 1.0) / 2.0) * 255).astype(np.uint8)
+        # Map the X, Y and Z coordinates from [-1, 1] to [0, 255].
+        normal_rgb[mask] = np.round(((normal.astype(np.float64, copy=False)[mask] + 1.0) / 2.0) * 255).astype(np.uint8)
 
-    return normal_rgb
+        return normal_rgb
 
