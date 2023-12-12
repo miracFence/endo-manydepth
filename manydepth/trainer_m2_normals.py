@@ -565,10 +565,10 @@ class Trainer_Monodepth2:
         #N_hat = torch.nn.functional.normalize(N_hat, p=2, dim=1)
         
         batch_size, height, width, channels = D_inv.shape
-        p1 = (0,1)
-        p2 = (0,2)
-        p3 = (1,0)
-        p4 = (2,0)
+        #p1 = (0,1)
+        #p2 = (0,2)
+        #p3 = (1,0)
+        #p4 = (2,0)
  
         # Homogeneous coordinates
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
@@ -583,8 +583,11 @@ class Trainer_Monodepth2:
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
-        for p_idx in [p1, p2, p3, p4]:
-            q = P.roll(shifts=p_idx,dims=(-2, -1))  # Keep only the first two dimensions
+        for idx,p_idx in enumerate[-1,-2,-1,-2]:
+            if idx < 2:
+                q = P.roll(shifts=p_idx,dims=2)  # Keep only the first two dimensions
+            else:
+                q = P.roll(shifts=p_idx,dims=1)
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
             Cpq = torch.einsum('bijk,bijk->bij', N_hat.permute(0, 2, 3, 1), X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
@@ -599,11 +602,6 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         
         D = D.permute(0, 2, 3, 1)
-
-        roll_offsets = []
-        roll_offsets.append((-1, -1)) #abajo derecha
-        roll_offsets.append((1, 1))
-
 
         batch_size, height, width, channels = D.shape
  
@@ -745,7 +743,7 @@ class Trainer_Monodepth2:
             #self.orthogonal_weight = 0.001
             loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
                 
             #Illumination invariant loss
             loss += 0.1 * loss_ilumination_invariant / 2.0
