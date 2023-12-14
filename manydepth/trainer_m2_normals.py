@@ -537,7 +537,7 @@ class Trainer_Monodepth2:
         # Compute orthogonality loss
         orth_loss = 0.0
         
-        D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        D_inv = 1.0 / D
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         #print(N_hat[0,:3,:3])
