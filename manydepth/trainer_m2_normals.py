@@ -571,7 +571,7 @@ class Trainer_Monodepth2:
             #print(q[0,:3,:3])
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
-            #print(P.shape)
+            print(P.shape)
             print(P[batch_size,0,height, width].shape)
             print(qq[batch_size,0,height, width].shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
