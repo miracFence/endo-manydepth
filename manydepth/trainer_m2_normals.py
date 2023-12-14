@@ -570,7 +570,7 @@ class Trainer_Monodepth2:
                 qq = P.roll(shifts=p_idx,dims=1)
             #print(q[0,:3,:3])
             #print(q.shape)
-            X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq)
+            X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
             print(P.shape)
             print(P[batch_size,height, width,0].shape)
             print(qq[batch_size,height, width,1].shape)
