@@ -549,7 +549,7 @@ class Trainer_Monodepth2:
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1).permute(0,3,1,2)
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
         print(P.shape)
         #print(ref_img.shape)
         #P = ref_img.permute(0, 2, 3, 1)
