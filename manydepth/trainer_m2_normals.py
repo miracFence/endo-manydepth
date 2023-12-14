@@ -551,7 +551,8 @@ class Trainer_Monodepth2:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        #print(P.shape)
+        print("P")
+        print(P.shape)
         #print(ref_img.shape)
         #P = ref_img.permute(0, 2, 3, 1)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
