@@ -578,7 +578,7 @@ class Trainer_Monodepth2:
             #print(P.shape)
             #print(P[0,0].shape)
             #print(qq[:,:,:,:2].shape)
-            D_inv_q = F.grid_sample(D_inv.permute(0,3,1,2), qq[:,:,:,:2])
+            D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:2])
             print(D_inv_q.shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv_p * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
