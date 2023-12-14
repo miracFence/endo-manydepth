@@ -555,7 +555,8 @@ class Trainer_Monodepth2:
         #print(ref_img.shape)
         #P = ref_img.permute(0, 2, 3, 1)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
-
+        print(N_hat.shape)
+        print(X_tilde_p.shape)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
