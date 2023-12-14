@@ -555,7 +555,6 @@ class Trainer_Monodepth2:
         #print(ref_img.shape)
         #P = ref_img.permute(0, 2, 3, 1)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
-        cam_points = torch.matmul(inv_K[:, :3, :3], self.pix_coords)
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
@@ -569,7 +568,7 @@ class Trainer_Monodepth2:
                 q = P.roll(shifts=p_idx,dims=1)
             #print(q[0,:3,:3])
             #print(q.shape)
-            X_tilde_q = torch.matmul(K_inv[:, :3, :3], q.permute(0, 3, 1, 2).view(batch_size,3,-1))
+            X_tilde_q = torch.matmul(K_inv[:, :3, :3], q)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
