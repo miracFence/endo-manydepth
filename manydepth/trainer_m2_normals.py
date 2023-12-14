@@ -650,7 +650,7 @@ class Trainer_Monodepth2:
                
         #print (orth_loss.shape)
 
-        return orth_loss.sum()
+        return torch.abs(orth_loss.sum())
 
 
     
