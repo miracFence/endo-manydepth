@@ -561,17 +561,17 @@ class Trainer_Monodepth2:
         #print(P.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
-                q = P.roll(shifts=p_idx,dims=2)
+                qq = P.roll(shifts=p_idx,dims=2)
                 
                 #pa_tl = torch.roll(P, shifts=1, dims=1)
                   # Keep only the first two dimensions
             else:
-                q = P.roll(shifts=p_idx,dims=1)
+                qq = P.roll(shifts=p_idx,dims=1)
             #print(q[0,:3,:3])
             #print(q.shape)
-            X_tilde_q = torch.matmul(K_inv[:, :3, :3], q)
+            X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq)
             print(P.shape)
-            print(q.shape)
+            print(qq.shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
