@@ -570,6 +570,8 @@ class Trainer_Monodepth2:
             #print(q[0,:3,:3])
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q)
+            print(P.shape)
+            print(q.shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
