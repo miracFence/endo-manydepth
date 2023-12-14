@@ -574,7 +574,7 @@ class Trainer_Monodepth2:
             print(P[batch_size,height, width,0].shape)
             print(qq[batch_size,height, width,1].shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            orth_loss += torch.abs(D_inv[P[batch_size,height, width,0]] * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv[qq[batch_size,height, width,1]] * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
