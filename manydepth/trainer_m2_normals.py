@@ -562,7 +562,7 @@ class Trainer_Monodepth2:
         #D = D.permute(0, 2, 3, 1)
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
-        print(D_inv[0,:3,:3])
+        #print(D_inv[0,:3,:3])
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D_inv.shape
