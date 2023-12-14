@@ -484,9 +484,9 @@ class Trainer_Monodepth2:
                     cam_points, inputs[("K", source_scale)], T)
 
                 outputs[("sample", frame_id, scale)] = pix_coords
-                print("Pixels")
-                print(outputs[("sample", frame_id, scale)].shape)
-                print(nputs[("color", frame_id, source_scale)].shape)
+                #print("Pixels")
+                #print(outputs[("sample", frame_id, scale)].shape)
+                #print(inputs[("color", frame_id, source_scale)].shape)
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
@@ -561,7 +561,7 @@ class Trainer_Monodepth2:
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.view(batch_size,3,-1))
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
-        print(D_inv.shape)
+        #print(D_inv.shape)
         print(P.permute(0,2,3,1)[:,:,:,:2].shape)
         #D_inv_p = F.grid_sample(D_inv.permute(0,3,1,2), P.])
         #print(P.shape)
@@ -577,8 +577,8 @@ class Trainer_Monodepth2:
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
             #print(P.shape)
             #print(P[0,0].shape)
-            #print(qq['batch_size',0,height, width].shape)
-            D_inv_q = F.grid_sample(D_inv, qq.unsqueeze(1))
+            print(qq[:,:,:,:2].shape)
+            D_inv_q = F.grid_sample(D_inv, qq[:,:,:,:2])
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
