@@ -552,7 +552,7 @@ class Trainer_Monodepth2:
         return l1_loss.sum()
 
     
-    def compute_orth_loss(self, disp, N_hat, K_inv):
+    def compute_orth_loss(self, disp, N_hat, K_inv,ref_img):
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         #print(D.shape)
         #print(N_hat.shape)
@@ -579,7 +579,8 @@ class Trainer_Monodepth2:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        #print(P[0,:3,:3])
+        print(P.shape)
+        print(ref_img.shape)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
@@ -610,7 +611,7 @@ class Trainer_Monodepth2:
         #print(N_hat[0,:3,:3])
         #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        print(D[0,:3,:3])
+        #print(D[0,:3,:3])
         D = torch.nn.functional.normalize(D, dim=-1)
         #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D.shape
@@ -716,7 +717,7 @@ class Trainer_Monodepth2:
             #self.orthogonal_weight = 0.001
             loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)],inputs[("color", 0, scale)])
                 
             #Illumination invariant loss
             loss += 0.1 * loss_ilumination_invariant / 2.0
