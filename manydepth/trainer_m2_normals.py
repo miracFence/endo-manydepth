@@ -512,43 +512,21 @@ class Trainer_Monodepth2:
         return reprojection_loss
 
     def norm_loss(self, pred, target, rotation_matrix,frame_id):
-        #print(pred.shape)
-        #print(target.shape)
         
         if frame_id < 0:
             rotation_matrix = rotation_matrix.transpose(1, 2)                
 
-        #rotation_matrix = rotation_matrix[:, :3, :3]
-
         target = target.permute(0,2,3,1)
         
-        #target = torch.nn.functional.normalize(target, p=2, dim=1)
-
         pred = pred.permute(0,2,3,1)
         batch_size, height, width, channels = pred.shape
-        #print(target.permute(0,3,1,2).view(batch_size,channels,-1).shape)
-        #print(rotation_matrix[:, :3, :3].shape)
-        #print(batch_size, height, width, channels)
-        #pred = torch.nn.functional.normalize(pred, p=2, dim=1)
-        #print(reshaped_normal_shapes.shape)
-        #print(rotation_matrix.unsqueeze(1).shape)
-        #print(target.shape)
-        #print(rotation_matrix.shape)
-        #print(channels)
-        #print(target.permute(0, 3, 1, 2).shape)
+
         rotated_images = torch.matmul(target.view(batch_size,-1,3), rotation_matrix[:, :3, :3]) 
-        #print(rotated_images.shape)
-        # Reshape the rotated images back to the original shape (12, 3, 256, 320)
+        
         rotated_images = rotated_images.view(batch_size,height,width,channels)
-        #rotated_images = rotated_images.permute(0,3,1,2)
-        #print(rotated_images.shape)
-        #result.view(12, 256, 320, 3)
-        #pred = pred.permute(0,2,3,1)
-        #print(pred.shape)
-        #print(rotated_images.shape)
+
         abs_diff = torch.abs(pred - rotated_images)
         l1_loss = abs_diff.mean(1, True)
-        #print(l1_loss)
         return l1_loss.sum()
 
     
@@ -559,31 +537,25 @@ class Trainer_Monodepth2:
         # Compute orthogonality loss
         orth_loss = 0.0
         
-        #D = D.permute(0, 2, 3, 1)
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
-        #print(D_inv[0,:3,:3])
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D_inv.shape
-        #p1 = (0,1)
-        #p2 = (0,2)
-        #p3 = (1,0)
-        #p4 = (2,0)
  
         # Homogeneous coordinates
-        """
+        
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
      
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)"""
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
         #print(P.shape)
         #print(ref_img.shape)
-        P = ref_img.permute(0, 2, 3, 1)
+        #P = ref_img.permute(0, 2, 3, 1)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.permute(0,3,1,2).view(batch_size,3,-1))
+        #cam_points = torch.matmul(inv_K[:, :3, :3], self.pix_coords)
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
