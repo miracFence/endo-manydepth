@@ -540,7 +540,7 @@ class Trainer_Monodepth2:
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        print(N_hat[0,:3,:3])
+        #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D_inv.shape
  
         # Homogeneous coordinates
@@ -571,10 +571,10 @@ class Trainer_Monodepth2:
             #print(q[0,:3,:3])
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq)
-            #print(P.shape)
-            #print(qq.shape)
+            print(P[batch_size,height, width,0].shape)
+            print(qq[batch_size,height, width,1].shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+            orth_loss += torch.abs(D_inv[P[batch_size,height, width,0]] * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv[qq[batch_size,height, width,1]] * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
