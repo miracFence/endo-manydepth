@@ -484,7 +484,9 @@ class Trainer_Monodepth2:
                     cam_points, inputs[("K", source_scale)], T)
 
                 outputs[("sample", frame_id, scale)] = pix_coords
-
+                print("Pixels")
+                print(outputs[("sample", frame_id, scale)].shape)
+                print(nputs[("color", frame_id, source_scale)].shape)
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
