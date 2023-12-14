@@ -542,8 +542,7 @@ class Trainer_Monodepth2:
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         batch_size, height, width, channels = D_inv.shape
  
-        # Homogeneous coordinates
-        
+        # Homogeneous coordinates        
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
      
