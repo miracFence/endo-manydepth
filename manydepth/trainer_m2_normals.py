@@ -537,26 +537,27 @@ class Trainer_Monodepth2:
         # Compute orthogonality loss
         orth_loss = 0.0
         
-        D_inv = 1.0 / D 
+        D_inv = 1.0 / D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         batch_size, height, width, channels = D_inv.shape
  
-        # Homogeneous coordinates        
+        # Homogeneous coordinates
+        
         p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
         q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
      
         p = p.expand(batch_size, height, width).unsqueeze(-1)
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
+        P = torch.cat([p, q, torch.ones_like(p)], dim=-1).permute(0,3,1,2).view(batch_size,3,-1)
+        print("P")
         print(P.shape)
         #print(ref_img.shape)
         #P = ref_img.permute(0, 2, 3, 1)
-        X_tilde_p = torch.matmul(K_inv[:, :3, :3], P).permute(0,2,1)
-        print(N_hat.shape)
-        print(X_tilde_p.shape)
-        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
+        X_tilde_p = torch.matmul(K_inv[:, :3, :3], P)
+
+        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(P.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
@@ -570,7 +571,7 @@ class Trainer_Monodepth2:
             #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], q)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            orth_loss += torch.abs(D_inv.view(batch_size, 1, -1) * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv.view(batch_size, 1, -1) * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
