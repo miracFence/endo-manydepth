@@ -560,7 +560,7 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         
         #D = D.permute(0, 2, 3, 1)
-        D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        D_inv = 1.0 / torch.nn.functional.normalize(D, dim=-1)
         N_hat = N_hat.permute(0, 2, 3, 1)
         #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
@@ -610,7 +610,7 @@ class Trainer_Monodepth2:
         #print(N_hat[0,:3,:3])
         #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        print(D[0,:3,:3])
+        #print(D[0,:3,:3])
         D = torch.nn.functional.normalize(D, dim=-1)
         #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D.shape
@@ -716,7 +716,7 @@ class Trainer_Monodepth2:
             #self.orthogonal_weight = 0.001
             loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            loss += 0.5 * self.compute_orth_loss(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
                 
             #Illumination invariant loss
             loss += 0.1 * loss_ilumination_invariant / 2.0
