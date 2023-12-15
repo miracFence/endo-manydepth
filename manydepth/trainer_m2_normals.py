@@ -540,6 +540,7 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        D_inv_q = D_inv
         #D_inv_ = self.colormap(D_inv)
         #print(D_inv.shape)
         wandb.log({"D_inv_": wandb.Image(D_inv[0].permute(2,0,1))},step=self.step)
