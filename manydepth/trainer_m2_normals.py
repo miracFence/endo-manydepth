@@ -565,22 +565,24 @@ class Trainer_Monodepth2:
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print("D_inv",D_inv.shape)
         #print(P.shape)
-        D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
-        wandb.log({"D_inv_p": wandb.Image(D_inv_p[0].permute(2,0,1))},step=self.step)
+        #D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
+        #wandb.log({"D_inv_p": wandb.Image(D_inv_p[0].permute(2,0,1))},step=self.step)
         #sampled_image = sampled_image.view(batch_size, 1, height, width, 3).squeeze(-1)
         #print("D_inv_p",D_inv_p.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
                 qq = P.roll(shifts=p_idx,dims=2)
+                D_inv_q = D_inv_q.roll(shifts=p_idx,dims=2)
                 #pa_tl = torch.roll(P, shifts=1, dims=1)
             else:
                 qq = P.roll(shifts=p_idx,dims=1)
+                D_inv_q = D_inv_q.roll(shifts=p_idx,dims=1)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
-            D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
+            #D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
             wandb.log({"D_inv_q": wandb.Image(D_inv_q[0].permute(2,0,1))},step=self.step)
             #print(D_inv_q)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            orth_loss += torch.abs(D_inv_p * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
+            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
         orth_loss = orth_loss.sum()
 
