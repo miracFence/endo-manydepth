@@ -571,6 +571,7 @@ class Trainer_Monodepth2:
         #sampled_image = sampled_image.view(batch_size, 1, height, width, 3).squeeze(-1)
         #print("D_inv_p",D_inv_p.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
+            D_inv_q = D_inv
             if idx < 2:
                 qq = P.roll(shifts=p_idx,dims=2)
                 D_inv_q = D_inv_q.roll(shifts=p_idx,dims=2)
