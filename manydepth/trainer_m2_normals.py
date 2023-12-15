@@ -541,7 +541,7 @@ class Trainer_Monodepth2:
         
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
         #D_inv_ = self.colormap(D_inv)
-        wandb.log({"D_inv_": wandb.Image(D_inv[0].transpose(1, 2, 0))},step=self.step)
+        wandb.log({"D_inv_": wandb.Image(D_inv[0])},step=self.step)
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         batch_size, height, width, channels = D_inv.shape
