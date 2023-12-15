@@ -563,7 +563,7 @@ class Trainer_Monodepth2:
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
         #print(D_inv.shape)
         #print(P.shape)
-        D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
+        D_inv_p = F.grid_sample(D_inv.permute(0,3,1,2), P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
         #sampled_image = sampled_image.view(batch_size, 1, height, width, 3).squeeze(-1)
         print("D_inv_p")
         print(D_inv_p.shape)
