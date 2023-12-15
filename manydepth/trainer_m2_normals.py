@@ -540,9 +540,10 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         
         D_inv = 1.0 / D.permute(0, 2, 3, 1)
+        #D_inv_ = self.colormap(D_inv)
+        wandb.log({"D_inv_": wandb.Image(D_inv[0].transpose(1, 2, 0))},step=self.step)
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D_inv.shape
  
         # Homogeneous coordinates
@@ -561,25 +562,22 @@ class Trainer_Monodepth2:
         X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.view(batch_size,3,-1))
 
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
-        print("D_inv",D_inv.shape)
+        #print("D_inv",D_inv.shape)
         #print(P.shape)
-        D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:],align_corners=True)
+        D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
+        wandb.log({"D_inv_p": wandb.Image(D_inv_p[0].transpose(1, 2, 0))},step=self.step)
         #sampled_image = sampled_image.view(batch_size, 1, height, width, 3).squeeze(-1)
-        print("D_inv_p",D_inv_p.shape)
+        #print("D_inv_p",D_inv_p.shape)
         for idx,p_idx in enumerate([-1,-2,-1,-2]):
             if idx < 2:
                 qq = P.roll(shifts=p_idx,dims=2)
                 #pa_tl = torch.roll(P, shifts=1, dims=1)
-                  # Keep only the first two dimensions
             else:
                 qq = P.roll(shifts=p_idx,dims=1)
-            #print(q[0,:3,:3])
-            #print(q.shape)
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
-            #print(P.shape)
-            #print(P[0,0].shape)
-            #print(qq[:,:,:,:2].shape)
-            D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:],align_corners=True)
+            D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
+            wandb.log({"D_inv_q": wandb.Image(D_inv_q[0].transpose(1, 2, 0))},step=self.step)
+            #print(D_inv_q)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv_p * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
