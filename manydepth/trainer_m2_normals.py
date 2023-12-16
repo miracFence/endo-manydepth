@@ -634,8 +634,8 @@ class Trainer_Monodepth2:
         
         V = 0
         print(D_a_tl.view(batch_size,-1,1))
-        pa = torch.matmul(K_inv[:, :3, :3], D_a_tl.permute(0, 3, 1, 2).view(batch_size,3,-1)) 
-        pb = torch.matmul(K_inv[:, :3, :3], D_b_br.permute(0, 3, 1, 2).view(batch_size,3,-1))
+        pa = torch.matmul(K_inv[:, :3, :3], D_a_tl.permute(0, 3, 1, 2).view(batch_size,-1,1)) 
+        pb = torch.matmul(K_inv[:, :3, :3], D_b_br.permute(0, 3, 1, 2).view(batch_size,-1,1))
 
         V = torch.abs(D_a_tl * pa.view(batch_size,3,height,width).permute(0,2,3,1) - D_b_br * pb.view(batch_size,3,height,width).permute(0,2,3,1))
 
