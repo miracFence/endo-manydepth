@@ -595,12 +595,7 @@ class Trainer_Monodepth2:
         orth_loss = 0.0
         D = D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
-        #print(N_hat[0,:3,:3])
-        #print(N_hat.shape)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        #print(D[0,:3,:3])
-        #D = torch.nn.functional.normalize(D, dim=-1)
-        #print(N_hat[0,:3,:3])
         batch_size, height, width, channels = D.shape
  
         # Homogeneous coordinates
@@ -612,8 +607,6 @@ class Trainer_Monodepth2:
         q = q.expand(batch_size, height, width).unsqueeze(-1)
         
         P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-        #P = nn.Parameter(torch.cat([p, q, torch.ones_like(p)], dim=-1), requires_grad=False)
-        #P = ref_img.permute(0, 2, 3, 1)
               
         pa_tl = torch.roll(P, shifts=1, dims=1)
         pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
