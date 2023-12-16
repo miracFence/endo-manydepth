@@ -647,7 +647,7 @@ class Trainer_Monodepth2:
         #print(V.shape)
         #print(N_hat.shape)
         
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat.view(batch_size,-1,3).permute(0,2,1), V)
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,height,width,3))
                
         #print (orth_loss.shape)
 
