@@ -634,6 +634,11 @@ class Trainer_Monodepth2:
         
         V = 0
         #print(D_a_tl.v)
+        cam_points = torch.matmul(K_inv[:, :3, :3], P.view(batch_size,-1,3))
+        cam_points = D.view(self.batch_size, 1, -1) * cam_points
+        cam_points = torch.cat([cam_points, self.ones], 1)
+        print(cam_points.shape)
+
         pa = torch.matmul(K_inv[:, :3, :3], D_a_tl.permute(0, 3, 1, 2).view(batch_size,1,-1)) 
         pb = torch.matmul(K_inv[:, :3, :3], D_b_br.permute(0, 3, 1, 2).view(batch_size,1,-1))
 
