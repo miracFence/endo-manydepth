@@ -605,10 +605,10 @@ class Trainer_Monodepth2:
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
         pix_coords = torch.cat([pix_coords, ones], 1)
         x = pix_coords[:,0]-1
-        print(x.shape)
+        #print(x.shape)
         y = pix_coords[:,1]+1
-        print(y.shape)
-        pa_tr = torch.cat([x,y,ones],1)
+        #print(y.shape)
+        pa_tr = torch.cat([x,y],1)
         print(pa_tr.shape)
         print(pa_tr)
         #pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
