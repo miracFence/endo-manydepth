@@ -597,6 +597,7 @@ class Trainer_Monodepth2:
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
         batch_size, height, width, channels = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
+        print(meshgrid.shape)
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
         id_coords = torch.from_numpy(id_coords)
         ones = torch.ones(batch_size, 1, height * width)        
@@ -604,9 +605,9 @@ class Trainer_Monodepth2:
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
         pix_coords = torch.cat([pix_coords, ones], 1)
-        pa_tr = pix_coords[:,0]-1
+        #pa_tr = pix_coords[:,0]-1
         #print(x.shape)
-        pa_tr = pa_tr[:,1]+1
+        #pa_tr = pa_tr[:,1]+1
         #print(y.shape)
         #pa_tr = torch.cat([x,y],1)
         print(pa_tr.shape)
