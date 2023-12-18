@@ -644,7 +644,7 @@ class Trainer_Monodepth2:
         pa = torch.matmul(K_inv[:, :3, :3], pa_tr.view(batch_size,3,-1)) 
         pb = torch.matmul(K_inv[:, :3, :3], pb_bl.view(batch_size,3,-1))
 
-        V += torch.abs(D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb)
+        V += D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
         
         #print(V.shape)
         #print(N_hat.shape)
