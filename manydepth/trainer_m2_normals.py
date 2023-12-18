@@ -599,6 +599,8 @@ class Trainer_Monodepth2:
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
         print(id_coords.shape)
+        id_coords = np.roll(meshgrid,(-1,-1), axis=(1, 2))
+        print(id_coords.shape)
         id_coords = torch.from_numpy(id_coords)
         ones = torch.ones(batch_size, 1, height * width)        
         pix_coords = torch.unsqueeze(torch.stack(
