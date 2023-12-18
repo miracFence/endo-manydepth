@@ -604,8 +604,10 @@ class Trainer_Monodepth2:
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
         pix_coords = torch.cat([pix_coords, ones], 1)
-        x = (pix_coords[:,0]-1)
-        y = (pix_coords[:,1]+1)
+        x = pix_coords[:,0]-1
+        print(x.shape)
+        y = pix_coords[:,1]+1
+        print(y.shape)
         pa_tr = torch.cat([x,y,ones],1)
         print(pa_tr.shape)
         print(pa_tr)
