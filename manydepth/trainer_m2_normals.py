@@ -603,7 +603,7 @@ class Trainer_Monodepth2:
         pix_coords = torch.unsqueeze(torch.stack(
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
-        pix_coords = torch.cat([pix_coords, ones], 1)#.permute(0,2,1)
+        pix_coords = torch.cat([pix_coords, ones], 1).to(device=K_inv.device)#.permute(0,2,1)
         print(pix_coords.shape)
         #print(pix_coords)
         cam_points = torch.matmul(K_inv[:, :3, :3],pix_coords)
