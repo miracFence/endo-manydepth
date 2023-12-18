@@ -592,6 +592,23 @@ class Trainer_Monodepth2:
 
     def compute_orth_loss2(self, disp, N_hat, K_inv,ref_img):
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        D = D.permute(0, 2, 3, 1)
+        N_hat = N_hat.permute(0, 2, 3, 1)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
+        batch_size, height, width, channels = D.shape
+        meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
+        id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
+        torch.from_numpy(id_coords)
+        ones = torch.ones(self.batch_size, 1, self.height * self.width)        
+        pix_coords = torch.unsqueeze(torch.stack(
+            [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
+        pix_coords = pix_coords.repeat(batch_size, 1, 1)
+        pix_coords = torch.cat([self.pix_coords, self.ones], 1)
+
+        print(pix_coords.shape)
+        print(pix_coords[0,:3,:3])
+        """
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         orth_loss = 0.0
         D = D.permute(0, 2, 3, 1)
         N_hat = N_hat.permute(0, 2, 3, 1)
@@ -651,8 +668,8 @@ class Trainer_Monodepth2:
         
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,height,width,3))
                
-        #print (orth_loss.shape)
-
+        #print (orth_loss.shape)"""
+        orth_loss = 0
         return orth_loss.sum()
 
 
