@@ -604,6 +604,7 @@ class Trainer_Monodepth2:
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
         pix_coords = torch.cat([pix_coords, ones], 1).to(device=K_inv.device)
+        print(pix_coords.shape)
         print(pix_coords)
         pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
         print(pix_coords)
