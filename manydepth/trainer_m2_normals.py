@@ -599,7 +599,7 @@ class Trainer_Monodepth2:
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
         id_coords = torch.from_numpy(id_coords)
-        ones = torch.ones(batch_size, 1, height * width).to(device=K_inv.device)   
+        ones = torch.ones(batch_size, 1, height * width)        
         pix_coords = torch.unsqueeze(torch.stack(
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
@@ -610,7 +610,7 @@ class Trainer_Monodepth2:
         #print(pa_tr.shape)
         #print(pa_tr)
         #pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
-        #print(pix_coords)
+        print(pix_coords)
         #print(pix_coords)
         cam_points = torch.matmul(K_inv[:, :3, :3],pix_coords)
         #print(cam_points.shape)
