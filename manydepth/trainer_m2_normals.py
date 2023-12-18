@@ -603,9 +603,11 @@ class Trainer_Monodepth2:
         pix_coords = torch.unsqueeze(torch.stack(
             [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
         pix_coords = pix_coords.repeat(batch_size, 1, 1)
-        pix_coords = torch.cat([pix_coords, ones], 1).permute(0,2,1)
+        pix_coords = torch.cat([pix_coords, ones], 1)#.permute(0,2,1)
         print(pix_coords.shape)
-        print(pix_coords)
+        #print(pix_coords)
+        cam_points = torch.matmul(inv_K[:, :3, :3],pix_coords)
+        print(cam_points.shape)
         #print(pix_coords[0,:10])
         #pa_tl = torch.roll(pix_coords, shifts=1, dims=1)
         #pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
