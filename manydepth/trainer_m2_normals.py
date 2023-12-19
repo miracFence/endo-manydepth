@@ -619,7 +619,8 @@ class Trainer_Monodepth2:
         pbbr = torch.from_numpy(pbbr)
         patr = torch.from_numpy(patr)
         pbbl = torch.from_numpy(pabl)
-
+        print(patl.shape)
+        
         
         p = [patl,pbbr,patr,pbbl]
         p_names = ["patl","pbbr","patr","pbbl"]
@@ -648,8 +649,8 @@ class Trainer_Monodepth2:
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb
         
-        print(V.shape)      
-        print(V)
+        #print(V.shape)      
+        #print(V)
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
@@ -658,8 +659,8 @@ class Trainer_Monodepth2:
         Dpa = D[:,ps["patr"][0,:,1].long(),ps["patr"][0,:,0].long()]
         Dpb = D[:,ps["pbbl"][0,:,1].long(),ps["pbbl"][0,:,0].long()]
         V += Dpa * pa - Dpb * pb
-        print(V.shape)      
-        print(V)
+        #print(V.shape)      
+        #print(V)
 
         orth_loss += torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
