@@ -648,10 +648,11 @@ class Trainer_Monodepth2:
         V = Dpa * pa - Dpb * pb
         #print(V)
         #print(V.shape)     
-        """ 
+         
         orth = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         orth_loss = orth.sum()
         
+        """
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
