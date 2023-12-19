@@ -645,7 +645,7 @@ class Trainer_Monodepth2:
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb  
-        print(V)
+        #print(V)
         #print(V.shape)      
         
         """
