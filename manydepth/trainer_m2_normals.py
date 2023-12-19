@@ -629,103 +629,24 @@ class Trainer_Monodepth2:
 
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
-            #print(p_names[idx])
             ps[p_names[idx]] = pix_coords
 
         
-        #pa_tr = pix_coords[:,0]-1
-        #print(x.shape)
-        #pa_tr = pa_tr[:,1]+1
-        #print(y.shape)
-        #pa_tr = torch.cat([x,y],1)
-        #print(pa_tr.shape)
-        #print(pa_tr)
-        #pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
-        #print(pix_coords)
-        #print(pix_coords)
-        #cam_points = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
-        #cam_points = torch.cat([cam_points, self.ones], 1)
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
 
-        V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
-        
+        V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb        
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
-        #cam_points = torch.cat([cam_points, self.ones], 1)
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
         V += D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
-        
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V)
-        print(orth_loss.shape)
-        #print(pix_coords[0,:10])
-        #pa_tl = torch.roll(pix_coords, shifts=1, dims=1)
-        #pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
-    
-        """
-        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        orth_loss = 0.0
-        D = D.permute(0, 2, 3, 1)
-        N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        batch_size, height, width, channels = D.shape
- 
-        # Homogeneous coordinates
-        
-        p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
-        
-        q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
-        p = p.expand(batch_size, height, width).unsqueeze(-1)
-        q = q.expand(batch_size, height, width).unsqueeze(-1)
-        
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1)
-              
-        pa_tl = torch.roll(P, shifts=1, dims=1)
-        pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
-        
-        D_a_tl = torch.roll(D,shifts=1,dims=1)
-        D_a_tl = torch.roll(D_a_tl,shifts=1,dims=2)
-    
-        pb_br = torch.roll(P, shifts=-1, dims=1)
-        pb_br = torch.roll(pb_br, shifts=-1, dims=2)
-
-        D_b_br = torch.roll(D,shifts=1,dims=1)
-        D_b_br = torch.roll(D_b_br,shifts=1,dims=2)
-
-        pa_tr = torch.roll(P, shifts=1, dims=1)
-        pa_tr = torch.roll(pa_tr, shifts=-1, dims=2)
-
-        D_a_tr = torch.roll(D,shifts=1,dims=1)
-        D_a_tr = torch.roll(D_a_tr,shifts=1,dims=2)
-
-        pb_bl = torch.roll(P, shifts=-1, dims=1)
-        pb_bl = torch.roll(pb_bl, shifts=1, dims=2)
-
-        D_b_bl = torch.roll(D,shifts=1,dims=1)
-        D_b_bl = torch.roll(D_b_bl,shifts=1,dims=2)
-        
-        V = 0
-        #print(D_a_tl.v)
-        pa = torch.matmul(K_inv[:, :3, :3], pa_tl.view(batch_size,3,-1))
-        #cam_points = torch.cat([cam_points, self.ones], 1)
-        pb = torch.matmul(K_inv[:, :3, :3], pb_br.view(batch_size,3,-1))
-
-        V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
-        #print(V.shape)
-
-        pa = torch.matmul(K_inv[:, :3, :3], pa_tr.view(batch_size,3,-1)) 
-        pb = torch.matmul(K_inv[:, :3, :3], pb_bl.view(batch_size,3,-1))
-
-        V += D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
-        
         print(V.shape)
-        #print(N_hat.shape)
+        print(N_hat.shape)
+        print(N_hat)
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V)
+        #print(orth_loss.shape)
         
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,height,width,3))
-               
-        #print (orth_loss.shape)"""
-        #orth_loss = 0
         return orth_loss.sum()
 
 
