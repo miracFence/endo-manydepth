@@ -645,8 +645,8 @@ class Trainer_Monodepth2:
         #for idx,p in enumerate(p):
             #ps[p_names[idx]] = ps[p_names[idx]].view()
 
-        wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0].permute(1, 2, 0))},step=self.step)
-        wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0].permute(1, 2, 0))},step=self.step)
+        wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
+        wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
 
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
