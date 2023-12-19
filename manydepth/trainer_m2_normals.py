@@ -650,6 +650,7 @@ class Trainer_Monodepth2:
 
         V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
         print(V.shape)
+        
         #print(pix_coords[0,:10])
         #pa_tl = torch.roll(pix_coords, shifts=1, dims=1)
         #pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
