@@ -725,7 +725,7 @@ class Trainer_Monodepth2:
             #self.orthogonal_weight = 0.001
             #loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
-            loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+            #loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
                 
             #Illumination invariant loss
             loss += 0.1 * loss_ilumination_invariant / 2.0
@@ -738,6 +738,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
+        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
