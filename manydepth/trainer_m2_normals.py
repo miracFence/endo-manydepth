@@ -640,7 +640,7 @@ class Trainer_Monodepth2:
         ps["pbbr"] = ps["pbbr"].view(batch_size, 3, height, width).long()
         ps["patr"] = ps["patr"].view(batch_size, 3, height, width).long()
         ps["pbbl"] = ps["pbbl"].view(batch_size, 3, height, width).long()
-
+        print(D[ps["patl"][:,0,:,:],ps["patl"][:,1,:,:]].shape)
         print(ps["patl"].shape)
 
         V = D[ps["patl"][:,0,:,:],ps["patl"][:,1,:,:]].view(batch_size, 1, -1) * pa - D[ps["pbbr"][:,0,:,:],ps["pbbr"][:,1,:,:]].view(batch_size, 1, -1) * pb        
