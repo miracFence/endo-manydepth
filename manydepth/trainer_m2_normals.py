@@ -629,7 +629,7 @@ class Trainer_Monodepth2:
 
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
-            ps[p_names[idx]] = pix_coords.long()
+            ps[p_names[idx]] = pix_coords
 
         
         V = 0
@@ -642,8 +642,8 @@ class Trainer_Monodepth2:
         #ps["pbbl"] = ps["pbbl"].view(batch_size, height, width,3).long()
         #print(D[:,0,ps["patl"].view(batch_size, height, width,3).long()[:,:,:,0],ps["patl"][:,:,:,1]].shape)
         #print(ps["patl"].shape)
-        Dpa = D[:,ps["patl"][0,:,1],ps["patl"][0,:,0]]
-        Dpb = D[:,ps["pbbr"][0,:,1],ps["pbbr"][0,:,0]]
+        Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
+        Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb  
         print(V.shape)      
 
