@@ -595,7 +595,8 @@ class Trainer_Monodepth2:
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+
         batch_size, height, width, channels = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
@@ -632,7 +633,6 @@ class Trainer_Monodepth2:
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
 
-        
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
@@ -649,7 +649,7 @@ class Trainer_Monodepth2:
         V = Dpa * pa - Dpb * pb
         #print(V)
         #print(V.shape)      
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V)
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
@@ -660,10 +660,11 @@ class Trainer_Monodepth2:
 
         #print(V.shape)
         #print(N_hat.shape)
-        orth_loss =torch.einsum('bijk,bijkl->bijl', N_hat, V)
+        orth_loss =torch.einsum('bijk,bijkl->bijl', N_hat, V.view(batch_size,3,height, width))
         #orth_loss = torch.einsum('ijk,ijkl->ijl', N_hat, V)
+        #loss = -torch.sum(preds_norm * truths_norm, dim = 1)
         
-        return orth_loss.sum()
+        return -orth_loss.sum()
 
 
     
