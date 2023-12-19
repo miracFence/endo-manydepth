@@ -595,7 +595,7 @@ class Trainer_Monodepth2:
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         batch_size, height, width, channels = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
