@@ -645,14 +645,17 @@ class Trainer_Monodepth2:
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb  
+        print(V)
         #print(V.shape)      
-
+        
+        """
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
         Dpa = D[:,ps["patr"][0,:,1].long(),ps["patr"][0,:,0].long()]
         Dpb = D[:,ps["pbbl"][0,:,1].long(),ps["pbbl"][0,:,0].long()]
-        V += Dpa * pa - Dpb * pb 
+        V += Dpa * pa - Dpb * pb """
+
         #print(V.shape)
         #print(N_hat.shape)
         #print(N_hat)
