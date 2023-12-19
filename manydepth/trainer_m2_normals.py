@@ -629,7 +629,7 @@ class Trainer_Monodepth2:
 
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
-            ps[p_names[idx]] = pix_coords
+            ps[p_names[idx]] = pix_coords.long()
 
         
         V = 0
