@@ -591,6 +591,7 @@ class Trainer_Monodepth2:
         return orth_loss
 
     def compute_orth_loss2(self, disp, N_hat, K_inv,ref_img):
+        orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
@@ -644,25 +645,24 @@ class Trainer_Monodepth2:
         #print(ps["patl"].shape)
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
-        V = torch.abs(Dpa * pa - Dpb * pb)
+        V = Dpa * pa - Dpb * pb
         #print(V)
-        #print(V.shape)      
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
-        """
+        #print(V.shape)     
+        """ 
+        orth = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
+        orth_loss = orth.sum()
+        
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
         Dpa = D[:,ps["patr"][0,:,1].long(),ps["patr"][0,:,0].long()]
         Dpb = D[:,ps["pbbl"][0,:,1].long(),ps["pbbl"][0,:,0].long()]
-        V = torch.abs(Dpa * pa - Dpb * pb)
+        V = Dpa * pa - Dpb * pb
 
-        #print(V.shape)
-        #print(N_hat.shape)
-        #print(N_hat)
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))"""
-        #print(orth_loss.shape)
+        orth = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
+        orth_loss += orth.sum()"""
         
-        return orth_loss.sum()
+        return orth_loss
 
 
     
