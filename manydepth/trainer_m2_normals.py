@@ -617,7 +617,7 @@ class Trainer_Monodepth2:
         patl = torch.from_numpy(patl)
         pbbr = torch.from_numpy(pbbr)
         patr = torch.from_numpy(patr)
-        pabl = torch.from_numpy(pabl)
+        pbbl = torch.from_numpy(pabl)
              
         
         p = [patl,pbbr,patr,pbbl]
