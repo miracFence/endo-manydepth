@@ -598,31 +598,52 @@ class Trainer_Monodepth2:
         batch_size, height, width, channels = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
-        print(id_coords)
-        id_coords_patl = np.roll(meshgrid,(-1), axis=(0))
-        id_coords_patl = np.roll(id_coords_patl,(-1), axis=(0))
-        #id_coords_patr = np.roll(meshgrid,(-1,-1), axis=(1, 2))
-        #id_coords_patr = np.roll(meshgrid,(-1,-1), axis=(1, 2))
-        #id_coords_patr = np.roll(meshgrid,(-1,-1), axis=(1, 2))
-        print(id_coords_patl)
+
+        ones = torch.ones(batch_size, 1, height * width)   
+
+        patl = np.roll(id_coords,(1), axis=(2))
+        patl = np.roll(patl,(1), axis=(1))
+
+        pbbr = np.roll(id_coords,(-1), axis=(2))
+        pbbr = np.roll(pbbr,(-1), axis=(1))
+
+        patr = np.roll(id_coords,(-1), axis=(2))
+        patr = np.roll(patr,(1), axis=(1))
+
+        pabl = np.roll(id_coords,(1), axis=(2))
+        pabl = np.roll(pabl,(-1), axis=(1))
+
         id_coords = torch.from_numpy(id_coords)
-        ones = torch.ones(batch_size, 1, height * width)        
-        pix_coords = torch.unsqueeze(torch.stack(
-            [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
-        pix_coords = pix_coords.repeat(batch_size, 1, 1)
-        pix_coords = torch.cat([pix_coords, ones], 1)
+        patl = torch.from_numpy(patl)
+        pbbr = torch.from_numpy(pbbr)
+        patr = torch.from_numpy(patr)
+        pabl = torch.from_numpy(pabl)
+             
+        
+        p = [patl,pbbr,patr,pbbl]
+        p_names = ["patl","pbbr","patr","pbbl"]
+        ps = {}
+        for idx,p in enumerate(ps):
+            pix_coords = torch.unsqueeze(torch.stack(
+                [p[0].view(-1), p[1].view(-1)], 0), 0)
+
+            pix_coords = pix_coords.repeat(batch_size, 1, 1)
+            pix_coords = torch.cat([pix_coords, ones], 1)
+            ps[p_names[idx]] = pix_coords
+
+        
         #pa_tr = pix_coords[:,0]-1
         #print(x.shape)
         #pa_tr = pa_tr[:,1]+1
         #print(y.shape)
         #pa_tr = torch.cat([x,y],1)
-        print(pa_tr.shape)
-        print(pa_tr)
+        #print(pa_tr.shape)
+        #print(pa_tr)
         #pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
         #print(pix_coords)
         #print(pix_coords)
-        cam_points = torch.matmul(K_inv[:, :3, :3],pix_coords)
-        #print(cam_points.shape)
+        cam_points = torch.matmul(K_inv[:, :3, :3],ps["patl"])
+        print(cam_points.shape)
         #print(pix_coords[0,:10])
         #pa_tl = torch.roll(pix_coords, shifts=1, dims=1)
         #pa_tl = torch.roll(pa_tl, shifts=1, dims=2)
