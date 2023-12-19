@@ -623,7 +623,7 @@ class Trainer_Monodepth2:
         p = [patl,pbbr,patr,pbbl]
         p_names = ["patl","pbbr","patr","pbbl"]
         ps = {}
-        for idx,p in enumerate(ps):
+        for idx,p in enumerate(p):
             pix_coords = torch.unsqueeze(torch.stack(
                 [p[0].view(-1), p[1].view(-1)], 0), 0)
 
