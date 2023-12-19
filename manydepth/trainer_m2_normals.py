@@ -618,7 +618,7 @@ class Trainer_Monodepth2:
         pbbr = torch.from_numpy(pbbr)
         patr = torch.from_numpy(patr)
         pbbl = torch.from_numpy(pabl)
-             
+
         
         p = [patl,pbbr,patr,pbbl]
         p_names = ["patl","pbbr","patr","pbbl"]
@@ -635,12 +635,13 @@ class Trainer_Monodepth2:
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
-
+        print(ps["patl"].shape)
+        print(ps["pbbr"].shape)
         V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb        
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
-        V += D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb
+        V += D.view(batch_size, 1, -1)[:, coordinates[:, 0], coordinates[:, 1]] * pa - D.view(batch_size, 1, -1) * pb
         #print(V.shape)
         #print(N_hat.shape)
         #print(N_hat)
