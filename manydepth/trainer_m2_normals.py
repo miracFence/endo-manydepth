@@ -615,10 +615,10 @@ class Trainer_Monodepth2:
         pabl = np.roll(pabl,(-1), axis=(1))
 
         id_coords = torch.from_numpy(id_coords)
-        patl = torch.from_numpy(patl[:,:,1:height-1,1:width-1])
-        pbbr = torch.from_numpy(pbbr[:,:,1:height-1,1:width-1])
-        patr = torch.from_numpy(patr[:,:,1:height-1,1:width-1])
-        pbbl = torch.from_numpy(pabl[:,:,1:height-1,1:width-1])        
+        patl = torch.from_numpy(patl[:,1:height-1,1:width-1])
+        pbbr = torch.from_numpy(pbbr[:,1:height-1,1:width-1])
+        patr = torch.from_numpy(patr[:,1:height-1,1:width-1])
+        pbbl = torch.from_numpy(pabl[:,1:height-1,1:width-1])        
         
         
         
