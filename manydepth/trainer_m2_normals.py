@@ -654,7 +654,7 @@ class Trainer_Monodepth2:
         
         #print(V.shape)      
         #print(V)
-        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
+        #orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
@@ -665,7 +665,7 @@ class Trainer_Monodepth2:
         #print(V.shape)      
         #print(V)
 
-        orth_loss += torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
+        orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         return orth_loss.sum()
 
