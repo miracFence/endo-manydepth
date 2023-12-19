@@ -614,16 +614,12 @@ class Trainer_Monodepth2:
         pabl = np.roll(id_coords,(1), axis=(2))
         pabl = np.roll(pabl,(-1), axis=(1))
 
-        print(patl.shape)
-
         id_coords = torch.from_numpy(id_coords)
-        patl = torch.from_numpy(patl[:,1:height-1,1:width-1])
-        pbbr = torch.from_numpy(pbbr[:,1:height-1,1:width-1])
-        patr = torch.from_numpy(patr[:,1:height-1,1:width-1])
-        pbbl = torch.from_numpy(pabl[:,1:height-1,1:width-1])        
-        
-        print(patl.shape)
-        
+        patl = torch.from_numpy(patl)
+        pbbr = torch.from_numpy(pbbr)
+        patr = torch.from_numpy(patr)
+        pbbl = torch.from_numpy(pabl)
+
         p = [patl,pbbr,patr,pbbl]
         p_names = ["patl","pbbr","patr","pbbl"]
         ps = {}
@@ -646,6 +642,11 @@ class Trainer_Monodepth2:
         #ps["pbbl"] = ps["pbbl"].view(batch_size, height, width,3).long()
         #print(D[:,0,ps["patl"].view(batch_size, height, width,3).long()[:,:,:,0],ps["patl"][:,:,:,1]].shape)
         #print(ps["patl"].shape)
+        #for idx,p in enumerate(p):
+            #ps[p_names[idx]] = ps[p_names[idx]].view()
+
+        wandb.log({"patl_{}/{}".format(s, j): wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
+        wandb.log({"pbbr_{}/{}".format(s, j): wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
 
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
