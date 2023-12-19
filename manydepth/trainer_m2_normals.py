@@ -595,7 +595,7 @@ class Trainer_Monodepth2:
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         batch_size, height, width, channels = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
@@ -645,7 +645,7 @@ class Trainer_Monodepth2:
         #print(ps["patl"].shape)
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
-        V = torch.abs(Dpa * pa - Dpb * pb)
+        V = Dpa * pa - Dpb * pb
         #print(V)
         #print(V.shape)      
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
@@ -655,7 +655,7 @@ class Trainer_Monodepth2:
 
         Dpa = D[:,ps["patr"][0,:,1].long(),ps["patr"][0,:,0].long()]
         Dpb = D[:,ps["pbbl"][0,:,1].long(),ps["pbbl"][0,:,0].long()]
-        V = torch.abs(Dpa * pa - Dpb * pb)
+        V = Dpa * pa - Dpb * pb
 
         orth_loss += torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
@@ -715,14 +715,14 @@ class Trainer_Monodepth2:
                 #target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
-                normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                #normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
             loss += loss_reprojection / 2.0    
             #Normal loss
             #if self.normal_flag == 1:
             #self.normal_weight = 0.005
             #self.orthogonal_weight = 0.001
-            loss += 0.1 * normal_loss / 2.0
+            #loss += 0.1 * normal_loss / 2.0
             #Orthogonal loss
             loss += 0.5 * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)],inputs[("color", 0, scale)])
                 
