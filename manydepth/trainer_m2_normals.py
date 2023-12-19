@@ -645,17 +645,23 @@ class Trainer_Monodepth2:
         #for idx,p in enumerate(p):
             #ps[p_names[idx]] = ps[p_names[idx]].view()
 
-        wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
-        wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
+        #wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
+        #wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
 
-        Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
+        Dpa = torch.roll(D,1, dims=2)
+        Dpa = torch.roll(Dpa,1,dims=1)
+        wandb.log({"Dpa": wandb.Image(Dpa[0])},step=self.step)
+        Dpb = torch.roll(D,-1,dims=2)
+        Dpb = torch.roll(Dpb,-1, dims=1)
+        wandb.log({"Dpb": wandb.Image(Dpb[0])},step=self.step)
+        #Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
+        #Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb
         
         #print(V.shape)      
         #print(V)
         #orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
-        
+        """
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
@@ -664,7 +670,7 @@ class Trainer_Monodepth2:
         V += Dpa * pa - Dpb * pb
         #print(V.shape)      
         #print(V)
-
+        """
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         return orth_loss.sum()
