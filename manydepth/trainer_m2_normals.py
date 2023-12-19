@@ -640,10 +640,12 @@ class Trainer_Monodepth2:
         #ps["pbbr"] = ps["pbbr"].view(batch_size, height, width,3).long()
         #ps["patr"] = ps["patr"].view(batch_size, height, width,3).long()
         #ps["pbbl"] = ps["pbbl"].view(batch_size, height, width,3).long()
-        print(D[:,0,ps["patl"].view(batch_size, height, width,3).long()[:,:,:,0],ps["patl"].view(batch_size, height, width,3).long()[:,:,:,1]].shape)
+        #print(D[:,0,ps["patl"].view(batch_size, height, width,3).long()[:,:,:,0],ps["patl"][:,:,:,1]].shape)
         #print(ps["patl"].shape)
-
-        V = D.view(batch_size, 1, -1) * pa - D.view(batch_size, 1, -1) * pb        
+        Dpa = D[:,ps["patl"][0,:,1],ps["patl"][0,:,0]]
+        Dpb = D[:,ps["pbbr"][0,:,1],ps["pbbr"][0,:,0]]
+        V = Dpa * pa - Dpb * pb  
+        print(V.shape)      
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
