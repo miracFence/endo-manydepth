@@ -630,7 +630,7 @@ class Trainer_Monodepth2:
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
             #print(p_names[idx])
-            ps[p_names[idx]] = pix_coords.to(device=K_inv.device)
+            ps[p_names[idx]] = pix_coords
 
         
         #pa_tr = pix_coords[:,0]-1
@@ -643,7 +643,7 @@ class Trainer_Monodepth2:
         #pix_coords = torch.roll(pix_coords, shifts=1, dims=1)
         #print(pix_coords)
         #print(pix_coords)
-        cam_points = torch.matmul(K_inv[:, :3, :3],ps["patl"])
+        cam_points = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         print(cam_points.shape)
         #print(pix_coords[0,:10])
         #pa_tl = torch.roll(pix_coords, shifts=1, dims=1)
