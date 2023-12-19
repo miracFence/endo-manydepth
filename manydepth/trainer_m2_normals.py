@@ -650,9 +650,11 @@ class Trainer_Monodepth2:
 
         Dpa = torch.roll(D,1, dims=2)
         Dpa = torch.roll(Dpa,1,dims=1)
+        print(Dpa.shape)
         wandb.log({"Dpa": wandb.Image(Dpa[0])},step=self.step)
         Dpb = torch.roll(D,-1,dims=2)
         Dpb = torch.roll(Dpb,-1, dims=1)
+        print(Dpb.shape)
         wandb.log({"Dpb": wandb.Image(Dpb[0])},step=self.step)
         #Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         #Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
