@@ -641,6 +641,8 @@ class Trainer_Monodepth2:
         ps["patr"] = ps["patr"].view(batch_size, 3, height, width).long()
         ps["pbbl"] = ps["pbbl"].view(batch_size, 3, height, width).long()
 
+        print(ps["patl"].shape)
+
         V = D[ps["patl"][:,0,:,:],ps["patl"][:,1,:,:]].view(batch_size, 1, -1) * pa - D[ps["pbbr"][:,0,:,:],ps["pbbr"][:,1,:,:]].view(batch_size, 1, -1) * pb        
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
