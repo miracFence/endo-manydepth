@@ -697,15 +697,20 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1, -1, 3).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1, -1, 3).expand(12, -1, -1)
         
-        pa = torch.matmul(K_inv[:, :3, :3],top_left_flat.permute(0,2,1).to(device=K_inv.device))
-        pb = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.permute(0,2,1).to(device=K_inv.device))
-        print(pa.shape)
-        print(pb.shape)
+        pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.permute(0,2,1).to(device=K_inv.device))
+        pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.permute(0,2,1).to(device=K_inv.device))
+
+        pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.permute(0,2,1).to(device=K_inv.device))
+        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))
+        #print(pa.shape)
+        #print(pb.shape)
         # Use depth information to adjust positions
-        top_left_depth = top_left_flat * D.unsqueeze(-1)
-        bottom_right_depth = bottom_right_flat * D.unsqueeze(-1)
-        top_right_depth = top_right_flat * D.unsqueeze(-1)
-        bottom_left_depth = bottom_left_flat * D.unsqueeze(-1)
+        print(top_left_flat.shape)
+        print(D.shape)
+        top_left_depth = top_left_flat * D.view(batch_size, 1, -1)
+        bottom_right_depth = bottom_right_flat * D.view(batch_size, 1, -1)
+        top_right_depth = top_right_flat * D.view(batch_size, 1, -1)
+        bottom_left_depth = bottom_left_flat * D.view(batch_size, 1, -1)
 
         return orth_loss.sum()
 
