@@ -608,23 +608,23 @@ class Trainer_Monodepth2:
 
         ones = torch.ones(batch_size, 1, height * width)   
 
-        patl = np.roll(id_coords,(1), axis=(2))
-        patl = np.roll(patl,(1), axis=(1))
+        patl = np.roll(id_coords,(-1), axis=(2))
+        patl = np.roll(patl,(-1), axis=(1))
 
         #print(id_coords.shape)
 
-        pbbr = np.roll(id_coords,(-1), axis=(2))
-        pbbr = np.roll(pbbr,(-1), axis=(1))
+        pbbr = np.roll(id_coords,(1), axis=(2))
+        pbbr = np.roll(pbbr,(1), axis=(1))
 
         #print(pbbr)
 
-        patr = np.roll(id_coords,(-1), axis=(2))
-        patr = np.roll(patr,(1), axis=(1))
+        patr = np.roll(id_coords,(1), axis=(2))
+        patr = np.roll(patr,(-1), axis=(1))
 
         #print(patr)
 
-        pabl = np.roll(id_coords,(1), axis=(2))
-        pabl = np.roll(pabl,(-1), axis=(1))
+        pabl = np.roll(id_coords,(-1), axis=(2))
+        pabl = np.roll(pabl,(1), axis=(1))
 
         #print(pabl)
 
