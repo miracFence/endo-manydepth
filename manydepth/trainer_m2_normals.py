@@ -545,11 +545,11 @@ class Trainer_Monodepth2:
 
         ones = torch.ones(batch_size, 1, height * width)   
 
-        q1 = np.roll(id_coords,(1), axis=(2))
-        q2 = np.roll(id_coords,(2), axis=(2))
+        q1 = np.roll(id_coords,(-1), axis=(2))
+        q2 = np.roll(id_coords,(-2), axis=(2))
         #patl = np.roll(patl,(1), axis=(1))
-        q3 = np.roll(id_coords,(1), axis=(1))
-        q4 = np.roll(id_coords,(2), axis=(1))
+        q3 = np.roll(id_coords,(-1), axis=(1))
+        q4 = np.roll(id_coords,(-2), axis=(1))
         
 
         id_coords = torch.from_numpy(id_coords)
@@ -652,7 +652,7 @@ class Trainer_Monodepth2:
         #print(D.shape)
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         batch_size,channels, height, width  = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
@@ -792,7 +792,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
