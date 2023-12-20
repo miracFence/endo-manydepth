@@ -694,7 +694,7 @@ class Trainer_Monodepth2:
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
         top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
-
+        print(top_left_flat.shape)
         pa = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
 
