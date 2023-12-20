@@ -597,7 +597,7 @@ class Trainer_Monodepth2:
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=1)
-        batch_size, height, width, channels = D.shape
+        batch_size,channels, height, width  = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
 
@@ -631,16 +631,16 @@ class Trainer_Monodepth2:
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
-            print(pix_coords.shape)
+            #print(pix_coords.shape)
         
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
         #ps -> torch.Size([12, 81920, 3])
-        print(ps["patl"].shape)
+        #print(ps["patl"].shape)
         ps["patl"] = torch.cat([ps["patl"][:,:,1],ps["patl"][:,:,0]], 1)
         print(ps["patl"].shape)
-        generated_depth = F.grid_sample(D,ps["patl"][:,-1:,:].view(12,height, width,2).to(device=K_inv.device),padding_mode="border",align_corners=True)
+        generated_depth = F.grid_sample(D,ps["patl"][:,:2,:].view(12,height, width,2).to(device=K_inv.device),padding_mode="border",align_corners=True)
         print(generated_depth.shape)
         
         #ps["patl"] = ps["patl"].view(batch_size, height, width,3).long()
