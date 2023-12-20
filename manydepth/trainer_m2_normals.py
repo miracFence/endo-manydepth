@@ -686,28 +686,32 @@ class Trainer_Monodepth2:
         #print(y.shape)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        top_left = torch.stack([x - 0.5, y - 0.5,ones], dim=-1)
-        bottom_right = torch.stack([x + 0.5, y + 0.5,ones], dim=-1)
-        top_right = torch.stack([x + 0.5, y - 0.5,ones], dim=-1)
-        bottom_left = torch.stack([x - 0.5, y + 0.5,ones], dim=-1)
+        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1)
+        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1)
+        top_right = torch.stack([x + 0.5, y - 0.5], dim=-1)
+        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1)
 
         # Flatten and concatenate to get pairs of positions
-        top_left_flat = top_left.view(1, -1, 3).expand(12, -1, -1)
-        bottom_right_flat = bottom_right.view(1, -1, 3).expand(12, -1, -1)
-        top_right_flat = top_right.view(1, -1, 3).expand(12, -1, -1)
-        bottom_left_flat = bottom_left.view(1, -1, 3).expand(12, -1, -1)
+        top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
+        bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
+        top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
+        bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
         
+        """
         pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.permute(0,2,1).to(device=K_inv.device))
         pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.permute(0,2,1).to(device=K_inv.device))
 
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.permute(0,2,1).to(device=K_inv.device))
-        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))
+        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))"""
 
-        top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
-        bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
-        top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
-        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        top_left_depth = top_left_flat.to(device=K_inv.device) * D.unsqueeze(-1)
+        bottom_right_depth = bottom_right_flat.to(device=K_inv.device) * D.unsqueeze(-1)
+        top_right_depth = top_right_flat.to(device=K_inv.device) * D.unsqueeze(-1)
+        bottom_left_depth = bottom_left_flat.to(device=K_inv.device) * D.unsqueeze(-1)
 
+        print(top_left_depth.shape)
+
+        """
         # Construct a new depth image using the mean of x and y coordinates
         top_left_depth = top_left_depth.view(batch_size,3,-1)
         top_left_depth = ((top_left_depth[:, 0, :] + top_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
@@ -716,7 +720,7 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_depth.view(batch_size,3,-1)
         top_right_depth = ((top_right_depth[:, 0, :] + top_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
-        bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)"""
 
         V = torch.abs(D * pa_tl.view(batch_size,3,height,width) - D * pb_br.view(batch_size,3,height,width))
         V +=  torch.abs(D * pa_tr.view(batch_size,3,height,width) - D * pb_bl.view(batch_size,3,height,width))
