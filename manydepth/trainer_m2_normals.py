@@ -591,9 +591,9 @@ class Trainer_Monodepth2:
             #print(X_tilde_q.shape)
             #print(N_hat.shape)
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height,width))
-            print(Cpq.shape)
-            print(D_inv.shape)
-            orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]].view(batch_size, 1, -1) * Cpp)
+            #print(Cpq.shape)
+            #print(D_inv.shape)
+            orth_loss += torch.abs(D_inv.view(batch_size, 1, -1) * Cpq - Ds[d_names[idx]].view(batch_size, 1, -1) * Cpp)
         return orth_loss.sum()
         """
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
