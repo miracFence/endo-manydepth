@@ -535,16 +535,50 @@ class Trainer_Monodepth2:
 
     
     def compute_orth_loss(self, disp, N_hat, K_inv,ref_img):
+        orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        #print(D.shape)
-        #print(N_hat.shape)
-        # Compute orthogonality loss
-        orth_loss = 0.0
-        
-        D_inv = 1.0 / D.permute(0, 2, 3, 1)
-        D_inv_q = D_inv
-        #D_inv_ = self.colormap(D_inv)
-        #print(D_inv.shape)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        batch_size,channels, height, width  = D.shape
+        meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
+        id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
+
+        ones = torch.ones(batch_size, 1, height * width)   
+
+        patl = np.roll(id_coords,(1), axis=(2))
+        patl = np.roll(patl,(1), axis=(1))
+
+        pbbr = np.roll(id_coords,(-1), axis=(2))
+        pbbr = np.roll(pbbr,(-1), axis=(1))
+
+        patr = np.roll(id_coords,(-1), axis=(2))
+        patr = np.roll(patr,(1), axis=(1))
+
+        pabl = np.roll(id_coords,(1), axis=(2))
+        pabl = np.roll(pabl,(-1), axis=(1))
+
+        id_coords = torch.from_numpy(id_coords)
+        patl = torch.from_numpy(patl)
+        pbbr = torch.from_numpy(pbbr)
+        patr = torch.from_numpy(patr)
+        pbbl = torch.from_numpy(pabl)
+
+        p = [patl,pbbr,patr,pbbl]
+        p_names = ["patl","pbbr","patr","pbbl"]
+        ps = {}
+        for idx,p in enumerate(p):
+            pix_coords = torch.unsqueeze(torch.stack(
+                [p[0].view(-1), p[1].view(-1)], 0), 0)
+
+            pix_coords = pix_coords.repeat(batch_size, 1, 1)
+            pix_coords = torch.cat([pix_coords, ones], 1)
+            ps[p_names[idx]] = pix_coords
+            #print(pix_coords.shape)
+        """
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+
+        orth_loss = 0.0        
+        D_inv = 1.0 / D
+
         wandb.log({"D_inv_": wandb.Image(D_inv[0].permute(2,0,1))},step=self.step)
         N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
@@ -588,7 +622,7 @@ class Trainer_Monodepth2:
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
             orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
 
-        orth_loss = orth_loss.sum()
+        orth_loss = orth_loss.sum()"""
 
         return orth_loss
 
@@ -598,7 +632,7 @@ class Trainer_Monodepth2:
         #print(D.shape)
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         batch_size,channels, height, width  = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
@@ -606,16 +640,16 @@ class Trainer_Monodepth2:
         ones = torch.ones(batch_size, 1, height * width)   
 
         patl = np.roll(id_coords,(1), axis=(2))
-        #patl = np.roll(patl,(1), axis=(1))
+        patl = np.roll(patl,(1), axis=(1))
 
-        pbbr = np.roll(id_coords,(2), axis=(2))
-        #pbbr = np.roll(pbbr,(-1), axis=(1))
+        pbbr = np.roll(id_coords,(-1), axis=(2))
+        pbbr = np.roll(pbbr,(-1), axis=(1))
 
-        patr = np.roll(id_coords,(1), axis=(1))
-        #patr = np.roll(patr,(1), axis=(1))
+        patr = np.roll(id_coords,(-1), axis=(2))
+        patr = np.roll(patr,(1), axis=(1))
 
-        pabl = np.roll(id_coords,(2), axis=(1))
-        #pabl = np.roll(pabl,(-1), axis=(1))
+        pabl = np.roll(id_coords,(1), axis=(2))
+        pabl = np.roll(pabl,(-1), axis=(1))
 
         id_coords = torch.from_numpy(id_coords)
         patl = torch.from_numpy(patl)
