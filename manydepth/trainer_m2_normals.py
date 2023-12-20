@@ -611,7 +611,7 @@ class Trainer_Monodepth2:
         patl = np.roll(id_coords,(1), axis=(2))
         patl = np.roll(patl,(1), axis=(1))
 
-        #print(patl)
+        print(id_coords.shape)
 
         pbbr = np.roll(id_coords,(-1), axis=(2))
         pbbr = np.roll(pbbr,(-1), axis=(1))
