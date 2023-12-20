@@ -766,8 +766,8 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-
-        #print(top_left_flat.shape)
+        top_left_depth = torch.gather(D, 2, top_left_flat.unsqueeze(1))
+        print(top_left_depth.shape)
         #print(ones.shape)
         
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
@@ -792,20 +792,6 @@ class Trainer_Monodepth2:
         top_right_depth = ((top_right_depth[:, 0, :] + top_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        
-        """
-        wandb.log({"top_left_depth": wandb.Image(top_left_depth[0])},step=self.step)
-        wandb.log({"bottom_right_depth": wandb.Image(bottom_right_depth[0])},step=self.step)
-        wandb.log({"top_right_depth": wandb.Image(top_right_depth[0])},step=self.step)
-        wandb.log({"bottom_left_depth": wandb.Image(bottom_left_depth[0])},step=self.step)"""
-
-        #print(top_left_depth.shape)
-        """
-        top_left_depth = torch.cat([top_left_depth, ones], dim=1)
-        bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
-        top_right_depth = torch.cat([top_right_depth, ones], dim=1)
-        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)"""
-        
    
 
         V = 0
@@ -816,7 +802,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
        
-        return -orth_loss
+        return orth_loss
 
     
     def get_ilumination_invariant_loss(self, pred, target):
