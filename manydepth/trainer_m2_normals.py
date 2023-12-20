@@ -706,11 +706,11 @@ class Trainer_Monodepth2:
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
         
         
-        V = Ds["Da_tl"].view(batch_size, 1, -1) * pa - Ds["Db_br"].view(batch_size, 1, -1) * pb        
+        V = torch.abs(Ds["Da_tl"].view(batch_size, 1, -1) * pa - Ds["Db_br"].view(batch_size, 1, -1) * pb)
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
-        V += Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb
+        V += torch.abs(Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb)
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         
@@ -792,7 +792,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
