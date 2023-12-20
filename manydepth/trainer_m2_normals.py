@@ -713,8 +713,8 @@ class Trainer_Monodepth2:
         top_right_depth = torch.cat([top_right_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
         bottom_left_depth = torch.cat([bottom_left_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
 
-        V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
-        V += top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
+        V = torch.abs(top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width))
+        V += torch.abs(top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width))
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         return -orth_loss.sum()
