@@ -631,6 +631,7 @@ class Trainer_Monodepth2:
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
+            print(pix_coords.shape)
         
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
