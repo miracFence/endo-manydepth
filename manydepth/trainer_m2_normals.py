@@ -583,8 +583,8 @@ class Trainer_Monodepth2:
             Ds[d_names[idx]] = F.grid_sample(D_inv,pix_coords.to(device=K_inv.device),align_corners=True)
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],ps["p"].to(device=K_inv.device))
-        #print(X_tilde_p.shape)
-        #print(N_hat.shape)
+        print(X_tilde_p.shape)
+        print(N_hat.shape)
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height,width))
         for idx,p in enumerate(p_names[:4]):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], ps[p].to(device=K_inv.device))
