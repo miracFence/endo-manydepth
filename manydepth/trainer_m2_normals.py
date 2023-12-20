@@ -708,7 +708,7 @@ class Trainer_Monodepth2:
 
         #print(top_left_flat.shape)
         #print(ones.shape)
-        """
+        
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
@@ -720,7 +720,7 @@ class Trainer_Monodepth2:
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
 
-        """
+        
         # Construct a new depth image using the mean of x and y coordinates
         #print(top_left_depth.shape)
         #top_left_depth = top_left_depth.view(batch_size,3,-1)
@@ -732,10 +732,11 @@ class Trainer_Monodepth2:
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         
+        """
         wandb.log({"top_left_depth": wandb.Image(top_left_depth[0])},step=self.step)
         wandb.log({"bottom_right_depth": wandb.Image(bottom_right_depth[0])},step=self.step)
         wandb.log({"top_right_depth": wandb.Image(top_right_depth[0])},step=self.step)
-        wandb.log({"bottom_left_depth": wandb.Image(bottom_left_depth[0])},step=self.step)
+        wandb.log({"bottom_left_depth": wandb.Image(bottom_left_depth[0])},step=self.step)"""
 
         #print(top_left_depth.shape)
         """
