@@ -701,16 +701,6 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
         
-        """
-        pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.permute(0,2,1).to(device=K_inv.device))
-        pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.permute(0,2,1).to(device=K_inv.device))
-
-        pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.permute(0,2,1).to(device=K_inv.device))
-        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))"""
-        
-        #print(top_left_flat)
-        #print(D.shape)
-        
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
@@ -739,7 +729,7 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_depth.view(batch_size,3,-1)
         top_right_depth = ((top_right_depth[:, 0, :] + top_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
-        bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)"""
+        bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
 
         #print(top_left_depth.shape)
         top_left_depth = torch.cat([top_left_depth, ones], dim=1)
@@ -747,17 +737,7 @@ class Trainer_Monodepth2:
         top_right_depth = torch.cat([top_right_depth, ones], dim=1)
         bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
         
-        """
-        print(top_left_depth.shape)
-        print(bottom_right_depth.shape)
-        print(top_right_depth.shape)
-        print(bottom_left_depth.shape)
-
-        # Extract x and y coordinates
-        x_coordinates = top_left_depth[:, 0, :]
-        y_coordinates = top_left_depth[:, 1, :]
-        top_left_depth = (x_coordinates + y_coordinates) / 2"""
-
+   
 
 
         V = (top_left_depth.view(12,3,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,3,height,width) * pb_br.view(12,3,height,width))
