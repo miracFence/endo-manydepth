@@ -647,13 +647,13 @@ class Trainer_Monodepth2:
             pix_coords = (pix_coords - 0.5) * 2
             Ds[d_names[idx]] = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
             #wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
-        V = 0
+            
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
         
-        """
+        
         V = Ds["Da_tl"].view(batch_size, 1, -1) * pa - Ds["Db_br"].view(batch_size, 1, -1) * pb        
-        pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
+        """pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
         V += Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb"""
