@@ -707,10 +707,10 @@ class Trainer_Monodepth2:
         # Use depth information to adjust positions
         print(top_left_flat.shape)
         print(D.shape)
-        top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width) * D
-        bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width) * D
-        top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width) * D
-        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width) * D
+        top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
 
         return orth_loss.sum()
 
