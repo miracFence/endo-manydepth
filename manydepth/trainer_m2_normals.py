@@ -634,63 +634,28 @@ class Trainer_Monodepth2:
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
             #print(pix_coords.shape)
+        Ds = {}
+        d_names = ["Da_tl","Db_br","Da_tr","Db_bl"]
+        for idx,p in enumerate(ps):
+            pix_coords = p[:, :2, :] / (p[:, 2, :].unsqueeze(1) + 1e-7)
+            pix_coords = pix_coords.view(batch_size, 2, height, width)
+            pix_coords = pix_coords.permute(0, 2, 3, 1)
+            pix_coords[..., 0] /= width - 1
+            pix_coords[..., 1] /= height - 1
+            pix_coords = (pix_coords - 0.5) * 2
+            Ds[d_names[idx]] = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
         
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
-        #ps -> torch.Size([12, 81920, 3])
-        #print(ps["patl"].shape)
-        #ps["patl"] = torch.cat([ps["patl"][:,:,1],ps["patl"][:,:,0]], 1)
-        #print(ps["patl"][:,:2,:].view(12,height, width,2).shape)
-        #print(D.shape)
-        pix_coords = ps["patl"][:, :2, :] / (ps["patl"][:, 2, :].unsqueeze(1) + 1e-7)
-        pix_coords = pix_coords.view(batch_size, 2, height, width)
-        pix_coords = pix_coords.permute(0, 2, 3, 1)
-        pix_coords[..., 0] /= width - 1
-        pix_coords[..., 1] /= height - 1
-        pix_coords = (pix_coords - 0.5) * 2
-        generated_depth = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
-        print(generated_depth.shape)
-        wandb.log({"generated_depth": wandb.Image(generated_depth[0])},step=self.step)
-        #ps["patl"] = ps["patl"].view(batch_size, height, width,3).long()
-        #ps["pbbr"] = ps["pbbr"].view(batch_size, height, width,3).long()
-        #ps["patr"] = ps["patr"].view(batch_size, height, width,3).long()
-        #ps["pbbl"] = ps["pbbl"].view(batch_size, height, width,3).long()
-        #print(D[:,0,ps["patl"].view(batch_size, height, width,3).long()[:,:,:,0],ps["patl"][:,:,:,1]].shape)
-        #print(ps["patl"].shape)
-        #for idx,p in enumerate(p):
-            #ps[p_names[idx]] = ps[p_names[idx]].view()
-
-        #wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
-        #wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
-
-        #Dpa = torch.roll(Dpa,1,dims=1)
-        #print(Dpa.shape)
-        #andb.log({"Dpa": wandb.Image(Dpa[0].permute(2,0,1))},step=self.step)
-        #Dpb = torch.roll(D,-1,dims=2)
-        #Dpb = torch.roll(Dpb,-1, dims=1)
-        #print(Dpb.shape)
-        #Dpb = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        #print(Dpb.shape)
-        #wandb.log({"Dpb": wandb.Image(Dpb[0].permute(2,0,1))},step=self.step)
-        #Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        #print(Dpa.shape)
-        #Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
-        V = D * pa - D * pb
         
-        #print(V.shape)      
-        #print(V)
-        #orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
-        """
+        V = Ds["Da_tl"].view(self.batch_size, 1, -1) * pa - Ds["Db_br"].view(self.batch_size, 1, -1) * pb
+        
         pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
-        Dpa = D[:,ps["patr"][0,:,1].long(),ps["patr"][0,:,0].long()]
-        Dpb = D[:,ps["pbbl"][0,:,1].long(),ps["pbbl"][0,:,0].long()]
-        V += Dpa * pa - Dpb * pb
-        #print(V.shape)      
-        #print(V)
-        """
+        V += Ds["Da_tr"].view(self.batch_size, 1, -1) * pa - Ds["Db_bl"].view(self.batch_size, 1, -1) * pb
+
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
         return orth_loss.sum()
