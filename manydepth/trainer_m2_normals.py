@@ -650,8 +650,8 @@ class Trainer_Monodepth2:
         pix_coords[..., 1] /= height - 1
         pix_coords = (pix_coords - 0.5) * 2
         generated_depth = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
-        #print(generated_depth[0].shape)
-        wandb.log({"generated_depth": wandb.Image(generated_depth[0].view(height,width,1))},step=self.step)
+        print(generated_depth.shape)
+        #wandb.log({"generated_depth": wandb.Image(generated_depth[0].view(height,width,1))},step=self.step)
         #ps["patl"] = ps["patl"].view(batch_size, height, width,3).long()
         #ps["pbbr"] = ps["pbbr"].view(batch_size, height, width,3).long()
         #ps["patr"] = ps["patr"].view(batch_size, height, width,3).long()
