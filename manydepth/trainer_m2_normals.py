@@ -631,8 +631,10 @@ class Trainer_Monodepth2:
         right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
         bottom_flat = torch.cat([bottom_flat.permute(0,2,1), ones], dim=1)
         bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
-        
+
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
+        print(X_tilde_p.shape)
+
         Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p)
 
         movements = [right_flat,right_right_flat,bottom_flat,bottom_bottom_flat]
