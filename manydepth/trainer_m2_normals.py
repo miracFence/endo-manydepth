@@ -572,7 +572,7 @@ class Trainer_Monodepth2:
 
         Ds = {}
         d_names = ["Da_q1","Db_q2","Da_q3","Db_q4"]
-        for idx,p in enumerate(p_names):
+        for idx,p in enumerate(d_names):
             #print(p)
             pix_coords = ps[p][:, :2, :] / (ps[p][:, 2, :].unsqueeze(1) + 1e-7)
             pix_coords = pix_coords.view(batch_size, 2, height, width)
