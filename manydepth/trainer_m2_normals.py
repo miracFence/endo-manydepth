@@ -572,7 +572,7 @@ class Trainer_Monodepth2:
 
         Ds = {}
         d_names = ["Da_q1","Db_q2","Da_q3","Db_q4"]
-        for idx,p in enumerate(d_names):
+        for idx,p in enumerate(p_names[:4]):
             #print(p)
             pix_coords = ps[p][:, :2, :] / (ps[p][:, 2, :].unsqueeze(1) + 1e-7)
             pix_coords = pix_coords.view(batch_size, 2, height, width)
@@ -584,7 +584,7 @@ class Trainer_Monodepth2:
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],ps["p"].to(device=K_inv.device))
         Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p)
-        for idx,p in enumerate(p_names[:,4]):
+        for idx,p in enumerate(p_names[:4]):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], ps[p].to(device=K_inv.device))
             Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q)
             V += torch.abs(D_inv * Cpq - Ds[d_names[idx]].view(batch_size, 1, -1) * Cpp)
