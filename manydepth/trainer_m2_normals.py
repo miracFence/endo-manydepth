@@ -684,7 +684,15 @@ class Trainer_Monodepth2:
         x = x.float().unsqueeze(0).unsqueeze(0)
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
         #print(y.shape)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        magnitude = torch.norm(N_hat, dim=1, keepdim=True)
+
+        # Avoid division by zero
+        # Replace zero magnitudes with 1 to keep the vector unchanged
+        magnitude[magnitude == 0] = 1
+
+        # Normalize the normal vectors
+        N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
@@ -746,7 +754,7 @@ class Trainer_Monodepth2:
         V = (top_left_depth * pa_tl) - (bottom_right_depth * pb_br)
         #orth_loss = torch.einsum('bijk,bijk->b', V.view(batch_size,3,height,width),N_hat)
         V += (top_right_depth * pa_tr) - (bottom_left_depth * pb_bl)
-        orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat)
+        orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         #orth_loss += torch.einsum('bijk,bijk->b', V.view(batch_size,3,height,width),N_hat)
 
         #print(V.shape)
