@@ -595,6 +595,7 @@ class Trainer_Monodepth2:
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D_inv = 1.0 / D
+        batch_size,channels, height, width  = D.shape
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
