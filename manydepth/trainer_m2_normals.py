@@ -679,7 +679,6 @@ class Trainer_Monodepth2:
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
-        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
@@ -704,18 +703,13 @@ class Trainer_Monodepth2:
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.permute(0,2,1).to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))
 
-        top_left_depth = top_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
-        bottom_right_depth = bottom_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
-        top_right_depth = top_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
-        bottom_left_depth = bottom_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
+        top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
 
-        top_left_depth = torch.cat([top_left_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
-        bottom_right_depth = torch.cat([bottom_right_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
-        top_right_depth = torch.cat([top_right_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
-        bottom_left_depth = torch.cat([bottom_left_depth,torch.ones(batch_size, 1, height , width).to(device=K_inv.device)],1)
-
-        V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
-        V += top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
+        V = torch.abs(top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width))
+        V += torch.abs(top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width))
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         return orth_loss.sum()
