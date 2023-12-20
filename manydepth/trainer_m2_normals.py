@@ -743,12 +743,12 @@ class Trainer_Monodepth2:
         print(top_left_depth.shape)
         print(pa_tl.shape)
 
-        #V = (top_left_depth * pa_tl) - (bottom_right_depth * pb_br)
+        V = (top_left_depth * pa_tl) - (bottom_right_depth * pb_br)
         #V += (top_right_depth * pa_tr) - (bottom_left_depth * pb_bl)
 
-        D_hat_pa = torch.einsum('bij,bi->bj', top_left_depth.view(batch_size,3,height,width), pa_tl.view(batch_size,3,height,width))
-        D_hat_pb = torch.einsum('bij,bi->bj', bottom_right_depth.view(batch_size,3,height,width), pb_br.view(batch_size,3,height,width))
+        print(V.shape)
 
+        
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         return orth_loss.sum()
 
