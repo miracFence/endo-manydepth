@@ -634,6 +634,7 @@ class Trainer_Monodepth2:
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
             #print(pix_coords.shape)
+        
         Ds = {}
         d_names = ["Da_tl","Db_br","Da_tr","Db_bl"]
         for idx,p in enumerate(p_names):
@@ -645,7 +646,7 @@ class Trainer_Monodepth2:
             pix_coords[..., 1] /= height - 1
             pix_coords = (pix_coords - 0.5) * 2
             Ds[d_names[idx]] = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
-        
+            wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
