@@ -650,14 +650,14 @@ class Trainer_Monodepth2:
         d_names = ["Da_tl","Db_br","Da_tr","Db_bl"]
         for idx,p in enumerate(p_names):
             #print(p)
-            pix_coords = ps[p][:, :2, :] / (ps[p][:, 2, :].unsqueeze(1) + 1e-7)
-            pix_coords = pix_coords.view(batch_size, 2, height, width)
-            pix_coords = pix_coords.permute(0, 2, 3, 1)
-            pix_coords[..., 0] /= width - 1
-            pix_coords[..., 1] /= height - 1
-            pix_coords = (pix_coords - 0.5) * 2
-            print(pix_coords)
-            Ds[d_names[idx]] = F.grid_sample(D,pix_coords.to(device=K_inv.device),align_corners=True)
+            coords = ps[p][:, :2, :] / (ps[p][:, 2, :].unsqueeze(1) + 1e-7)
+            coords = coords.view(batch_size, 2, height, width)
+            coords = coords.permute(0, 2, 3, 1)
+            coords[..., 0] /= width - 1
+            coords[..., 1] /= height - 1
+            coords = (coords - 0.5) * 2
+            #print(pix_coords)
+            Ds[d_names[idx]] = F.grid_sample(D,coords.to(device=K_inv.device),align_corners=True)
             #wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
