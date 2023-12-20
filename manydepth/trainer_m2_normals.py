@@ -706,13 +706,13 @@ class Trainer_Monodepth2:
         #print(pb.shape)
         # Use depth information to adjust positions
         #print(top_left_flat.shape)
-        print(D.shape)
-        print(top_left_flat[:,:,:2].shape)
+        #print(D.shape)
+        #print(top_left_flat[:,:,:2].shape)
         #.view(depth.size(0), 1, depth.size(2), depth.size(3))
-        top_left_depth = top_left_flat[:,:,:2] * D
-        bottom_right_depth = bottom_right_flat[:,:,:2] * D
-        top_right_depth = top_right_flat[:,:,:2] * D
-        bottom_left_depth = bottom_left_flat[:,:,:2] * D
+        top_left_depth = top_left_flat[:,:,:2].transpose(1, 2) * D
+        bottom_right_depth = bottom_right_flat[:,:,:2].transpose(1, 2) * D
+        top_right_depth = top_right_flat[:,:,:2].transpose(1, 2) * D
+        bottom_left_depth = bottom_left_flat[:,:,:2].transpose(1, 2) * D
 
         """
         top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
