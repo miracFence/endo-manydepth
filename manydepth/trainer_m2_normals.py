@@ -590,6 +590,50 @@ class Trainer_Monodepth2:
             Cpq = torch.einsum('bijk,bijk->bijk', N_hat, X_tilde_q.view(batch_size,3,height,width))
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
+
+    def compute_orth_loss4(self, disp, N_hat, K_inv):
+        orth_loss = 0
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        D_inv = 1.0 / D
+        y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
+        y = y.float().unsqueeze(0).unsqueeze(0)
+        x = x.float().unsqueeze(0).unsqueeze(0)
+        ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
+        magnitude = torch.norm(N_hat, dim=1, keepdim=True)
+        magnitude[magnitude == 0] = 1
+        N_hat_normalized = N_hat / magnitude
+
+        # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
+        normal = torch.stack([x , y ], dim=-1).to(device=K_inv.device)
+        right = torch.stack([x + 0.5, y ], dim=-1).to(device=K_inv.device)
+        right_right = torch.stack([x + 1.0, y], dim=-1).to(device=K_inv.device)
+        bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
+        bottom_bottom = torch.stack([x , y + 1.0], dim=-1).to(device=K_inv.device)
+
+        normal_flat = normal.view(1, -1, 2).expand(12, -1, -1)
+        right_flat = right.view(1, -1, 2).expand(12, -1, -1)
+        right_right_flat = right_right.view(1, -1, 2).expand(12, -1, -1)
+        bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
+        bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
+        
+        right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        bottom_bottom_depth = bottom_bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+
+        X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
+        Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p)
+
+        movements = [right_flat,right_right_flat,bottom_flat,bottom_bottom_flat]
+        depths = [right_depth,right_right_depth,bottom_flat_depth,bottom_bottom_depth]
+
+        for m,idx in enumerate(movements):
+            X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
+            Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q)
+            orth_loss += torch.abs(D_inv * Cpq - depths[idx] * Cpp)
+
+
+        return orth_loss.sum()
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -832,7 +876,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
