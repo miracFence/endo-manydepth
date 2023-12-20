@@ -487,7 +487,7 @@ class Trainer_Monodepth2:
                 print("Pixels")
                 #print(pix_coords.shape)
                 #print(outputs[("sample", frame_id, scale)].shape)
-                print(inputs[("color", frame_id, source_scale)].shape)
+                #print(inputs[("color", frame_id, source_scale)].shape)
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
