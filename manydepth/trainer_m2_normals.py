@@ -682,7 +682,7 @@ class Trainer_Monodepth2:
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
-        ones = torch.ones(1, 1, height , width)  
+        ones = torch.ones(12, 1, height * width)  
         #print(y.shape)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
@@ -710,7 +710,18 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
 
-        print(top_left_depth.shape)
+        #print(top_left_depth.shape)
+        #top_left_flat = torch.cat(
+        top_left_flat = torch.cat([top_left_flat, ones], dim=1)
+        bottom_right_flat = torch.cat([bottom_right_flat, ones], dim=1)
+        top_right_flat = torch.cat([top_right_flat, ones], dim=1)
+        bottom_left_flat = torch.cat([bottom_left_flat, ones], dim=1)
+
+        pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.permute(0,2,1).to(device=K_inv.device))
+        pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.permute(0,2,1).to(device=K_inv.device))
+
+        pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.permute(0,2,1).to(device=K_inv.device))
+        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.permute(0,2,1).to(device=K_inv.device))
 
         """
         # Construct a new depth image using the mean of x and y coordinates
