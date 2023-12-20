@@ -607,7 +607,7 @@ class Trainer_Monodepth2:
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
 
         ones = torch.ones(batch_size, 1, height * width)   
-
+        
         patl = np.roll(id_coords,(-1), axis=(2))
         patl = np.roll(patl,(-1), axis=(1))
 
@@ -674,6 +674,37 @@ class Trainer_Monodepth2:
         
         return orth_loss.sum()
 
+    def compute_orth_loss3(self, disp, N_hat, K_inv):
+        orth_loss = 0
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        batch_size,channels, height, width  = D.shape
+        # Create coordinate grids
+        y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
+        y = y.float().unsqueeze(0).unsqueeze(0)
+        x = x.float().unsqueeze(0).unsqueeze(0)
+
+        # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
+        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1)
+        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1)
+        top_right = torch.stack([x + 0.5, y - 0.5], dim=-1)
+        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1)
+
+        # Flatten and concatenate to get pairs of positions
+        top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
+        bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
+        top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
+        bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
+
+        pa = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
+        pb = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
+
+        # Use depth information to adjust positions
+        top_left_depth = top_left_flat * D.unsqueeze(-1)
+        bottom_right_depth = bottom_right_flat * D.unsqueeze(-1)
+        top_right_depth = top_right_flat * D.unsqueeze(-1)
+        bottom_left_depth = bottom_left_flat * D.unsqueeze(-1)
+
+        return orth_loss.sum()
 
     
     def get_ilumination_invariant_loss(self, pred, target):
@@ -750,7 +781,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
