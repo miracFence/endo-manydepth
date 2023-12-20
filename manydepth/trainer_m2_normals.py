@@ -749,7 +749,11 @@ class Trainer_Monodepth2:
         bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
         top_right_depth = torch.cat([top_right_depth, ones], dim=1)
         bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
-
+        
+        print(top_left_depth.shape)
+        print(bottom_right_depth.shape)
+        print(top_right_depth.shape)
+        print(bottom_left_depth.shape)
 
 
         V = (top_left_depth.view(12,3,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,3,height,width) * pb_br.view(12,3,height,width))
