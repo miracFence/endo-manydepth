@@ -648,7 +648,7 @@ class Trainer_Monodepth2:
         #wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
         #wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
 
-        Dpa = torch.roll(D,1, dims=2)
+        Dpa = torch.roll(D,-1, dims=2)
         Dpa = torch.roll(Dpa,1,dims=1)
         print(Dpa.shape)
         wandb.log({"Dpa": wandb.Image(Dpa[0].permute(2,0,1))},step=self.step)
