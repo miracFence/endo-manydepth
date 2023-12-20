@@ -643,7 +643,7 @@ class Trainer_Monodepth2:
         #ps["patl"] = torch.cat([ps["patl"][:,:,1],ps["patl"][:,:,0]], 1)
         #print(ps["patl"][:,:2,:].view(12,height, width,2).shape)
         #print(D.shape)
-        pix_coords = ps["patl"][:, :2, :] / (ps["patl"][:, 2, :].unsqueeze(1) + self.eps)
+        pix_coords = ps["patl"][:, :2, :] / (ps["patl"][:, 2, :].unsqueeze(1) + 1e-7)
         pix_coords = pix_coords.view(batch_size, 2, height, width)
         pix_coords = pix_coords.permute(0, 2, 3, 1)
         pix_coords[..., 0] /= self.width - 1
