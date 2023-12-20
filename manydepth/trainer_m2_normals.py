@@ -738,18 +738,19 @@ class Trainer_Monodepth2:
         wandb.log({"bottom_left_depth": wandb.Image(bottom_left_depth[0])},step=self.step)
 
         #print(top_left_depth.shape)
+        """
         top_left_depth = torch.cat([top_left_depth, ones], dim=1)
         bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
         top_right_depth = torch.cat([top_right_depth, ones], dim=1)
-        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
+        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)"""
         
    
 
 
-        V = (top_left_depth.view(12,3,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,3,height,width) * pb_br.view(12,3,height,width))
+        V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
-        V += (top_right_depth.view(12,3,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,3,height,width) * pb_bl.view(12,3,height,width))
+        V += (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
         orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         orth_loss += torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
        
