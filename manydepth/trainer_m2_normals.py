@@ -595,7 +595,7 @@ class Trainer_Monodepth2:
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        print(D.shape)
+        #print(D.shape)
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=1)
@@ -651,7 +651,7 @@ class Trainer_Monodepth2:
         pix_coords = (pix_coords - 0.5) * 2
         generated_depth = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
         print(generated_depth.shape)
-        #wandb.log({"generated_depth": wandb.Image(generated_depth[0].view(height,width,1))},step=self.step)
+        wandb.log({"generated_depth": wandb.Image(generated_depth[0])},step=self.step)
         #ps["patl"] = ps["patl"].view(batch_size, height, width,3).long()
         #ps["pbbr"] = ps["pbbr"].view(batch_size, height, width,3).long()
         #ps["patr"] = ps["patr"].view(batch_size, height, width,3).long()
