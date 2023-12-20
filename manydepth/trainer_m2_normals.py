@@ -646,8 +646,8 @@ class Trainer_Monodepth2:
         pix_coords = ps["patl"][:, :2, :] / (ps["patl"][:, 2, :].unsqueeze(1) + 1e-7)
         pix_coords = pix_coords.view(batch_size, 2, height, width)
         pix_coords = pix_coords.permute(0, 2, 3, 1)
-        pix_coords[..., 0] /= self.width - 1
-        pix_coords[..., 1] /= self.height - 1
+        pix_coords[..., 0] /= width - 1
+        pix_coords[..., 1] /= height - 1
         pix_coords = (pix_coords - 0.5) * 2
         generated_depth = F.grid_sample(D,pix_coords.to(device=K_inv.device),padding_mode="border",align_corners=True)
         #print(generated_depth[0].shape)
