@@ -587,11 +587,7 @@ class Trainer_Monodepth2:
         Cpp = torch.einsum('bijk,bijk->bijk', N_hat, X_tilde_p.view(batch_size,3,height,width))
         for idx,p in enumerate(p_names[:4]):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], ps[p].to(device=K_inv.device))
-            #print(X_tilde_q.shape)
-            #print(N_hat.shape)
             Cpq = torch.einsum('bijk,bijk->bijk', N_hat, X_tilde_q.view(batch_size,3,height,width))
-            #print(Cpq.shape)
-            #print(D_inv.shape)
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
         
@@ -683,8 +679,6 @@ class Trainer_Monodepth2:
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
-        #print(y.shape)
-        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
         magnitude = torch.norm(N_hat, dim=1, keepdim=True)
 
         # Avoid division by zero
@@ -750,22 +744,25 @@ class Trainer_Monodepth2:
         top_right_depth = torch.cat([top_right_depth, ones], dim=1)
         bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
         
+        """
         print(top_left_depth.shape)
         print(bottom_right_depth.shape)
         print(top_right_depth.shape)
         print(bottom_left_depth.shape)
 
+        # Extract x and y coordinates
+        x_coordinates = top_left_depth[:, 0, :]
+        y_coordinates = top_left_depth[:, 1, :]
+        top_left_depth = (x_coordinates + y_coordinates) / 2"""
+
+
 
         V = (top_left_depth.view(12,3,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,3,height,width) * pb_br.view(12,3,height,width))
-        #orth_loss = torch.einsum('bijk,bijk->b', V.view(batch_size,3,height,width),N_hat)
+        #torch.einsum('ij,ij->', [a, b])
+        #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
         V += (top_right_depth.view(12,3,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,3,height,width) * pb_bl.view(12,3,height,width))
         orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
-        #orth_loss += torch.einsum('bijk,bijk->b', V.view(batch_size,3,height,width),N_hat)
-
-        #print(V.shape)
-
-        #print(V.shape)
-        #print(N_hat.shape)
+        orth_loss += torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
        
         return orth_loss
 
