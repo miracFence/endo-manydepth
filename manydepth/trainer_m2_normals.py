@@ -682,7 +682,7 @@ class Trainer_Monodepth2:
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
-        ones = torch.ones(12, 1, height * width)  
+        ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
         #print(y.shape)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
@@ -735,10 +735,10 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)"""
 
         #print(top_left_depth.shape)
-        top_left_depth = torch.cat([top_left_depth.to(device=K_inv.device), ones], dim=1)
-        bottom_right_depth = torch.cat([bottom_right_depth.to(device=K_inv.device), ones], dim=1)
-        top_right_depth = torch.cat([top_right_depth.to(device=K_inv.device), ones], dim=1)
-        bottom_left_depth = torch.cat([bottom_left_depth.to(device=K_inv.device), ones], dim=1)
+        top_left_depth = torch.cat([top_left_depth, ones], dim=1)
+        bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
+        top_right_depth = torch.cat([top_right_depth, ones], dim=1)
+        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
         print(top_left_depth.shape)
 
         V = top_left_depth.view(batch_size,1,height,width) * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
