@@ -684,6 +684,7 @@ class Trainer_Monodepth2:
         x = x.float().unsqueeze(0).unsqueeze(0)
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
         #print(y.shape)
+        N_hat = torch.nn.functional.normalize(N_hat, dim=1)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
