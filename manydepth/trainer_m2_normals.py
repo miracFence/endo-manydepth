@@ -611,22 +611,22 @@ class Trainer_Monodepth2:
         patl = np.roll(id_coords,(1), axis=(2))
         patl = np.roll(patl,(1), axis=(1))
 
-        print(patl)
+        #print(patl)
 
         pbbr = np.roll(id_coords,(-1), axis=(2))
         pbbr = np.roll(pbbr,(-1), axis=(1))
 
-        print(pbbr)
+        #print(pbbr)
 
         patr = np.roll(id_coords,(-1), axis=(2))
         patr = np.roll(patr,(1), axis=(1))
 
-        print(patr)
+        #print(patr)
 
         pabl = np.roll(id_coords,(1), axis=(2))
         pabl = np.roll(pabl,(-1), axis=(1))
 
-        print(pabl)
+        #print(pabl)
 
         id_coords = torch.from_numpy(id_coords)
         patl = torch.from_numpy(patl)
@@ -656,8 +656,9 @@ class Trainer_Monodepth2:
             pix_coords[..., 0] /= width - 1
             pix_coords[..., 1] /= height - 1
             pix_coords = (pix_coords - 0.5) * 2
+            print(pix_coords)
             Ds[d_names[idx]] = F.grid_sample(D,pix_coords.to(device=K_inv.device),align_corners=True)
-            wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
+            #wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
 
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
