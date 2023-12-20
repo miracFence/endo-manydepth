@@ -752,8 +752,8 @@ class Trainer_Monodepth2:
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
         V += (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
-        orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
-        orth_loss += torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
+        #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
+        orth_loss += torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
        
         return orth_loss
 
