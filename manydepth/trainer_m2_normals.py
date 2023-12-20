@@ -640,7 +640,7 @@ class Trainer_Monodepth2:
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
         #ps -> torch.Size([12, 81920, 3])
         ps["patl"] = torch.cat([ps["patl"][:,:,1],ps["patl"][:,:,0]])
-
+        print(ps["patl"].shape)
         generated_depth = F.grid_sample(D,ps["patl"][:,:2,:].view(12,height, width,2).to(device=K_inv.device),padding_mode="border",align_corners=True)
         print(generated_depth.shape)
         
