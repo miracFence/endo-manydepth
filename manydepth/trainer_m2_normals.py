@@ -594,6 +594,7 @@ class Trainer_Monodepth2:
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        print(D.shape)
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
         N_hat = torch.nn.functional.normalize(N_hat, dim=1)
