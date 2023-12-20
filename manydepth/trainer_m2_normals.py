@@ -717,10 +717,9 @@ class Trainer_Monodepth2:
         top_right_depth = ((top_right_depth[:, 0, :] + top_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        #print(top_left_depth.shape) 
 
-        V = top_left_depth.view(batch_size,1,height,width) * pa_tl.view(batch_size,3,height,width) - bottom_right_depth.view(batch_size,1,height,width) * pb_br.view(batch_size,3,height,width)
-        V += top_right_depth.view(batch_size,1,height,width) * pa_tr.view(batch_size,3,height,width) - bottom_left_depth.view(batch_size,1,height,width) * pb_bl.view(batch_size,3,height,width)
+        V = D * pa_tl.view(batch_size,3,height,width) - D * pb_br.view(batch_size,3,height,width)
+        V += D * pa_tr.view(batch_size,3,height,width) - D * pb_bl.view(batch_size,3,height,width)
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         return orth_loss.sum()
