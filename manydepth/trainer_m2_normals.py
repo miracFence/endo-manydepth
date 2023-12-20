@@ -608,17 +608,17 @@ class Trainer_Monodepth2:
 
         ones = torch.ones(batch_size, 1, height * width)   
 
-        patl = np.roll(id_coords,(-1), axis=(2))
-        patl = np.roll(patl,(-1), axis=(1))
+        patl = np.roll(id_coords,(1), axis=(2))
+        patl = np.roll(patl,(1), axis=(1))
 
-        pbbr = np.roll(id_coords,(1), axis=(2))
-        pbbr = np.roll(pbbr,(1), axis=(1))
+        pbbr = np.roll(id_coords,(-1), axis=(2))
+        pbbr = np.roll(pbbr,(-1), axis=(1))
 
-        patr = np.roll(id_coords,(1), axis=(2))
-        patr = np.roll(patr,(-1), axis=(1))
+        patr = np.roll(id_coords,(-1), axis=(2))
+        patr = np.roll(patr,(1), axis=(1))
 
-        pabl = np.roll(id_coords,(-1), axis=(2))
-        pabl = np.roll(pabl,(1), axis=(1))
+        pabl = np.roll(id_coords,(1), axis=(2))
+        pabl = np.roll(pabl,(-1), axis=(1))
 
         id_coords = torch.from_numpy(id_coords)
         patl = torch.from_numpy(patl)
@@ -741,7 +741,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 13 * self.compute_orth_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 13 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
