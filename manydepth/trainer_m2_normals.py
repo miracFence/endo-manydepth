@@ -718,7 +718,7 @@ class Trainer_Monodepth2:
         V += top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
-        return -orth_loss.sum()
+        return orth_loss.sum()
 
     
     def get_ilumination_invariant_loss(self, pred, target):
