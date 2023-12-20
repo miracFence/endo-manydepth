@@ -682,13 +682,14 @@ class Trainer_Monodepth2:
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
-        print(y.shape)
+        ones = torch.ones(1, 1, height , width)  
+        #print(y.shape)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        top_left = torch.stack([x - 0.5, y - 0.5,1], dim=-1)
-        bottom_right = torch.stack([x + 0.5, y + 0.5,1], dim=-1)
-        top_right = torch.stack([x + 0.5, y - 0.5,1], dim=-1)
-        bottom_left = torch.stack([x - 0.5, y + 0.5,1], dim=-1)
+        top_left = torch.stack([x - 0.5, y - 0.5,ones], dim=-1)
+        bottom_right = torch.stack([x + 0.5, y + 0.5,ones], dim=-1)
+        top_right = torch.stack([x + 0.5, y - 0.5,ones], dim=-1)
+        bottom_left = torch.stack([x - 0.5, y + 0.5,ones], dim=-1)
 
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 3).expand(12, -1, -1)
