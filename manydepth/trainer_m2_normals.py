@@ -707,21 +707,22 @@ class Trainer_Monodepth2:
         # Use depth information to adjust positions
         #print(top_left_flat.shape)
         #print(D.shape)
-        print(top_left_flat.shape)
-        top_left_depth = top_left_flat * depth.unsqueeze(-1)
-        bottom_right_depth = bottom_right_flat * depth.unsqueeze(-1)
-        top_right_depth = top_right_flat * depth.unsqueeze(-1)
-        bottom_left_depth = bottom_left_flat * depth.unsqueeze(-1)
+        #print(top_left_flat.shape)
+        top_left_depth = top_left_flat[:,:,:2] * D.unsqueeze(-1)
+        bottom_right_depth = bottom_right_flat[:,:,:2] * D.unsqueeze(-1)
+        top_right_depth = top_right_flat[:,:,:2] * D.unsqueeze(-1)
+        bottom_left_depth = bottom_left_flat[:,:,:2] * D.unsqueeze(-1)
 
+        """
         top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
-        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
+        bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D"""
 
         #print(top_left_depth.shape)
         #print(pa_tl.shape)
-        V = torch.abs(top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width))
-        V += torch.abs(top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width))
+        V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
+        V += top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
 
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         return orth_loss.sum()
