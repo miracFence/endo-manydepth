@@ -708,7 +708,11 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
 
-        print(top_left_depth.shape)
+        # Construct a new depth image using the mean of x and y coordinates
+        top_left_depth = top_left_depth.view(batch_size, :2,-1)
+        new_depth_image = (top_left_depth[:, 0, :] + top_left_depth[:, 1, :]) / 2
+        print(new_depth_image.shape) 
+        
         V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
         V += torch.abs(top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width))
 
