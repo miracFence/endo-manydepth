@@ -719,7 +719,7 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D"""
-        top_left_depth = torch.stack([top_left_depth,ones])
+        top_left_depth = torch.cat([top_left_depth,ones],1)
         print(top_left_depth.shape)
         print(pa_tl.shape)
         V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
