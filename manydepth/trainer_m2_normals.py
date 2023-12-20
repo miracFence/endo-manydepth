@@ -699,6 +699,7 @@ class Trainer_Monodepth2:
         bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([x + 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
+        print(top_left)
 
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
