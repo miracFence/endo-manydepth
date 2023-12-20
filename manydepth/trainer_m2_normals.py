@@ -631,7 +631,7 @@ class Trainer_Monodepth2:
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
-            print(pix_coords.shape)
+            #print(pix_coords.shape)
         
         V = 0
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
@@ -639,7 +639,7 @@ class Trainer_Monodepth2:
         #ps -> torch.Size([12, 81920, 3])
         #print(ps["patl"].shape)
         ps["patl"] = torch.cat([ps["patl"][:,:,1],ps["patl"][:,:,0]], 1)
-        #print(ps["patl"].shape)
+        print(ps["patl"].shape)
         generated_depth = F.grid_sample(D,ps["patl"][:,:2,:].view(12,height, width,2).to(device=K_inv.device),padding_mode="border",align_corners=True)
         print(generated_depth.shape)
         
