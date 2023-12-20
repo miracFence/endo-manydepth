@@ -622,6 +622,7 @@ class Trainer_Monodepth2:
         bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_bottom_depth = bottom_bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
 
+        print(normal_flat.shape)
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p)
 
