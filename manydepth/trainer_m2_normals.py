@@ -709,10 +709,10 @@ class Trainer_Monodepth2:
         print(D.shape)
         print(top_left_flat[:,:,:2].shape)
         #.view(depth.size(0), 1, depth.size(2), depth.size(3))
-        top_left_depth = top_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width) * D
-        bottom_right_depth = bottom_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width) * D
-        top_right_depth = top_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width) * D
-        bottom_left_depth = bottom_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width) * D
+        top_left_depth = top_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
+        bottom_right_depth = bottom_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
+        top_right_depth = top_right_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
+        bottom_left_depth = bottom_left_flat[:,:,:2].transpose(1, 2).view(batch_size,2,height,width).to(device=K_inv.device) * D
 
         """
         top_left_depth = top_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
@@ -720,8 +720,8 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D
         bottom_left_depth = bottom_left_flat.permute(0,2,1).view(batch_size,3,height,width).to(device=K_inv.device) * D"""
 
-        #print(top_left_depth.shape)
-        #print(pa_tl.shape)
+        print(top_left_depth.shape)
+        print(pa_tl.shape)
         V = top_left_depth * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
         V += top_right_depth * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
 
