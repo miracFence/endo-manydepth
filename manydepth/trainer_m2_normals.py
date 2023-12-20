@@ -734,7 +734,13 @@ class Trainer_Monodepth2:
         bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)"""
 
+        #print(top_left_depth.shape)
+        top_left_depth = torch.cat([top_left_depth, ones], dim=1)
+        bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
+        top_right_depth = torch.cat([top_right_depth, ones], dim=1)
+        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
         print(top_left_depth.shape)
+
         V = top_left_depth.view(batch_size,1,height,width) * pa_tl.view(batch_size,3,height,width) - bottom_right_depth * pb_br.view(batch_size,3,height,width)
         V +=  top_right_depth.view(batch_size,3,height,width) * pa_tr.view(batch_size,3,height,width) - bottom_left_depth * pb_bl.view(batch_size,3,height,width)
 
