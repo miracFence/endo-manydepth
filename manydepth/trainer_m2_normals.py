@@ -591,61 +591,9 @@ class Trainer_Monodepth2:
             Cpq = torch.einsum('bijk,bijk->bijk', N_hat, X_tilde_q.view(batch_size,3,height,width))
             #print(Cpq.shape)
             #print(D_inv.shape)
-            orth_loss += torch.abs(D_inv* Cpq - Ds[d_names[idx]] * Cpp)
+            orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
-        """
-        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-
-        orth_loss = 0.0        
-        D_inv = 1.0 / D
-
-        wandb.log({"D_inv_": wandb.Image(D_inv[0].permute(2,0,1))},step=self.step)
-        N_hat = N_hat.permute(0, 2, 3, 1)
-        N_hat = torch.nn.functional.normalize(N_hat, dim=-1)
-        batch_size, height, width, channels = D_inv.shape
- 
-        # Homogeneous coordinates
         
-        p = torch.arange(height, dtype=torch.float32).view(1, height, 1).to(device=K_inv.device)
-        q = torch.arange(width, dtype=torch.float32).view(1, 1, width).to(device=K_inv.device)
-     
-        p = p.expand(batch_size, height, width).unsqueeze(-1)
-        q = q.expand(batch_size, height, width).unsqueeze(-1)
-        
-        P = torch.cat([p, q, torch.ones_like(p)], dim=-1).permute(0,3,1,2)
-        #print("P")
-        #print(P.shape)
-        #print(ref_img.shape)
-        #P = ref_img.permute(0, 2, 3, 1)
-        X_tilde_p = torch.matmul(K_inv[:, :3, :3], P.view(batch_size,3,-1))
-
-        Cpp = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_p.view(batch_size,3,height, width).permute(0,2,3,1))
-        #print("D_inv",D_inv.shape)
-        #print(P.shape)
-        #D_inv_p = F.grid_sample(D_inv, P.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
-        #wandb.log({"D_inv_p": wandb.Image(D_inv_p[0].permute(2,0,1))},step=self.step)
-        #sampled_image = sampled_image.view(batch_size, 1, height, width, 3).squeeze(-1)
-        #print("D_inv_p",D_inv_p.shape)
-        for idx,p_idx in enumerate([-1,-2,-1,-2]):
-            D_inv_q = D_inv
-            if idx < 2:
-                qq = P.roll(shifts=p_idx,dims=2)
-                D_inv_q = D_inv_q.roll(shifts=p_idx,dims=2)
-                #pa_tl = torch.roll(P, shifts=1, dims=1)
-            else:
-                qq = P.roll(shifts=p_idx,dims=1)
-                D_inv_q = D_inv_q.roll(shifts=p_idx,dims=1)
-            X_tilde_q = torch.matmul(K_inv[:, :3, :3], qq.view(batch_size,3,-1))
-            #D_inv_q = F.grid_sample(D_inv, qq.permute(0,3,1,2)[:,:,:,:2],align_corners=True)
-            wandb.log({"D_inv_q": wandb.Image(D_inv_q[0].permute(2,0,1))},step=self.step)
-            #print(D_inv_q)
-            Cpq = torch.einsum('bijk,bijk->bij', N_hat, X_tilde_q.view(batch_size,3,height, width).permute(0,2,3,1))
-            orth_loss += torch.abs(D_inv * torch.unsqueeze(Cpq,0).permute(1,2,3,0) - D_inv_q * torch.unsqueeze(Cpp,0).permute(1,2,3,0))
-
-        orth_loss = orth_loss.sum()"""
-
-        return orth_loss
-
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
@@ -792,7 +740,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 13 * self.compute_orth_loss(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
