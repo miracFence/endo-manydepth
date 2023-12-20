@@ -630,6 +630,8 @@ class Trainer_Monodepth2:
             pix_coords = pix_coords.repeat(batch_size, 1, 1)
             pix_coords = torch.cat([pix_coords, ones], 1)
             ps[p_names[idx]] = pix_coords
+            print(pix_coords.shape)
+            print(pix_coords)
 
         
         V = 0
@@ -648,16 +650,15 @@ class Trainer_Monodepth2:
         #wandb.log({"patl": wandb.Image(D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()][0])},step=self.step)
         #wandb.log({"pbbr": wandb.Image(D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()][0])},step=self.step)
 
-        Dpa = torch.roll(D,(-1,-1), dims=(1,2))
         #Dpa = torch.roll(Dpa,1,dims=1)
         #print(Dpa.shape)
-        wandb.log({"Dpa": wandb.Image(Dpa[0].permute(2,0,1))},step=self.step)
-        Dpb = torch.roll(D,-1,dims=2)
+        #andb.log({"Dpa": wandb.Image(Dpa[0].permute(2,0,1))},step=self.step)
+        #Dpb = torch.roll(D,-1,dims=2)
         #Dpb = torch.roll(Dpb,-1, dims=1)
         #print(Dpb.shape)
-        Dpb = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        print(Dpb.shape)
-        wandb.log({"Dpb": wandb.Image(Dpb[0].permute(2,0,1))},step=self.step)
+        #Dpb = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
+        #print(Dpb.shape)
+        #wandb.log({"Dpb": wandb.Image(Dpb[0].permute(2,0,1))},step=self.step)
         #Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         #Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb
