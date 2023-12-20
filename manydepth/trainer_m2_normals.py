@@ -606,16 +606,16 @@ class Trainer_Monodepth2:
         ones = torch.ones(batch_size, 1, height * width)   
 
         patl = np.roll(id_coords,(1), axis=(2))
-        patl = np.roll(patl,(1), axis=(1))
+        #patl = np.roll(patl,(1), axis=(1))
 
-        pbbr = np.roll(id_coords,(-1), axis=(2))
-        pbbr = np.roll(pbbr,(-1), axis=(1))
+        pbbr = np.roll(id_coords,(2), axis=(2))
+        #pbbr = np.roll(pbbr,(-1), axis=(1))
 
-        patr = np.roll(id_coords,(-1), axis=(2))
-        patr = np.roll(patr,(1), axis=(1))
+        patr = np.roll(id_coords,(1), axis=(1))
+        #patr = np.roll(patr,(1), axis=(1))
 
-        pabl = np.roll(id_coords,(1), axis=(2))
-        pabl = np.roll(pabl,(-1), axis=(1))
+        pabl = np.roll(id_coords,(2), axis=(1))
+        #pabl = np.roll(pabl,(-1), axis=(1))
 
         id_coords = torch.from_numpy(id_coords)
         patl = torch.from_numpy(patl)
@@ -653,10 +653,10 @@ class Trainer_Monodepth2:
         
         
         V = Ds["Da_tl"].view(batch_size, 1, -1) * pa - Ds["Db_br"].view(batch_size, 1, -1) * pb        
-        """pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
+        pa = torch.matmul(K_inv[:, :3, :3],ps["patr"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbl"].to(device=K_inv.device))
 
-        V += Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb"""
+        V += Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb
 
         orth_loss = torch.einsum('bijk,bijk->bij', N_hat, V.view(batch_size,3,height, width))
         
