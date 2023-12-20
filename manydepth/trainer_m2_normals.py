@@ -684,16 +684,16 @@ class Trainer_Monodepth2:
         x = x.float().unsqueeze(0).unsqueeze(0)
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1)
-        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1)
-        top_right = torch.stack([x + 0.5, y - 0.5], dim=-1)
-        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1)
+        top_left = torch.stack([x - 0.5, y - 0.5,1], dim=-1)
+        bottom_right = torch.stack([x + 0.5, y + 0.5,1], dim=-1)
+        top_right = torch.stack([x + 0.5, y - 0.5,1], dim=-1)
+        bottom_left = torch.stack([x - 0.5, y + 0.5,1], dim=-1)
 
         # Flatten and concatenate to get pairs of positions
-        top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
-        bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
-        top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
-        bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
+        top_left_flat = top_left.view(1, -1, 3).expand(12, -1, -1)
+        bottom_right_flat = bottom_right.view(1, -1, 3).expand(12, -1, -1)
+        top_right_flat = top_right.view(1, -1, 3).expand(12, -1, -1)
+        bottom_left_flat = bottom_left.view(1, -1, 3).expand(12, -1, -1)
         print(top_left_flat.shape)
         pa = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
