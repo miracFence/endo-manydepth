@@ -638,7 +638,7 @@ class Trainer_Monodepth2:
         pa = torch.matmul(K_inv[:, :3, :3],ps["patl"].to(device=K_inv.device))
         pb = torch.matmul(K_inv[:, :3, :3],ps["pbbr"].to(device=K_inv.device))
 
-        generated_depth = F.grid_sample(D, ps["patl"][:,:2,:].view(12,height, width,2).to(device=K_inv.device))
+        generated_depth = F.grid_sample(D,ps["patl"][0,:2,:].view(height, width,2).to(device=K_inv.device),align_corners=True)
         print(generated_depth.shape)
         
         #ps["patl"] = ps["patl"].view(batch_size, height, width,3).long()
@@ -663,7 +663,7 @@ class Trainer_Monodepth2:
         #print(Dpb.shape)
         #wandb.log({"Dpb": wandb.Image(Dpb[0].permute(2,0,1))},step=self.step)
         Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        print(Dpa.shape)
+        #print(Dpa.shape)
         Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb
         
