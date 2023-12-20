@@ -581,6 +581,7 @@ class Trainer_Monodepth2:
             pix_coords[..., 1] /= height - 1
             pix_coords = (pix_coords - 0.5) * 2
             Ds[d_names[idx]] = F.grid_sample(D_inv,pix_coords.to(device=K_inv.device),align_corners=True)
+            wandb.log({"depth_grid": wandb.Image(Ds[d_names[idx]][0])},step=self.step)
         
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],ps["p"].to(device=K_inv.device))
         Cpp = torch.einsum('bijk,bijk->bijk', N_hat, X_tilde_p.view(batch_size,3,height,width))
