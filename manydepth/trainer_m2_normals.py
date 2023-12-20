@@ -659,8 +659,9 @@ class Trainer_Monodepth2:
         #Dpb = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
         #print(Dpb.shape)
         #wandb.log({"Dpb": wandb.Image(Dpb[0].permute(2,0,1))},step=self.step)
-        #Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
-        #Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
+        Dpa = D[:,ps["patl"][0,:,1].long(),ps["patl"][0,:,0].long()]
+        print(Dpa.shape)
+        Dpb = D[:,ps["pbbr"][0,:,1].long(),ps["pbbr"][0,:,0].long()]
         V = Dpa * pa - Dpb * pb
         
         #print(V.shape)      
