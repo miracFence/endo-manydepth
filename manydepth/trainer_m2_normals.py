@@ -812,6 +812,11 @@ class Trainer_Monodepth2:
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         
+        print(D - top_left_depth)
+        print(D - bottom_right_depth)
+        print(D - top_right_depth)
+        print(D - top_right_depth)
+
 
         V = 0
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
