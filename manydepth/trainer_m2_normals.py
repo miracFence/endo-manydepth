@@ -768,9 +768,9 @@ class Trainer_Monodepth2:
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         #print(top_left_flat.shape)
         #top_left_depth = torch.gather(D, 2, top_left_flat.unsqueeze(1).long())
-        top_left_depth = D[:, :, top_left_flat[:, :, 1].long(), top_left_flat[:, :, 0].long()]
-        top_left_depth = top_left_depth.unsqueeze(2)
-        print(top_left_depth.shape)
+        #top_left_depth = D[:, :, top_left_flat[:, :, 1].long(), top_left_flat[:, :, 0].long()]
+        #top_left_depth = top_left_depth.unsqueeze(2)
+        #print(top_left_depth.shape)
         #print(ones.shape)
         
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
@@ -803,7 +803,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
         V += (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
         #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
-        orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
+        orth_loss = torch.einsum('ijkl,ijl->ikl', V.view(batch_size,3,height,width),N_hat_normalized)
        
         return orth_loss
 
