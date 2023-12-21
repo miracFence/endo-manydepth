@@ -321,6 +321,7 @@ class Trainer_Monodepth2:
         """
         outputs = {}
         outputs["normal_inputs"] = self.models["normal"](features)
+        #outputs["normal_depth"] = calculate_surface_normal_from_depth()
         if self.num_pose_frames == 2:
             # In this setting, we compute the pose to each source frame via a
             # separate forward pass through the pose network.
@@ -499,6 +500,7 @@ class Trainer_Monodepth2:
             features = self.models["encoder"](outputs[("color", frame_id, 0)])
             outputs[("normal",frame_id)] = self.models["normal"](features)
             
+            
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -591,7 +593,7 @@ class Trainer_Monodepth2:
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
 
-    def compute_orth_loss4(self, disp, N_hat, K_inv):
+    def compute_orth_loss4(self, disp, N_hat, K_inv, image):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D_inv = 1.0 / D
@@ -617,12 +619,6 @@ class Trainer_Monodepth2:
         bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
         bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
 
-        right_depth = D_inv[:, :, right_flat[0, :, 1].long(), right_flat[0, :, 0].long()]
-        right_right_depth = D_inv[:, :, right_right_flat[0, :, 1].long(), right_right_flat[0, :, 0].long()]
-        bottom_flat_depth = D_inv[:, :, bottom_flat[0, :, 1].long(), bottom_flat[0, :, 0].long()]
-        bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0, :, 1].long(), bottom_bottom_flat[0, :, 0].long()]
-        
-        """
         right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
@@ -632,7 +628,7 @@ class Trainer_Monodepth2:
         right_right_depth = ((right_right_depth[:, 0, :] + right_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_flat_depth = ((bottom_flat_depth[:, 0, :] + bottom_flat_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_bottom_depth = ((bottom_bottom_depth[:, 0, :] + bottom_bottom_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        """
+        
 
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
 
@@ -661,8 +657,14 @@ class Trainer_Monodepth2:
             #print(depths[idx].shape)
             orth_loss += torch.abs(D_inv * Cpq.unsqueeze(-1).unsqueeze(-1) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(-1).unsqueeze(-1))
 
+        # Compute gradient of the image
+        gradient_x = F.conv2d(image, torch.tensor([[-1, 0, 1]]).view(1, 1, 1, 3))
+        gradient_y = F.conv2d(image, torch.tensor([[-1], [0], [1]]).view(1, 1, 3, 1))
+        gradient_magnitude = torch.sqrt(gradient_x**2 + gradient_y**2)
 
-        return orth_loss.sum()
+        # Calculate G(p)
+        G_p = torch.exp(-1 * gradient_magnitude**2 / 1)
+        return G_p * orth_loss.sum()
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -820,7 +822,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         #print(V.shape)
         #orth_loss = torch.einsum('bik,bik->', V.view(12, 3, -1),N_hat_normalized.view(12, 3, -1))
-        orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
+        orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
        
         return orth_loss.sum()
 
@@ -899,7 +901,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)],inputs[("color", 0, 0)])
         losses["loss"] = total_loss
         
         return losses
