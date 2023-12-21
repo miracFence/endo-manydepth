@@ -654,6 +654,7 @@ class Trainer_Monodepth2:
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
             Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
+            print(Cpq.shape)
             orth_loss += torch.abs(D_inv * Cpq - depths[idx] * Cpp)
 
 
