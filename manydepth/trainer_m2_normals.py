@@ -661,7 +661,9 @@ class Trainer_Monodepth2:
 
         grad_x = torch.abs(image_batch[:, :, :, :-1] - image_batch[:, :, :, 1:])
         grad_y = torch.abs(image_batch[:, :, :-1, :] - image_batch[:, :, 1:, :])
-        gradient_magnitude = torch.sqrt(grad_x**2 + grad_y**2)
+        print(grad_x.shape)
+        print(grad_y.shape)
+        gradient_magitude = torch.sqrt(grad_x**2 + grad_y**2)
 
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magnitude**2 / 1)
