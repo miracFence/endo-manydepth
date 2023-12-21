@@ -657,7 +657,8 @@ class Trainer_Monodepth2:
             #Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
             Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
             #print(Cpq.unsqueeze(0).shape)
-            #print(D_inv.shape)
+            print(D_inv.shape)
+            print(depths[idx].shape)
             orth_loss += torch.abs(D_inv * Cpq.unsqueeze(-1).unsqueeze(-1) - depths[idx] * Cpp.unsqueeze(-1).unsqueeze(-1))
 
 
