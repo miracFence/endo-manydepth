@@ -659,9 +659,9 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
 
-        gradient_x = F.conv2d(image_batch, torch.tensor([[-1, 0, 1]]).view(1, 1, 1, 3))
-        gradient_y = F.conv2d(image_batch, torch.tensor([[-1], [0], [1]]).view(1, 1, 3, 1))
-        gradient_magnitude = torch.sqrt(gradient_x**2 + gradient_y**2)
+        grad_x = torch.abs(image_batch[:, :, :, :-1] - image_batch[:, :, :, 1:])
+        grad_y = torch.abs(image_batch[:, :, :-1, :] - image_batch[:, :, 1:, :])
+        gradient_magnitude = torch.sqrt(grad_x**2 + grad_y**2)
 
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magnitude**2 / 1)
