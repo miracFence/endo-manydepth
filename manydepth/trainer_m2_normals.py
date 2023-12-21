@@ -607,9 +607,9 @@ class Trainer_Monodepth2:
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         normal = torch.stack([x , y ], dim=-1).to(device=K_inv.device)
         right = torch.stack([x + 0.5, y ], dim=-1).to(device=K_inv.device)
-        right_right = torch.stack([x + 1.0, y], dim=-1).to(device=K_inv.device)
+        right_right = torch.stack([x + 0.5, y], dim=-1).to(device=K_inv.device)
         bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
-        bottom_bottom = torch.stack([x , y + 1.0], dim=-1).to(device=K_inv.device)
+        bottom_bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
 
         normal_flat = normal.view(1, -1, 2).expand(12, -1, -1)
         right_flat = right.view(1, -1, 2).expand(12, -1, -1)
@@ -617,10 +617,10 @@ class Trainer_Monodepth2:
         bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
         bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
 
-        right_depth = D_inv[:, :, right_flat[0, :, 0].long(), right_flat[0, :, 1].long()]
-        right_right_depth = D_inv[:, :, right_right_flat[0, :, 0].long(), right_right_flat[0, :, 1].long()]
-        bottom_flat_depth = D_inv[:, :, bottom_flat[0, :, 0].long(), bottom_flat[0, :, 1].long()]
-        bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0, :, 0].long(), bottom_bottom_flat[0, :, 1].long()]
+        right_depth = D_inv[:, :, right_flat[0, :, 1].long(), right_flat[0, :, 0].long()]
+        right_right_depth = D_inv[:, :, right_right_flat[0, :, 1].long(), right_right_flat[0, :, 0].long()]
+        bottom_flat_depth = D_inv[:, :, bottom_flat[0, :, 1].long(), bottom_flat[0, :, 0].long()]
+        bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0, :, 1].long(), bottom_bottom_flat[0, :, 0].long()]
         
         """
         right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
