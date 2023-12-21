@@ -769,7 +769,7 @@ class Trainer_Monodepth2:
         #print(top_left_flat.shape)
         #top_left_depth = torch.gather(D, 2, top_left_flat.unsqueeze(1).long())
         top_left_depth = D[:, :, top_left_flat[0, :, 1].long(), top_left_flat[0, :, 0].long()]
-        bottom_right = D[:, :, bottom_right_flat[0, :, 1].long(), bottom_right_flat[0, :, 0].long()]
+        bottom_right_depth = D[:, :, bottom_right_flat[0, :, 1].long(), bottom_right_flat[0, :, 0].long()]
         top_right_depth = D[:, :, top_right_flat[0, :, 1].long(), top_right_flat[0, :, 0].long()]
         bottom_left_depth = D[:, :, bottom_left_flat[0, :, 1].long(), bottom_left_flat[0, :, 0].long()]
         #top_left_depth = top_left_depth.unsqueeze(2)
