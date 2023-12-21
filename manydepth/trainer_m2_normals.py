@@ -788,13 +788,13 @@ class Trainer_Monodepth2:
         # Construct a new depth image using the mean of x and y coordinates
         #print(top_left_depth.shape)
         #top_left_depth = top_left_depth.view(batch_size,3,-1)
-        top_left_depth = ((top_left_depth[:, 0, :] + top_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        top_left_depth = ((top_left_depth[:, 1, :] + top_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         #bottom_right_depth = bottom_right_depth.view(batch_size,3,-1)
-        bottom_right_depth = ((bottom_right_depth[:, 0, :] + bottom_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        bottom_right_depth = ((bottom_right_depth[:, 1, :] + bottom_right_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         #top_right_depth = top_right_depth.view(batch_size,3,-1)
-        top_right_depth = ((top_right_depth[:, 0, :] + top_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        top_right_depth = ((top_right_depth[:, 1, :] + top_right_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
-        bottom_left_depth = ((bottom_left_depth[:, 0, :] + bottom_left_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
    
 
         V = 0
