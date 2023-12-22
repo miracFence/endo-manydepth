@@ -658,11 +658,13 @@ class Trainer_Monodepth2:
             orth_loss += torch.abs(D_inv * Cpq.unsqueeze(-1).unsqueeze(-1) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(-1).unsqueeze(-1))
 
         # Compute gradient of the image
-        print(image_batch.shape)
-        gradient_x = F.conv2d(image_batch, torch.tensor([[-1, 0, 1]]).view(1, 3, 1, 1).to(device=K_inv.device))
-        gradient_y = F.conv2d(image_batch, torch.tensor([[-1], [0], [1]]).view(1, 1, 3, 1).to(device=K_inv.device))
-        print(gradient_x.shape)
-        print(gradient_y.shape)
+        #print(image_batch.shape)
+        x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
+        y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
+        gradient_x = F.conv2d(image_batch, x.view(1, 3, 1, 1))
+        gradient_y = F.conv2d(image_batch, y.view(1, 1, 3, 1))
+        #print(gradient_x.shape)
+        #print(gradient_y.shape)
         gradient_magitude = torch.sqrt(grad_x**2 + grad_y**2)
 
         # Calculate G(p)
