@@ -666,7 +666,7 @@ class Trainer_Monodepth2:
         #print(gradient_x.shape)
         #print(gradient_y.shape)
         gradient_magitude = torch.sqrt(gradient_x**2 + gradient_y**2)
-
+        gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magitude **2 / 1)
         return G_p * orth_loss.sum()
