@@ -647,7 +647,7 @@ class Trainer_Monodepth2:
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
         Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
         movements = [right_flat,bottom_flat]
-        depths = [right_depth,right_right_depth,bottom_flat_depth,bottom_bottom_depth]
+        depths = [right_depth,bottom_flat_depth]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
