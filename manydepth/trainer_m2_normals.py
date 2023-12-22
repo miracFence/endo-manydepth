@@ -609,25 +609,25 @@ class Trainer_Monodepth2:
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         normal = torch.stack([x , y ], dim=-1).to(device=K_inv.device)
         right = torch.stack([x + 0.5, y ], dim=-1).to(device=K_inv.device)
-        right_right = torch.stack([x + 0.5, y], dim=-1).to(device=K_inv.device)
+        #right_right = torch.stack([x + 0.5, y], dim=-1).to(device=K_inv.device)
         bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
-        bottom_bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
+        #bottom_bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
 
         normal_flat = normal.view(1, -1, 2).expand(12, -1, -1)
         right_flat = right.view(1, -1, 2).expand(12, -1, -1)
-        right_right_flat = right_right.view(1, -1, 2).expand(12, -1, -1)
+        #right_right_flat = right_right.view(1, -1, 2).expand(12, -1, -1)
         bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
-        bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
+        #bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
 
         right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        #right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        bottom_bottom_depth = bottom_bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        #bottom_bottom_depth = bottom_bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
 
         right_depth = ((right_depth[:, 0, :] + right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        right_right_depth = ((right_right_depth[:, 0, :] + right_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        #right_right_depth = ((right_right_depth[:, 0, :] + right_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         bottom_flat_depth = ((bottom_flat_depth[:, 0, :] + bottom_flat_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        bottom_bottom_depth = ((bottom_bottom_depth[:, 0, :] + bottom_bottom_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        #bottom_bottom_depth = ((bottom_bottom_depth[:, 0, :] + bottom_bottom_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         
 
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
@@ -636,22 +636,23 @@ class Trainer_Monodepth2:
         #print(normal_flat.shape)
         normal_flat = torch.cat([normal_flat.permute(0,2,1), ones], dim=1)
         right_flat = torch.cat([right_flat.permute(0,2,1), ones], dim=1)
-        right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
+        #right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
         bottom_flat = torch.cat([bottom_flat.permute(0,2,1), ones], dim=1)
-        bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
+        #bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
-        Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),N_hat_normalized.view(12, 3, -1))
-        movements = [right_flat,right_right_flat,bottom_flat,bottom_bottom_flat]
+        #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
+        Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
+        movements = [right_flat,bottom_flat]
         depths = [right_depth,right_right_depth,bottom_flat_depth,bottom_bottom_depth]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
-            #Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
-            Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
+            Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
+            #Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
             #print(Cpq.unsqueeze(0).shape)
             #print(D_inv.shape)
             #print(depths[idx].shape)
