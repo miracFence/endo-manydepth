@@ -659,7 +659,7 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
         print(image_batch.shape)
-        gradient_x = F.conv2d(image_batch, torch.tensor([[-1, 0, 1]]).view(1, 1, 1, 3))
+        gradient_x = F.conv2d(image_batch, torch.tensor([[-1, 0, 1]]).view(1, 3, 1, 3))
         gradient_y = F.conv2d(image_batch, torch.tensor([[-1], [0], [1]]).view(1, 1, 3, 1))
         print(gradient_x.shape)
         print(gradient_y.shape)
