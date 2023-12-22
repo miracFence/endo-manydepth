@@ -657,7 +657,8 @@ class Trainer_Monodepth2:
             #print(Cpp)
             #print(D_inv.shape)
             #print(depths[idx].shape)
-            orth_loss += torch.abs(D_inv * Cpq.unsqueeze(2).unsqueeze(3) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(2).unsqueeze(3))
+            #orth_loss += torch.abs(D_inv * Cpq.unsqueeze(2).unsqueeze(3) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(2).unsqueeze(3))
+            orth_loss += torch.abs(D_inv.view(12, -1) * Cpq - depths[idx].view(batch_size,-1) * Cpp)
 
         # Compute gradient of the image
         #print(image_batch.shape)
@@ -830,7 +831,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         #print(V.shape)
         #orth_loss = torch.einsum('bik,bik->', V.view(12, 3, -1),N_hat_normalized.view(12, 3, -1))
-        orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
+        orth_loss = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
        
         return orth_loss.sum()
 
