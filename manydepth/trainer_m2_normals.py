@@ -660,6 +660,7 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
         #print(image_batch.shape)
+        """
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         gradient_x = F.conv2d(image_batch, x.view(1, 3, 1, 1))
@@ -669,8 +670,8 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.sqrt(gradient_x**2 + gradient_y**2)
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
-        G_p = torch.exp(-1 * gradient_magitude **2 / 1)
-        return G_p * orth_loss.sum()
+        G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
+        return orth_loss.sum()
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
