@@ -645,18 +645,18 @@ class Trainer_Monodepth2:
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
-        Cpp = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
+        Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
         movements = [right_flat,bottom_flat]
         depths = [right_depth,bottom_flat_depth]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
-            Cpq = torch.einsum('bijk,bijk->', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
+            Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
             #Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
-            print(Cpq.unsqueeze(0).shape)
+            #print(Cpq.unsqueeze(0).shape)
             #print(D_inv.shape)
             #print(depths[idx].shape)
-            orth_loss += torch.abs(torch.matmul(D_inv, Cpq.unsqueeze(0)) - torch.matmul(depths[idx].view(batch_size,1,height,width) , Cpp.unsqueeze(0)))
+            orth_loss += torch.abs(torch.matmul(D_inv, Cpq) - torch.matmul(depths[idx].view(batch_size,1,height,width) , Cpp))
 
         # Compute gradient of the image
         #print(image_batch.shape)
