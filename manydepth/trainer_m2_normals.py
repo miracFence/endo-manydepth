@@ -657,7 +657,7 @@ class Trainer_Monodepth2:
             #print(Cpp)
             #print(D_inv.shape)
             #print(depths[idx].shape)
-            orth_loss += torch.abs(D_inv.view(12, -1) * Cpq - depths[idx].view(batch_size,-1) * Cpp)
+            orth_loss += torch.abs(D_inv * Cpq.unsqueeze(2).unsqueeze(3) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(2).unsqueeze(3))
 
         # Compute gradient of the image
         #print(image_batch.shape)
