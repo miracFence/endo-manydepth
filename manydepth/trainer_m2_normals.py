@@ -811,10 +811,10 @@ class Trainer_Monodepth2:
         top_right = torch.stack([x + 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)"""
 
-        xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
-        xy = xy.view(1, -1, 2).expand(12, -1, -1)
+        #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
+        #xy = xy.view(1, -1, 2).expand(12, -1, -1)
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
-        print(xy[0])
+        #print(xy[0])
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
@@ -825,16 +825,7 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        #print(top_left_flat.shape)
-        #top_left_depth = torch.gather(D, 2, top_left_flat.unsqueeze(1).long())
-        """
-        top_left_depth = D[:, :, top_left_flat[0, :, 0].long(), top_left_flat[0, :, 1].long()]
-        bottom_right_depth = D[:, :, bottom_right_flat[0, :, 0].long(), bottom_right_flat[0, :, 1].long()]
-        top_right_depth = D[:, :, top_right_flat[0, :, 0].long(), top_right_flat[0, :, 1].long()]
-        bottom_left_depth = D[:, :, bottom_left_flat[0, :, 0].long(), bottom_left_flat[0, :, 1].long()]"""
-        #top_left_depth = top_left_depth.unsqueeze(2)
-        #print(top_left_depth.shape)
-        #print(ones.shape)
+       
         
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
@@ -861,26 +852,23 @@ class Trainer_Monodepth2:
         
         V = 0
 
-        torch.matmul(depths_a * calibration_matrix_inv, positions_a) - \
-                      torch.matmul(depths_b * calibration_matrix_inv, positions_b)
+        #torch.matmul(depths_a * calibration_matrix_inv, positions_a) - \
+        #              torch.matmul(depths_b * calibration_matrix_inv, positions_b)
 
 
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
-        orth_loss1 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
-        V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
-        orth_loss2 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
+        #orth_loss1 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
+        V += (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
+        #orth_loss2 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
         #V += (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
         #orth_loss = torch.sum(V.view(batch_size,3,height,width) * N_hat_normalized)
         #print(V.shape)
         #orth_loss = torch.einsum('bik,bik->', V.view(12, 3, -1),N_hat_normalized.view(12, 3, -1))
-        #orth_loss = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
-        orth_loss1 = orth_loss1.sum()
-        orth_loss2 = orth_loss2.sum()
-
+        orth_loss = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
     
-        return orth_loss1 + orth_loss2
+        return -torch.mean(orth_loss)
 
     
     def get_ilumination_invariant_loss(self, pred, target):
