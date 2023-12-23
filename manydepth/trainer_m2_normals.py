@@ -801,7 +801,7 @@ class Trainer_Monodepth2:
         """
         
         #print(top_left_depth.shape)
-        top_left_depth = D[:, :, top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
+        top_left_depth = D[:, :, top_left_flat[0,:,0].long(), top_left_flat[0,:,1].long()]
         bottom_right_depth = D[:, :, bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
         top_right_depth = D[:, :, top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
         bottom_left_depth = D[:, :, bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
@@ -848,7 +848,7 @@ class Trainer_Monodepth2:
         # Compute the dot product for orthogonality
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
         #return -torch.mean(torch.sum(orth_loss,dim=1))
-        print(orth_loss.shape)
+        #print(orth_loss.shape)
         return torch.sum(orth_loss)
 
 
