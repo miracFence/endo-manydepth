@@ -770,8 +770,8 @@ class Trainer_Monodepth2:
         #offset_b = offset_b.view(1,2, 1, 1).expand(12, -1, -1,-11)
 
           # Reshape the offset tensors to (1, 2, 1, 1)
-        offset_a = offset_a.view(1, 2, 1, 2)
-        offset_b = offset_b.view(1, 2, 1, 2)
+        offset_a = offset_a.view(1, 2, 2, 1)
+        offset_b = offset_b.view(1, 2, 2, 1)
 
         # Repeat the offset tensors along the height and width dimensions
         offset_a = offset_a.expand(pixel_positions.size(0), -1, pixel_positions.size(2), -1)
@@ -813,9 +813,8 @@ class Trainer_Monodepth2:
 
         xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         xy = xy.view(1, -1, 2).expand(12, -1, -1)
-        positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
-        print(positions_a.shape)
-        print(positions_b.shape)
+        #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
+        print(xy[0])
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
