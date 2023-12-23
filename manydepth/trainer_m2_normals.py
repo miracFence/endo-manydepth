@@ -768,8 +768,8 @@ class Trainer_Monodepth2:
         # Expand dimensions to match the shape of pixel_positions
         #offset_a = offset_a.view(1,2, 1, 1).expand(12, -1, -1,-1)
         #offset_b = offset_b.view(1,2, 1, 1).expand(12, -1, -1,-11)
-        offset_a = offset_a.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
-        offset_b = offset_b.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+        offset_a = offset_a.unsqueeze(0).unsqueeze(-1)
+        offset_b = offset_b.unsqueeze(0).unsqueeze(-1)
 
         # Compute positions_a and positions_b
         print(pixel_positions.shape)
