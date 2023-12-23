@@ -681,7 +681,7 @@ class Trainer_Monodepth2:
         #print(D.shape)
         #D = D.permute(0, 2, 3, 1)
         #N_hat = N_hat.permute(0, 2, 3, 1)
-        #N_hat = torch.nn.functional.normalize(N_hat, dim=1)
+        N_hat_n = torch.nn.functional.normalize(N_hat, dim=1)
         batch_size,channels, height, width  = D.shape
         meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
@@ -750,42 +750,11 @@ class Trainer_Monodepth2:
 
         V += Ds["Da_tr"].view(batch_size, 1, -1) * pa - Ds["Db_bl"].view(batch_size, 1, -1) * pb
 
-        orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
+        orth_loss = torch.einsum('bijk,bijk->bi', N_hat_n, V.view(batch_size,3,height, width))
         
-        return orth_loss.sum()
+        return -torch.mean(torch.sum(orth_loss,dim=1))
     
-    def compute_nearby_positions(self,pixel_positions):
-        # pixel_positions: Tensor of shape (batch_size, 2, height, width)
-
-        # Define offsets for nearby pixels
-        offset_a = torch.tensor([[-1, -1], [1, 1]], dtype=torch.float32, device=pixel_positions.device)
-        offset_b = torch.tensor([[-1, 1], [1, -1]], dtype=torch.float32, device=pixel_positions.device)
-        print(offset_a.shape)
-        print(offset_b.shape)
-        #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
-        #offset_a = offset_a.view(1,-1,-1, 2).expand(12, -1, -1)
-        #offset_b = offset_a.view(1,-1,-1, 2).expand(12, -1, -1)
-        # Expand dimensions to match the shape of pixel_positions
-        #offset_a = offset_a.view(1,2, 1, 1).expand(12, -1, -1,-1)
-        #offset_b = offset_b.view(1,2, 1, 1).expand(12, -1, -1,-11)
-
-          # Reshape the offset tensors to (1, 2, 1, 1)
-        offset_a = offset_a.view(1, 2, 2, 1)
-        offset_b = offset_b.view(1, 2, 2, 1)
-
-        # Repeat the offset tensors along the height and width dimensions
-        offset_a = offset_a.expand(pixel_positions.size(0), -1, pixel_positions.size(2), -1)
-        offset_b = offset_b.expand(pixel_positions.size(0), -1, pixel_positions.size(2), -1)
-
-        print(pixel_positions.shape)
-        print(offset_a.shape)
-
-
-        positions_a = pixel_positions + offset_a
-        positions_b = pixel_positions + offset_b
-
-        return positions_a, positions_b
-
+    
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
@@ -947,7 +916,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
