@@ -785,13 +785,15 @@ class Trainer_Monodepth2:
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
         #print(xy[0])
         # Flatten and concatenate to get pairs of positions
-        print(top_left.shape)
+        #print(top_left.shape)
 
         
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
         top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
+
+        print(top_left_flat.shape)
         
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
