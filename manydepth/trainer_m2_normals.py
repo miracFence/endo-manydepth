@@ -754,7 +754,7 @@ class Trainer_Monodepth2:
         
         return orth_loss.sum()
     
-    def compute_nearby_positions(pixel_positions):
+    def compute_nearby_positions(self,pixel_positions):
         # pixel_positions: Tensor of shape (batch_size, 2, height, width)
 
         # Define offsets for nearby pixels
@@ -798,7 +798,9 @@ class Trainer_Monodepth2:
 
         xy = torch.stack([x, y], dim=-1).to(device=K_inv.device).to(device=K_inv.device)
         xy = xy.view(1, -1, 2).expand(12, -1, -1)
-        print(xy.shape)
+        positions_a, positions_b = compute_nearby_positions(xy.view(12,2,height,width))
+        print(positions_a.shape)
+        print(positions_b.shape)
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
