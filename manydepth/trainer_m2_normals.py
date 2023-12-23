@@ -806,16 +806,17 @@ class Trainer_Monodepth2:
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         
-        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
-        top_right = torch.stack([x + 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
+        top_left = torch.stack([x - 1, y - 1], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([x + 1, y + 1], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([x + 1, y - 1], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([x - 1, y + 1], dim=-1).to(device=K_inv.device)
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
         #print(xy[0])
         # Flatten and concatenate to get pairs of positions
+        print(top_left.shape)
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
         top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
