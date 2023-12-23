@@ -752,7 +752,7 @@ class Trainer_Monodepth2:
 
         orth_loss = torch.einsum('bijk,bijk->bi', N_hat_n, V.view(batch_size,3,height, width))
         
-        return -torch.mean(torch.sum(orth_loss,dim=1))
+        return torch.mean(torch.sum(orth_loss,dim=1))
     
     
     def compute_orth_loss3(self, disp, N_hat, K_inv):
@@ -808,9 +808,8 @@ class Trainer_Monodepth2:
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
 
-        
+        """
         # Construct a new depth image using the mean of x and y coordinates
-        #print(top_left_depth.shape)
         #top_left_depth = top_left_depth.view(batch_size,3,-1)
         top_left_depth = ((top_left_depth[:, 1, :] + top_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         #bottom_right_depth = bottom_right_depth.view(batch_size,3,-1)
@@ -819,7 +818,7 @@ class Trainer_Monodepth2:
         top_right_depth = ((top_right_depth[:, 1, :] + top_right_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
-        
+        """
         V = 0
 
         #torch.matmul(depths_a * calibration_matrix_inv, positions_a) - \
@@ -916,7 +915,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
