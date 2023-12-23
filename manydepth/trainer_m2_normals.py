@@ -753,6 +753,23 @@ class Trainer_Monodepth2:
         orth_loss = torch.einsum('bijk,bijk->bijk', N_hat, V.view(batch_size,3,height, width))
         
         return orth_loss.sum()
+    
+    def compute_nearby_positions(pixel_positions):
+        # pixel_positions: Tensor of shape (batch_size, 2, height, width)
+
+        # Define offsets for nearby pixels
+        offset_a = torch.tensor([[-1, -1], [1, 1]], dtype=torch.float32, device=pixel_positions.device)
+        offset_b = torch.tensor([[-1, 1], [1, -1]], dtype=torch.float32, device=pixel_positions.device)
+
+        # Expand dimensions to match the shape of pixel_positions
+        offset_a = offset_a.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+        offset_b = offset_b.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+
+        # Compute positions_a and positions_b
+        positions_a = pixel_positions + offset_a
+        positions_b = pixel_positions + offset_b
+
+        return positions_a, positions_b
 
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -773,12 +790,15 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
+        """
         top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([x + 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)"""
 
-
+        xy = torch.stack([x, y], dim=-1).to(device=K_inv.device).to(device=K_inv.device)
+        xy = xy.view(1, -1, 2).expand(12, -1, -1)
+        print(xy.shape)
         # Flatten and concatenate to get pairs of positions
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
@@ -824,6 +844,11 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         
         V = 0
+
+        torch.matmul(depths_a * calibration_matrix_inv, positions_a) - \
+                      torch.matmul(depths_b * calibration_matrix_inv, positions_b)
+
+
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
         orth_loss1 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
         V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
