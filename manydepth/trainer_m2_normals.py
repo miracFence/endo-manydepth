@@ -760,7 +760,8 @@ class Trainer_Monodepth2:
         # Define offsets for nearby pixels
         offset_a = torch.tensor([[-1, -1], [1, 1]], dtype=torch.float32, device=pixel_positions.device)
         offset_b = torch.tensor([[-1, 1], [1, -1]], dtype=torch.float32, device=pixel_positions.device)
-
+        print(offset_a.shape)
+        print(offset_b.shape)
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         offset_a = offset_a.view(1, -1, 2).expand(12, -1, -1)
         offset_b = offset_a.view(1, -1, 2).expand(12, -1, -1)
