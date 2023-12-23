@@ -825,9 +825,9 @@ class Trainer_Monodepth2:
         
         V = 0
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
-        orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
+        orth_loss1 = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
         V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
-        orth_loss += torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
+        orth_loss2 = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat_normalized)
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
         #V += (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
@@ -835,8 +835,11 @@ class Trainer_Monodepth2:
         #print(V.shape)
         #orth_loss = torch.einsum('bik,bik->', V.view(12, 3, -1),N_hat_normalized.view(12, 3, -1))
         #orth_loss = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
-       
-        return orth_loss.sum()
+        orth_loss1 = orth_loss1.sum(dim=1)
+        orth_loss2 = orth_loss2.sum(dim=1)
+
+    
+        return orth_loss1 + orth_loss2
 
     
     def get_ilumination_invariant_loss(self, pred, target):
