@@ -761,9 +761,12 @@ class Trainer_Monodepth2:
         offset_a = torch.tensor([[-1, -1], [1, 1]], dtype=torch.float32, device=pixel_positions.device)
         offset_b = torch.tensor([[-1, 1], [1, -1]], dtype=torch.float32, device=pixel_positions.device)
 
+        #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
+        offset_a = xy.view(1, -1, 2).expand(12, -1, -1)
+        offset_b = xy.view(1, -1, 2).expand(12, -1, -1)
         # Expand dimensions to match the shape of pixel_positions
-        offset_a = offset_a.view(1,2, 1, 1).expand(12, -1, -1,-1)
-        offset_b = offset_b.view(1,2, 1, 1).expand(12, -1, -1,-11)
+        #offset_a = offset_a.view(1,2, 1, 1).expand(12, -1, -1,-1)
+        #offset_b = offset_b.view(1,2, 1, 1).expand(12, -1, -1,-11)
 
         # Compute positions_a and positions_b
         print(pixel_positions.shape)
@@ -798,9 +801,9 @@ class Trainer_Monodepth2:
         top_right = torch.stack([x + 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([x - 0.5, y + 0.5], dim=-1).to(device=K_inv.device)"""
 
-        xy = torch.stack([x, y], dim=-1).to(device=K_inv.device).to(device=K_inv.device)
+        xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         xy = xy.view(1, -1, 2).expand(12, -1, -1)
-        positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
+        positions_a, positions_b = self.compute_nearby_positions(xy)
         print(positions_a.shape)
         print(positions_b.shape)
         # Flatten and concatenate to get pairs of positions
