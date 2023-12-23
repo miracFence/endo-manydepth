@@ -798,7 +798,7 @@ class Trainer_Monodepth2:
 
         xy = torch.stack([x, y], dim=-1).to(device=K_inv.device).to(device=K_inv.device)
         xy = xy.view(1, -1, 2).expand(12, -1, -1)
-        positions_a, positions_b = compute_nearby_positions(xy.view(12,2,height,width))
+        positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
         print(positions_a.shape)
         print(positions_b.shape)
         # Flatten and concatenate to get pairs of positions
