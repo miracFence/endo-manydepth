@@ -811,7 +811,6 @@ class Trainer_Monodepth2:
         top_right_flat = torch.abs(torch.cat([top_right_flat.permute(0,2,1).int(), ones], dim=1))
         bottom_left_flat = torch.abs(torch.cat([bottom_left_flat.permute(0,2,1).int(), ones], dim=1))
 
-        print(top_left_flat)
 
         pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
@@ -851,7 +850,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
-        return torch.mean(torch.sum(orth_loss,dim = 1))
+        return -torch.mean(torch.sum(orth_loss,dim = 1))
 
 
     
