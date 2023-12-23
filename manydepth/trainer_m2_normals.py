@@ -773,9 +773,14 @@ class Trainer_Monodepth2:
         offset_a = offset_a.view(1, 2, 1, 2)
         offset_b = offset_b.view(1, 2, 1, 2)
 
-        # Compute positions_a and positions_b
+        # Repeat the offset tensors along the height and width dimensions
+        offset_a = offset_a.expand(pixel_positions.size(0), -1, pixel_positions.size(2), -1)
+        offset_b = offset_b.expand(pixel_positions.size(0), -1, pixel_positions.size(2), -1)
+
         print(pixel_positions.shape)
         print(offset_a.shape)
+
+
         positions_a = pixel_positions + offset_a
         positions_b = pixel_positions + offset_b
 
