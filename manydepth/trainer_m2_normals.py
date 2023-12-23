@@ -762,8 +762,8 @@ class Trainer_Monodepth2:
         offset_b = torch.tensor([[-1, 1], [1, -1]], dtype=torch.float32, device=pixel_positions.device)
 
         # Expand dimensions to match the shape of pixel_positions
-        offset_a = offset_a.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
-        offset_b = offset_b.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+        offset_a = offset_a.view(2, 2, 1, 1)
+        offset_b = offset_b.view(2, 2, 1, 1)
 
         # Compute positions_a and positions_b
         print(pixel_positions.shape)
