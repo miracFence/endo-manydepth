@@ -849,7 +849,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
-        return torch.sum(orth_loss)
+        return -torch.mean(torch.sum(orth_loss,dim = 1))
 
 
     
