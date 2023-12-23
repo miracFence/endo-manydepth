@@ -801,7 +801,7 @@ class Trainer_Monodepth2:
         """
         
         #print(top_left_depth.shape)
-        top_left_depth = D[:, :, top_left_flat[0,:,1], top_left_flat[0,:,0]]
+        top_left_depth = D[:, :, top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
         print(top_left_depth.shape)
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
