@@ -816,7 +816,7 @@ class Trainer_Monodepth2:
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
         #print(xy[0])
         # Flatten and concatenate to get pairs of positions
-        print(top_left)
+        #print(top_left)
 
         top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
         bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
