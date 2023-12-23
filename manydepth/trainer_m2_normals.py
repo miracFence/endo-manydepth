@@ -847,7 +847,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized))
         # Compute the dot product for orthogonality
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
-        return -torch.mean(torch.sum(orth_loss,dim=1))
+        return torch.sum(orth_loss,dim=1)
 
     
     def get_ilumination_invariant_loss(self, pred, target):
