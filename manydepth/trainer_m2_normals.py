@@ -766,6 +766,8 @@ class Trainer_Monodepth2:
         offset_b = offset_b.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
 
         # Compute positions_a and positions_b
+        print(pixel_positions.shape)
+        print(offset_a.shape)
         positions_a = pixel_positions + offset_a
         positions_b = pixel_positions + offset_b
 
