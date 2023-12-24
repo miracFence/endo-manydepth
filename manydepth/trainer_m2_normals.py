@@ -593,7 +593,7 @@ class Trainer_Monodepth2:
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
 
-    def compute_orth_loss4(self, disp, N_hat, K_inv):
+    def compute_orth_loss4(self, disp, N_hat, K_inv,batch_image):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D_inv = 1.0 / D
