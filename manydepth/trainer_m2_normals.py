@@ -833,9 +833,9 @@ class Trainer_Monodepth2:
         #              torch.matmul(depths_b * calibration_matrix_inv, positions_b)
 
 
-        V = torch.abs((top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width)))
+        V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
         #orth_loss1 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
-        V += torch.abs((bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width)))
+        V += (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
         #orth_loss2 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
