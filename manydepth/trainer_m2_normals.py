@@ -804,9 +804,9 @@ class Trainer_Monodepth2:
         top_right_depth = D[:, :, top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
         bottom_left_depth = D[:, :, bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
 
-        top_left_flat = torch.abs(torch.cat([top_left_flat.permute(0,2,1).int(), ones], dim=1))
-        bottom_right_flat = torch.abs(torch.cat([bottom_right_flat.permute(0,2,1).int(), ones], dim=1))
-        top_right_flat = torch.abs(torch.cat([top_right_flat.permute(0,2,1).int(), ones], dim=1))
+        top_left_flat = torch.cat([top_left_flat.permute(0,2,1).int(), ones], dim=1)
+        bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1).int(), ones], dim=1)
+        top_right_flat = torch.cat([top_right_flat.permute(0,2,1).int(), ones], dim=1)
         bottom_left_flat = torch.abs(torch.cat([bottom_left_flat.permute(0,2,1).int(), ones], dim=1))
 
 
@@ -833,9 +833,9 @@ class Trainer_Monodepth2:
         #              torch.matmul(depths_b * calibration_matrix_inv, positions_b)
 
 
-        V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
+        V = torch.abs((top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width)))
         #orth_loss1 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
-        V += (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
+        V += torch.abs((bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width)))
         #orth_loss2 = torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized)
         #torch.einsum('ij,ij->', [a, b])
         #orth_loss = torch.einsum('bijk,bijk->', V.view(batch_size,3,height,width),N_hat)
