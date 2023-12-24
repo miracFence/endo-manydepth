@@ -593,7 +593,7 @@ class Trainer_Monodepth2:
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
 
-    def compute_orth_loss4(self, disp, N_hat, K_inv, image_batch):
+    def compute_orth_loss4(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D_inv = 1.0 / D
@@ -619,25 +619,25 @@ class Trainer_Monodepth2:
         bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
         #bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
 
-        right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D_inv.view(batch_size, 1, -1)
+        #right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D_inv.view(batch_size, 1, -1)
         #right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D_inv.view(batch_size, 1, -1)
+        #bottom_flat_depth = bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D_inv.view(batch_size, 1, -1)
         #bottom_bottom_depth = bottom_bottom_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
 
-        right_depth = ((right_depth[:, 0, :] + right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        #right_depth = ((right_depth[:, 0, :] + right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         #right_right_depth = ((right_right_depth[:, 0, :] + right_right_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        bottom_flat_depth = ((bottom_flat_depth[:, 0, :] + bottom_flat_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
+        #bottom_flat_depth = ((bottom_flat_depth[:, 0, :] + bottom_flat_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         #bottom_bottom_depth = ((bottom_bottom_depth[:, 0, :] + bottom_bottom_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
-        
-
+        right_depth = D_inv[:, :, right_flat[0,:,1].long(), right_flat[0,:,0].long()]
+        bottom_depth = D_inv[:, :, bottom_flat[0,:,1].long(), bottom_flat[0,:,0].long()]
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
 
 
         #print(normal_flat.shape)
-        normal_flat = torch.cat([normal_flat.permute(0,2,1), ones], dim=1)
-        right_flat = torch.cat([right_flat.permute(0,2,1), ones], dim=1)
+        normal_flat = torch.cat([normal_flat.permute(0,2,1).int(), ones], dim=1)
+        right_flat = torch.cat([right_flat.permute(0,2,1).int(), ones], dim=1)
         #right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
-        bottom_flat = torch.cat([bottom_flat.permute(0,2,1), ones], dim=1)
+        bottom_flat = torch.cat([bottom_flat.permute(0,2,1).int(), ones], dim=1)
         #bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
@@ -647,7 +647,7 @@ class Trainer_Monodepth2:
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
         Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
         movements = [right_flat,bottom_flat]
-        depths = [right_depth,bottom_flat_depth]
+        depths = [right_depth,bottom_depth]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
@@ -662,7 +662,7 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
         #print(image_batch.shape)
-        
+        """
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         gradient_x = F.conv2d(image_batch, x.view(1, 3, 1, 1))
@@ -672,8 +672,8 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.sqrt(gradient_x**2 + gradient_y**2)
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
-        G_p = torch.exp(-1 * gradient_magitude **2 / 1)
-        return G_p * orth_loss.sum()
+        G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
+        return orth_loss.sum()
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -753,7 +753,6 @@ class Trainer_Monodepth2:
         orth_loss = torch.einsum('bijk,bijk->bi', N_hat_n, V.view(batch_size,3,height, width))
         
         return torch.mean(torch.sum(orth_loss,dim=1))
-    
     
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -928,7 +927,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
