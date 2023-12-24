@@ -607,11 +607,12 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        normal = torch.stack([x , y ], dim=-1).to(device=K_inv.device)
-        right = torch.stack([x + 1, y ], dim=-1).to(device=K_inv.device)
-        right_right = torch.stack([x + 2, y], dim=-1).to(device=K_inv.device)
-        bottom = torch.stack([x , y + 1  ], dim=-1).to(device=K_inv.device)
-        bottom_bottom = torch.stack([x , y + 2], dim=-1).to(device=K_inv.device)
+        normal = torch.stack([x , y], dim=-1).to(device=K_inv.device)
+        right = torch.stack([x + 0.5, y], dim=-1).to(device=K_inv.device)
+        right_right = torch.stack([x + 0.5, y], dim=-1).to(device=K_inv.device)
+        bottom = torch.stack([x , y + 0.5  ], dim=-1).to(device=K_inv.device)
+        bottom_bottom = torch.stack([x , y + 0.5], dim=-1).to(device=K_inv.device)
+    
 
         normal_flat = normal.view(1, -1, 2).expand(12, -1, -1)
         right_flat = right.view(1, -1, 2).expand(12, -1, -1)
@@ -632,6 +633,7 @@ class Trainer_Monodepth2:
         right_right_depth = D_inv[:, :, right_right_flat[0,:,1].long(), right_right_flat[0,:,0].long()]
         bottom_depth = D_inv[:, :, bottom_flat[0,:,1].long(), bottom_flat[0,:,0].long()]
         bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0,:,1].long(), bottom_bottom_flat[0,:,0].long()]
+        
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
 
 
@@ -851,7 +853,7 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
-        return torch.sum(orth_loss)
+        return -torch.mean(torch.sum(orth_loss))
 
 
     
@@ -929,7 +931,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
