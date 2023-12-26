@@ -765,7 +765,7 @@ class Trainer_Monodepth2:
         # Create coordinate grids
         #y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y, x = torch.meshgrid(torch.arange(0, width), torch.arange(0, height))
-        meshgrid = np.meshgrid(range(self.width), range(self.height), indexing='xy')
+        meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
         id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
         print(id_coords.shape)
         y = y.float().unsqueeze(0).unsqueeze(0)
