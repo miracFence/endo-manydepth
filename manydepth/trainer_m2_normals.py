@@ -775,7 +775,7 @@ class Trainer_Monodepth2:
         
         top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
-        top_right = torch.stack([y -1 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([y - 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([y + 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
