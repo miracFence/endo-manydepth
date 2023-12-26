@@ -807,8 +807,7 @@ class Trainer_Monodepth2:
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1).int(), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1).int(), ones], dim=1)
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1).int(), ones], dim=1)
-        bottom_left_flat = torch.abs(torch.cat([bottom_left_flat.permute(0,2,1).int(), ones], dim=1))
-
+        bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1).int(), ones], dim=1)
 
         pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
