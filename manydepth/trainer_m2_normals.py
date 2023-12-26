@@ -849,10 +849,7 @@ class Trainer_Monodepth2:
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
         ol = orth_loss1+orth_loss2
-        if ol < 0:
-            return -torch.mean(ol)
-        else:
-            return torch.mean(ol)
+        return -torch.mean(ol)
 
 
     
