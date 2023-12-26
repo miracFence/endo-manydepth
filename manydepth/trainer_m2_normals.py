@@ -775,8 +775,8 @@ class Trainer_Monodepth2:
         
         top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
-        top_right = torch.stack([y - 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([y + 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([y + 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([y - 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
@@ -855,7 +855,7 @@ class Trainer_Monodepth2:
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
         ol = orth_loss1+orth_loss2
-        return torch.mean(ol)
+        return -torch.mean(ol)
 
 
     
