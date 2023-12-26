@@ -763,11 +763,7 @@ class Trainer_Monodepth2:
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
-        #y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
-        y, x = torch.meshgrid(torch.arange(0, width), torch.arange(0, height))
-        meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
-        id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
-        print(id_coords.shape)
+        y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
