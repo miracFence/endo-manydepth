@@ -834,18 +834,18 @@ class Trainer_Monodepth2:
 
 
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
-        #V = torch.matmul(top_left_depth.view(12,1,height,width) , pa_tl.view(12,3,height,width)) - torch.matmul(bottom_right_depth.view(12,1,height,width) , pb_br.view(12,3,height,width))
-        #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
-        orth_loss1 = V.view(12,height,width,3) * N_hat_normalized.view(12,height,width,3)
+        #V = torch.matmul(top_left_depth.view(12, height * width, 1) , pa_tl.view(12, 3, height * width)) - torch.matmul(bottom_right_depth.view(12, height * width, 1) , pb_br.view(12, 3, height * width))
+        orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
+        #orth_loss1 = V.view(12,height,width,3) * N_hat_normalized.view(12,height,width,3)
         # Sum over the channel dimension (dimension 1)
-        orth_loss1 = orth_loss1.sum(dim=-1)
+        #orth_loss1 = orth_loss1.sum(dim=-1)
 
-        V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
-        #V = torch.matmul(bottom_right_depth.view(12,1,height,width) , pa_tr.view(12,3,height,width)) - torch.matmul(bottom_left_depth.view(12,1,height,width) , pb_bl.view(12,3,height,width))
-        #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
-        orth_loss2 = V.view(12,height,width,3) * N_hat_normalized.view(12,height,width,3)
+        V = (top_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
+        #V = torch.matmul(top_right_depth.view(12, height * width, 1) , pa_tr.view(12, 3, height * width)) - torch.matmul(bottom_left_depth.view(12, height * width, 1) , pb_bl.view(12, 3, height * width))
+        orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
+        #orth_loss2 = V.view(12,height,width,3) * N_hat_normalized.view(12,height,width,3)
         # Sum over the channel dimension (dimension 1)
-        orth_loss2 = orth_loss2.sum(dim=-1)
+        #orth_loss2 = orth_loss2.sum(dim=-1)
         
         
         #torch.einsum('ij,ij->', [a, b])
