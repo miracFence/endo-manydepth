@@ -771,6 +771,12 @@ class Trainer_Monodepth2:
         magnitude[magnitude == 0] = 1
         N_hat_normalized = N_hat / magnitude
 
+        """meshgrid = np.meshgrid(range(width), range(height), indexing='xy')
+        id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
+        pix_coords = torch.unsqueeze(torch.stack(
+            [id_coords[0].view(-1), id_coords[1].view(-1)], 0), 0)
+        pix_coords = pix_coords.repeat(batch_size, 1, 1)"""
+
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         
         top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
@@ -855,7 +861,7 @@ class Trainer_Monodepth2:
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
         ol = orth_loss1+orth_loss2
-        return -torch.mean(ol)
+        return torch.mean(ol)
 
 
     
