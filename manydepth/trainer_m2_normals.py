@@ -839,7 +839,7 @@ class Trainer_Monodepth2:
         # Sum over the channel dimension (dimension 1)
         orth_loss1 = orth_loss1.sum(dim=1)
 
-        V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
+        V = (bottom_right_depth.view(12,1,height,width) * pa_tr.view(12,3,height,width)) - (bottom_left_depth.view(12,1,height,width) * pb_bl.view(12,3,height,width))
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
         orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
