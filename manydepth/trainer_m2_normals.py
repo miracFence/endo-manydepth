@@ -764,7 +764,7 @@ class Trainer_Monodepth2:
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
         #y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
-        y, x = torch.meshgrid(torch.arange(0, width), torch.arange(0, height))
+        x, y = torch.meshgrid(torch.arange(0, width), torch.arange(0, height))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
@@ -800,10 +800,10 @@ class Trainer_Monodepth2:
         """
         
         #print(top_left_depth.shape)
-        top_left_depth = D[:, :, top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
-        bottom_right_depth = D[:, :, bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
-        top_right_depth = D[:, :, top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
-        bottom_left_depth = D[:, :, bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
+        top_left_depth = D[:, :, top_left_flat[0,:,0].long(), top_left_flat[0,:,1].long()]
+        bottom_right_depth = D[:, :, bottom_right_flat[0,:,0].long(), bottom_right_flat[0,:,1].long()]
+        top_right_depth = D[:, :, top_right_flat[0,:,0].long(), top_right_flat[0,:,1].long()]
+        bottom_left_depth = D[:, :, bottom_left_flat[0,:,0].long(), bottom_left_flat[0,:,1].long()]
 
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1).int(), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1).int(), ones], dim=1)
