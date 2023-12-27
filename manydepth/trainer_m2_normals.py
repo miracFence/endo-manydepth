@@ -654,19 +654,20 @@ class Trainer_Monodepth2:
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
-        Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
+        #Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
         movements = [right_flat,bottom_flat]
         depths = [right_depth,right_right_depth,bottom_depth,bottom_bottom_depth]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
-            Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
+            #Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
             #Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
             #print(Cpq)
             #print(Cpp)
             #print(D_inv.shape)
             #print(depths[idx].shape)
-            orth_loss += torch.abs(D_inv * Cpq.unsqueeze(2).unsqueeze(3) - depths[idx].view(batch_size,1,height,width) * Cpp.unsqueeze(2).unsqueeze(3))
+            abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].view(batch_size,1,-1) * X_tilde_p)
+            orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
         # Compute gradient of the image
@@ -939,7 +940,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
