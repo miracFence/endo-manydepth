@@ -642,7 +642,7 @@ class Trainer_Monodepth2:
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
 
 
-        #print(normal_flat.shape)
+        print(normal_flat.shape)
         normal_flat = torch.cat([normal_flat.permute(0,2,1).int(), ones], dim=1)
         right_flat = torch.cat([right_flat.permute(0,2,1).int(), ones], dim=1)
         right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
