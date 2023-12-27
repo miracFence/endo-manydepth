@@ -636,7 +636,7 @@ class Trainer_Monodepth2:
         #bottom_bottom_depth = ((bottom_bottom_depth[:, 0, :] + bottom_bottom_depth[:, 1, :]) / 2).view(batch_size,1,height,width)
         right_depth = D_inv[:, :, right_flat[0,:,0].long(), right_flat[0,:,1].long()]
         right_right_depth = D_inv[:, :, right_right_flat[0,:,0].long(), right_right_flat[0,:,1].long()]
-        bottom_depth = D_inv[:, :, bottom_flat[0,:,0].long(), bottom_flat[0,:1].long()]
+        bottom_depth = D_inv[:, :, bottom_flat[0,:,0].long(), bottom_flat[0,:,1].long()]
         bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0,:,0].long(), bottom_bottom_flat[0,:,1].long()]
         
         ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
