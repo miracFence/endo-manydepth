@@ -773,7 +773,7 @@ class Trainer_Monodepth2:
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         
-        top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1).long(), torch.clamp(x + 1.0, min=0, max=width-1)].long(), dim=-1).to(device=K_inv.device)
+        top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([y - 1.0, x - 1.0], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([y + 1.0, x - 1.0], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([y - 1.0, x + 1.0], dim=-1).to(device=K_inv.device)
