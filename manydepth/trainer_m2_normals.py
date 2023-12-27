@@ -601,7 +601,7 @@ class Trainer_Monodepth2:
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
-        ones = torch.ones(1, 1, height * width).to(device=K_inv.device)
+        ones = torch.ones( 1, 1, height * width).to(device=K_inv.device)
         magnitude = torch.norm(N_hat, dim=1, keepdim=True)
         magnitude[magnitude == 0] = 1
         N_hat_normalized = N_hat / magnitude
@@ -639,10 +639,6 @@ class Trainer_Monodepth2:
         bottom_depth = D_inv[:, :, bottom_flat[0,:,0].long(), bottom_flat[0,:,1].long()]
         bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0,:,0].long(), bottom_bottom_flat[0,:,1].long()]
         
-        ones = torch.ones(12, 1, height * width).to(device=K_inv.device)
-
-
-        print(normal_flat.shape)
         normal_flat = torch.cat([normal_flat.permute(0,2,1).int(), ones], dim=1)
         right_flat = torch.cat([right_flat.permute(0,2,1).int(), ones], dim=1)
         right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
