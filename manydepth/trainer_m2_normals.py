@@ -775,12 +775,18 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        
+        """
+        top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)"""
+
         top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
 
+        print(top_left)
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
