@@ -610,8 +610,8 @@ class Trainer_Monodepth2:
         normal = torch.stack([y , x], dim=-1).to(device=K_inv.device)
         right = torch.stack([y, torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         right_right = torch.stack([y, torch.clamp(x + 2.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
-        bottom = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1) , x  ], dim=-1).to(device=K_inv.device)
-        bottom_bottom = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1) , x], dim=-1).to(device=K_inv.device)
+        bottom = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1) , x ], dim=-1).to(device=K_inv.device)
+        bottom_bottom = torch.stack([torch.clamp(y + 2.0, min=0, max=height-1) , x], dim=-1).to(device=K_inv.device)
         """
         top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
