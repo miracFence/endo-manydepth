@@ -773,8 +773,8 @@ class Trainer_Monodepth2:
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
         
-        top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_right = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
+        top_left = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([y + 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([y - 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
 
@@ -784,12 +784,11 @@ class Trainer_Monodepth2:
         #print(xy[0])
         # Flatten and concatenate to get pairs of positions
         #print(top_left.shape)
-
         
-        top_left_flat = top_left.view(1, -1, 2).expand(12, -1, -1)
-        bottom_right_flat = bottom_right.view(1, -1, 2).expand(12, -1, -1)
-        top_right_flat = top_right.view(1, -1, 2).expand(12, -1, -1)
-        bottom_left_flat = bottom_left.view(1, -1, 2).expand(12, -1, -1)
+        top_left_flat = top_left.view(1, -1, 2)
+        bottom_right_flat = bottom_right.view(1, -1, 2)
+        top_right_flat = top_right.view(1, -1, 2)
+        bottom_left_flat = bottom_left.view(1, -1, 2)
 
         """
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
