@@ -799,7 +799,7 @@ class Trainer_Monodepth2:
         bottom_right_flat = bottom_right.view(1, -1, 2)
         top_right_flat = top_right.view(1, -1, 2)
         bottom_left_flat = bottom_left.view(1, -1, 2)
-       
+        print(top_left_flat.shape)
 
         """
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
