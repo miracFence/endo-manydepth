@@ -782,17 +782,12 @@ class Trainer_Monodepth2:
         top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         """
-        normal = torch.stack([x,y], dim=-1).to(device=K_inv.device)   
+  
         top_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
 
-        print(normal)
-        print(top_left)
-        print(bottom_right)
-        print(top_right)
-        print(bottom_left)
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
@@ -819,6 +814,11 @@ class Trainer_Monodepth2:
         bottom_right_depth = D[:,:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
         top_right_depth = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
         bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
+
+        print(D-top_left_depth)
+        print(D-bottom_right_depth)
+        print(D-top_right_depth)
+        print(D-bottom_left_depth)
 
         wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
