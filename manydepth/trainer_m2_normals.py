@@ -815,10 +815,10 @@ class Trainer_Monodepth2:
 
         #D = D.permute(0,2,3,1)
         
-        top_left_depth = D[:,:,top_left_flat[0,:,0].long(), top_left_flat[0,:,1].long()]
-        bottom_right_depth = D[:,:,bottom_right_flat[0,:,0].long(), bottom_right_flat[0,:,1].long()]
-        top_right_depth = D[:,:,top_right_flat[0,:,0].long(), top_right_flat[0,:,1].long()]
-        bottom_left_depth = D[:,:,bottom_left_flat[0,:,0].long(), bottom_left_flat[0,:,1].long()]
+        top_left_depth = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
+        bottom_right_depth = D[:,:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
+        top_right_depth = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
+        bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
 
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
