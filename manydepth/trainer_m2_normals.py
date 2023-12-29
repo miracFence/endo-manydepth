@@ -800,7 +800,7 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
         
-        print(top_left_flat)
+        #print(top_left_flat)
 
         """
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
@@ -815,22 +815,20 @@ class Trainer_Monodepth2:
         top_right_depth = D[:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
         bottom_left_depth = D[:, bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
 
-        print(top_left_depth.shape)
+        #print(top_left_depth.shape)
 
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
         bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
 
-        print(top_left_flat.shape)
+        #print(top_left_flat.shape)
 
         pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
 
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
-
-        print(pa_tl.shape)
 
         """
         # Construct a new depth image using the mean of x and y coordinates
@@ -843,10 +841,6 @@ class Trainer_Monodepth2:
         #bottom_left_depth = bottom_left_depth.view(batch_size,3,-1)
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         """
-
-        #torch.matmul(depths_a * calibration_matrix_inv, positions_a) - \
-        #              torch.matmul(depths_b * calibration_matrix_inv, positions_b)
-
 
         V = (top_left_depth.view(12,1,height,width) * pa_tl.view(12,3,height,width)) - (bottom_right_depth.view(12,1,height,width) * pb_br.view(12,3,height,width))
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
