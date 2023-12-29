@@ -775,18 +775,17 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        
+        """
         top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
-        print(top_left.shape)
-        print(top_left)
-        """    
+        """
+           
         top_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
+        bottom_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
@@ -795,10 +794,11 @@ class Trainer_Monodepth2:
         # Flatten and concatenate to get pairs of positions
         #print(top_left.shape)
         
-        top_left_flat = top_left.view(1, -1, 2)
-        bottom_right_flat = bottom_right.view(1, -1, 2)
-        top_right_flat = top_right.view(1, -1, 2)
-        bottom_left_flat = bottom_left.view(1, -1, 2)
+        top_left_flat = top_left.view(-1, 2)
+        bottom_right_flat = bottom_right.view(-1, 2)
+        top_right_flat = top_right.view(-1, 2)
+        bottom_left_flat = bottom_left.view(-1, 2)
+        
         print(top_left_flat.shape)
 
         """
