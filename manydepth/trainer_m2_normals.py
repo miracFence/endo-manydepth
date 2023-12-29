@@ -808,7 +808,7 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         """
-        D = D.view(batch_size,-1,1)
+        D = D.view(12,height * width,1)
         top_left_depth = D[:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
         bottom_right_depth = D[:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,1].long()]
         top_right_depth = D[:,top_right_flat[0,:,1].long(), top_right_flat[0,:,1].long()]
@@ -821,7 +821,8 @@ class Trainer_Monodepth2:
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
         bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
 
-        #print(top_left_flat)
+        print("Ok")
+        print(top_left_flat)
 
         pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
         pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
