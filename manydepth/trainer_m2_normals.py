@@ -776,17 +776,22 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        
+        """
         top_left = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)"""
         
         """
         top_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
+
+        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([x + 0.5,y - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([x - 0.5, y + 0.5 ], dim=-1).to(device=K_inv.device)
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
@@ -806,14 +811,14 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-    
+        
 
         #D = D.permute(0,2,3,1)
-        """
+        
         top_left_depth = D[:,:,top_left_flat[0,:,0].long(), top_left_flat[0,:,1].long()]
         bottom_right_depth = D[:,:,bottom_right_flat[0,:,0].long(), bottom_right_flat[0,:,1].long()]
         top_right_depth = D[:,:,top_right_flat[0,:,0].long(), top_right_flat[0,:,1].long()]
-        bottom_left_depth = D[:,:,bottom_left_flat[0,:,0].long(), bottom_left_flat[0,:,1].long()]"""
+        bottom_left_depth = D[:,:,bottom_left_flat[0,:,0].long(), bottom_left_flat[0,:,1].long()]
 
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
