@@ -829,6 +829,8 @@ class Trainer_Monodepth2:
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
 
+        print(pa_tl.shape)
+
         """
         # Construct a new depth image using the mean of x and y coordinates
         #top_left_depth = top_left_depth.view(batch_size,3,-1)
