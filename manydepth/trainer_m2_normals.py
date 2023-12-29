@@ -815,10 +815,10 @@ class Trainer_Monodepth2:
         top_right_depth = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
         bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
 
-        print(D-top_left_depth)
-        print(D-bottom_right_depth)
-        print(D-top_right_depth)
-        print(D-bottom_left_depth)
+        print(sum(D.view(12,height*width)-top_left_depth))
+        print(sum(D.view(12,height*width)-bottom_right_depth))
+        print(sum(D.view(12,height*width)-top_right_depth))
+        print(sum(D.view(12,height*width)-bottom_left_depth))
 
         wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
