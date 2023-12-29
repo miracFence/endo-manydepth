@@ -782,12 +782,18 @@ class Trainer_Monodepth2:
         top_right = torch.stack([torch.clamp(y + 1.0, min=0, max=height-1), torch.clamp(x - 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(y - 1.0, min=0, max=height-1), torch.clamp(x + 1.0, min=0, max=width-1)], dim=-1).to(device=K_inv.device)
         """
-           
+        normal = torch.stack([x,y], dim=-1).to(device=K_inv.device)   
         top_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
 
+        print(normal)
+        print(top_left)
+        print(bottom_right)
+        print(top_right)
+        print(bottom_left)
+        break
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
         #positions_a, positions_b = self.compute_nearby_positions(xy.view(12,2,height,width))
