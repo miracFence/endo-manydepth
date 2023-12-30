@@ -820,7 +820,7 @@ class Trainer_Monodepth2:
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         print(top_left_depth.shape)
         D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        print(D_hat_pa)
+        print(D_hat_pa.shape)
         #D = D.permute(0,2,3,1)
         """
         top_left_depth = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
