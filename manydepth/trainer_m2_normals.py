@@ -811,18 +811,42 @@ class Trainer_Monodepth2:
         bottom_right_flat = bottom_right.view(1,-1, 2).expand(12, -1, -1)
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
+
+        top_left_flat = top_left_flat.view(batch_size, 2,height,width)
+        top_left_flat = top_left_flat.permute(0, 2, 3, 1)
+        top_left_flat[..., 0] /= width - 1
+        top_left_flat[..., 1] /= height - 1
+        top_left_flat = (top_left_flat - 0.5) * 2
+
+        bottom_right_flat = bottom_right_flat.view(batch_size, 2,height,width)
+        bottom_right_flat = bottom_right_flat.permute(0, 2, 3, 1)
+        bottom_right_flat[..., 0] /= width - 1
+        bottom_right_flat[..., 1] /= height - 1
+        bottom_right_flat = (bottom_right_flat - 0.5) * 2
+
+        top_right_flat = top_right_flat.view(batch_size, 2,height,width)
+        top_right_flat = top_right_flat.permute(0, 2, 3, 1)
+        top_right_flat[..., 0] /= width - 1
+        top_right_flat[..., 1] /= height - 1
+        top_right_flat = (top_right_flat - 0.5) * 2
+
+        bottom_left_flat = bottom_left_flat.view(batch_size, 2,height,width)
+        bottom_left_flat = bottom_left_flat.permute(0, 2, 3, 1)
+        bottom_left_flat[..., 0] /= width - 1
+        bottom_left_flat[..., 1] /= height - 1
+        bottom_left_flat = (bottom_left_flat - 0.5) * 2
         
         #print(top_left_flat)
-        
+        """        
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
+        bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
         #print(top_left_depth.shape)
-        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_flat.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_flat.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_flat.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_flat.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         #print(D_hat_pa.shape)
         #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
