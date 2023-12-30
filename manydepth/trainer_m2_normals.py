@@ -788,10 +788,10 @@ class Trainer_Monodepth2:
         top_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
         
-        top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_right = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
-        top_right = torch.stack([y + 0.5,x - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([y - 0.5, x + 0.5 ], dim=-1).to(device=K_inv.device)
+        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([x + 0.5,y - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([x - 0.5, y + 0.5 ], dim=-1).to(device=K_inv.device)
 
         """
         top_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
@@ -819,7 +819,6 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         
-        print(top_left_depth.shape)
 
         #D = D.permute(0,2,3,1)
         """
@@ -831,7 +830,9 @@ class Trainer_Monodepth2:
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
 
-        #print(top_left_depth.shape)
+        
+        top_left_depth = torch.cat([top_left_depth.permute(0,2,1), ones], dim=1)
+        print(top_left_depth.shape)
 
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
