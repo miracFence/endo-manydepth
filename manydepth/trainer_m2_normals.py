@@ -862,14 +862,14 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         """
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
-        V = (top_left_depth.view(12,1,-1) * pa_tl) - (bottom_right_depth.view(12,1,-1) * pb_br)
+        V = (top_left_depth.view(12,3,-1) * pa_tl) - (bottom_right_depth.view(12,3,-1) * pb_br)
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
-        V = (top_right_depth.view(12,1,-1) * pa_tr) - (bottom_left_depth.view(12,1,-1) * pb_bl)
+        V = (top_right_depth.view(12,3,-1) * pa_tr) - (bottom_left_depth.view(12,3,-1) * pb_bl)
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
