@@ -818,10 +818,13 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        print(top_left_depth.shape)
-        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_flat.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        print(D_hat_pa.shape)
-        print(D_hat_pa)
+        #print(top_left_depth.shape)
+        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        #print(D_hat_pa.shape)
+        #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
         """
         top_left_depth = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
@@ -832,11 +835,6 @@ class Trainer_Monodepth2:
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
 
-        #print(top_left_depth.shape)
-        top_left_depth = torch.cat([top_left_depth, ones], dim=1)
-        bottom_right_depth = torch.cat([bottom_right_depth, ones], dim=1)
-        top_right_depth = torch.cat([top_right_depth, ones], dim=1)
-        bottom_left_depth = torch.cat([bottom_left_depth, ones], dim=1)
         #print(top_left_depth.shape)
 
         top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
@@ -864,14 +862,14 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         """
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
-        V = (top_left_depth.view(12,3,-1) * pa_tl) - (bottom_right_depth.view(12,3,-1) * pb_br)
+        V = (D_hat_pa.view(12,1,-1) * pa_tl) - (D_hat_pb.view(12,1,-1) * pb_br)
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
-        V = (top_right_depth.view(12,3,-1) * pa_tr) - (bottom_left_depth.view(12,3,-1) * pb_bl)
+        V = (D_hat_pa2.view(12,1,-1) * pa_tr) - (D_hat_pb2.view(12,1,-1) * pb_bl)
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
