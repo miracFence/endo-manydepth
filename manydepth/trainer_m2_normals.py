@@ -830,7 +830,7 @@ class Trainer_Monodepth2:
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
 
-        
+        print(top_left_depth.shape)
         top_left_depth = torch.cat([top_left_depth.permute(0,2,1), ones], dim=1)
         print(top_left_depth.shape)
 
