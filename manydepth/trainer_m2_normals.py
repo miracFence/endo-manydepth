@@ -787,16 +787,17 @@ class Trainer_Monodepth2:
         bottom_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
-        """
-        top_left = torch.stack([x - 0.5, y - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_right = torch.stack([x + 0.5, y + 0.5], dim=-1).to(device=K_inv.device)
-        top_right = torch.stack([x + 0.5,y - 0.5], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([x - 0.5, y + 0.5 ], dim=-1).to(device=K_inv.device)"""
+        
+        top_left = torch.stack([y - 0.5, x - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([y + 0.5, x + 0.5], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([y + 0.5,x - 0.5], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([y - 0.5, x + 0.5 ], dim=-1).to(device=K_inv.device)
 
+        """
         top_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
-        bottom_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
 
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
@@ -812,19 +813,19 @@ class Trainer_Monodepth2:
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
         
         #print(top_left_flat)
-        """
+        
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
-        bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
+        bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         
 
         #D = D.permute(0,2,3,1)
-        
+        """
         top_left_depth = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
         bottom_right_depth = D[:,:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
         top_right_depth = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
-        bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
+        bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]"""
 
         #wandb.log({"disp_multi_tl": wandb.Image(top_left_depth[0].view(1,height,width))},step=self.step)
         #wandb.log({"disp_multi_o": wandb.Image(D[0].view(1,height,width))},step=self.step)
@@ -858,14 +859,14 @@ class Trainer_Monodepth2:
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
         V = (top_left_depth.view(12,1,-1) * pa_tl) - (bottom_right_depth.view(12,1,-1) * pb_br)
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
-        orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
+        orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
         V = (top_right_depth.view(12,1,-1) * pa_tr) - (bottom_left_depth.view(12,1,-1) * pb_bl)
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
-        orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,height,width,3),N_hat_normalized.view(batch_size,height,width,3)))
+        orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss2 = orth_loss2.sum(dim=1)
