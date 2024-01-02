@@ -811,6 +811,11 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
 
+        top_left_flat = D.view(batch_size, 1, -1) * top_left_flat
+        bottom_right_flat = D.view(batch_size, 1, -1) * bottom_right_flat
+        top_right_flat = D.view(batch_size, 1, -1) * top_right_flat
+        bottom_left_flat = D.view(batch_size, 1, -1) * bottom_left_flat
+
         top_left_flat_ = top_left_flat.view(batch_size,2,height,width).clone()
         top_left_flat_ = top_left_flat_.permute(0, 2, 3, 1)
         top_left_flat_[..., 0] /= width - 1
