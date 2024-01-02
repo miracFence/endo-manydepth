@@ -191,6 +191,7 @@ class Project3D(nn.Module):
         print(cam_points.shape)
         pix_coords = cam_points[:, :2, :] / (cam_points[:, 2, :].unsqueeze(1) + self.eps)
         print(pix_coords.shape)
+        print(pix_coords)
         pix_coords = pix_coords.view(self.batch_size, 2, self.height, self.width)
         pix_coords = pix_coords.permute(0, 2, 3, 1)
         pix_coords[..., 0] /= self.width - 1
