@@ -806,14 +806,14 @@ class Trainer_Monodepth2:
         #print(xy[0])
         # Flatten and concatenate to get pairs of positions
         #print(top_left.shape)
-        
         top_left_flat = top_left.view(1,-1, 2).expand(12, -1, -1).clone()
         bottom_right_flat = bottom_right.view(1,-1, 2).expand(12, -1, -1)
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
 
-        top_left_flat_ = top_left_flat.view(batch_size, 2,height,width).clone()
-        top_left_flat_ = top_left_flat_[:, :2, :] / (top_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
+        print(top_left_flat.shape)
+        top_left_flat_ = top_left_flat.view(batch_size,2,height,width).clone()
+        top_left_flat_ = top_left_flat_[:, :, :, :] / (top_left_flat_[:,:, :,:].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat_.permute(0, 2, 3, 1)
         top_left_flat_[..., 0] /= width - 1
         top_left_flat_[..., 1] /= height - 1
