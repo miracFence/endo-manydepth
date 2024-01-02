@@ -793,15 +793,12 @@ class Trainer_Monodepth2:
         top_right = torch.stack([x + 1, y - 1], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([x - 1, y + 1 ], dim=-1).to(device=K_inv.device)
 
-        
-
         """
         top_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         top_right = torch.stack([torch.clamp(x - 1.0, min=0, max=width-1), torch.clamp(y + 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
         bottom_left = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1), torch.clamp(y - 1.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)"""
 
-        
 
         #xy = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         #xy = xy.view(1, -1, 2).expand(12, -1, -1)
@@ -814,31 +811,30 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
 
-        #print(top_left_flat.shape)
-        top_left_flat = D.view(batch_size, 1, -1) * top_left_flat.permute(0,2,1)
-        bottom_right_flat = D.view(batch_size, 1, -1) * bottom_right_flat.permute(0,2,1)
-        top_right_flat = D.view(batch_size, 1, -1) * top_right_flat.permute(0,2,1)
-        bottom_left_flat = D.view(batch_size, 1, -1) * bottom_left_flat.permute(0,2,1)
-
+        top_left_flat_ = top_left_flat / (top_left_flat[:,:, :,:].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat.view(batch_size,2,height,width).clone()
+        top_left_flat_ = top_left_flat_[:, :, :, :] / (top_left_flat_[:,:, :,:].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat_.permute(0, 2, 3, 1)
         top_left_flat_[..., 0] /= width - 1
         top_left_flat_[..., 1] /= height - 1
         top_left_flat_ = (top_left_flat_ - 0.5) * 2
 
         bottom_right_flat_ = bottom_right_flat.view(batch_size, 2,height,width).clone()
+        bottom_right_flat_ = bottom_right_flat_[:, :2, :] / (bottom_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_right_flat_ = bottom_right_flat_.permute(0, 2, 3, 1)
         bottom_right_flat_[..., 0] /= width - 1
         bottom_right_flat_[..., 1] /= height - 1
         bottom_right_flat_ = (bottom_right_flat_ - 0.5) * 2
 
         top_right_flat_ = top_right_flat.view(batch_size, 2,height,width).clone()
+        top_right_flat_ = top_right_flat_[:, :2, :] / (top_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         top_right_flat_ = top_right_flat_.permute(0, 2, 3, 1)
         top_right_flat_[..., 0] /= width - 1
         top_right_flat_[..., 1] /= height - 1
         top_right_flat_ = (top_right_flat_ - 0.5) * 2
 
         bottom_left_flat_ = bottom_left_flat.view(batch_size, 2,height,width).clone()
+        bottom_left_flat_ = bottom_left_flat_[:, :2, :] / (bottom_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_left_flat_ = bottom_left_flat_.permute(0, 2, 3, 1)
         bottom_left_flat_[..., 0] /= width - 1
         bottom_left_flat_[..., 1] /= height - 1
@@ -869,7 +865,23 @@ class Trainer_Monodepth2:
 
         #print(top_left_depth.shape)
 
-        
+        top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
+        bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
+        top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
+        bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
+
+        #print(top_left_flat.shape)
+
+        pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
+        pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
+
+        pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
+        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
+
+        pa_tl = depth.view(self.batch_size, 1, -1) * pa_tl
+        pb_br = depth.view(self.batch_size, 1, -1) * pb_br
+        pa_tr = depth.view(self.batch_size, 1, -1) * pa_tr
+        pb_bl = depth.view(self.batch_size, 1, -1) * pb_bl
 
         """
         # Construct a new depth image using the mean of x and y coordinates
