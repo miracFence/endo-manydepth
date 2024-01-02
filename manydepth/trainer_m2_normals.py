@@ -811,30 +811,25 @@ class Trainer_Monodepth2:
         top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
 
-        top_left_flat_ = top_left_flat / (top_left_flat[:,:, :,:].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat.view(batch_size,2,height,width).clone()
-        top_left_flat_ = top_left_flat_[:, :, :, :] / (top_left_flat_[:,:, :,:].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat_.permute(0, 2, 3, 1)
         top_left_flat_[..., 0] /= width - 1
         top_left_flat_[..., 1] /= height - 1
         top_left_flat_ = (top_left_flat_ - 0.5) * 2
 
         bottom_right_flat_ = bottom_right_flat.view(batch_size, 2,height,width).clone()
-        bottom_right_flat_ = bottom_right_flat_[:, :2, :] / (bottom_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_right_flat_ = bottom_right_flat_.permute(0, 2, 3, 1)
         bottom_right_flat_[..., 0] /= width - 1
         bottom_right_flat_[..., 1] /= height - 1
         bottom_right_flat_ = (bottom_right_flat_ - 0.5) * 2
 
         top_right_flat_ = top_right_flat.view(batch_size, 2,height,width).clone()
-        top_right_flat_ = top_right_flat_[:, :2, :] / (top_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         top_right_flat_ = top_right_flat_.permute(0, 2, 3, 1)
         top_right_flat_[..., 0] /= width - 1
         top_right_flat_[..., 1] /= height - 1
         top_right_flat_ = (top_right_flat_ - 0.5) * 2
 
         bottom_left_flat_ = bottom_left_flat.view(batch_size, 2,height,width).clone()
-        bottom_left_flat_ = bottom_left_flat_[:, :2, :] / (bottom_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_left_flat_ = bottom_left_flat_.permute(0, 2, 3, 1)
         bottom_left_flat_[..., 0] /= width - 1
         bottom_left_flat_[..., 1] /= height - 1
