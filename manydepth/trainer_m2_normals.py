@@ -813,24 +813,28 @@ class Trainer_Monodepth2:
         bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
 
         top_left_flat_ = top_left_flat.view(batch_size, 2,height,width).clone()
+        top_left_flat_ = top_left_flat_[:, :2, :] / (top_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         top_left_flat_ = top_left_flat_.permute(0, 2, 3, 1)
         top_left_flat_[..., 0] /= width - 1
         top_left_flat_[..., 1] /= height - 1
         top_left_flat_ = (top_left_flat_ - 0.5) * 2
 
         bottom_right_flat_ = bottom_right_flat.view(batch_size, 2,height,width).clone()
+        bottom_right_flat_ = bottom_right_flat_[:, :2, :] / (bottom_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_right_flat_ = bottom_right_flat_.permute(0, 2, 3, 1)
         bottom_right_flat_[..., 0] /= width - 1
         bottom_right_flat_[..., 1] /= height - 1
         bottom_right_flat_ = (bottom_right_flat_ - 0.5) * 2
 
         top_right_flat_ = top_right_flat.view(batch_size, 2,height,width).clone()
+        top_right_flat_ = top_right_flat_[:, :2, :] / (top_right_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         top_right_flat_ = top_right_flat_.permute(0, 2, 3, 1)
         top_right_flat_[..., 0] /= width - 1
         top_right_flat_[..., 1] /= height - 1
         top_right_flat_ = (top_right_flat_ - 0.5) * 2
 
         bottom_left_flat_ = bottom_left_flat.view(batch_size, 2,height,width).clone()
+        bottom_left_flat_ = bottom_left_flat_[:, :2, :] / (bottom_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         bottom_left_flat_ = bottom_left_flat_.permute(0, 2, 3, 1)
         bottom_left_flat_[..., 0] /= width - 1
         bottom_left_flat_[..., 1] /= height - 1
@@ -886,14 +890,14 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         """
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
-        V = (D_hat_pa.view(12,1,-1) * pa_tl) - (D_hat_pb.view(12,1,-1) * pb_br)
+        V = D_hat_pa.view(12,1,-1) * pa_tl - D_hat_pb.view(12,1,-1) * pb_br
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
-        V = (D_hat_pa2.view(12,1,-1) * pa_tr) - (D_hat_pb2.view(12,1,-1) * pb_bl)
+        V = D_hat_pa2.view(12,1,-1) * pa_tr - D_hat_pb2.view(12,1,-1) * pb_bl
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
