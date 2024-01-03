@@ -601,7 +601,7 @@ class Trainer_Monodepth2:
         y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
         y = y.float().unsqueeze(0).unsqueeze(0)
         x = x.float().unsqueeze(0).unsqueeze(0)
-        ones = torch.ones( 1, 1, height * width).to(device=K_inv.device)
+        ones = torch.ones( batch_size, 1, height * width).to(device=K_inv.device)
         magnitude = torch.norm(N_hat, dim=1, keepdim=True)
         magnitude[magnitude == 0] = 1
         N_hat_normalized = N_hat / magnitude
@@ -625,10 +625,10 @@ class Trainer_Monodepth2:
         bottom_flat = bottom.view(1, -1, 2).expand(12, -1, -1)
         bottom_bottom_flat = bottom_bottom.view(1, -1, 2).expand(12, -1, -1)
 
-        normal_flat = torch.cat([normal_flat.permute(0,2,1).int(), ones], dim=1)
-        right_flat = torch.cat([right_flat.permute(0,2,1).int(), ones], dim=1)
+        normal_flat = torch.cat([normal_flat.permute(0,2,1), ones], dim=1)
+        right_flat = torch.cat([right_flat.permute(0,2,1), ones], dim=1)
         right_right_flat = torch.cat([right_right_flat.permute(0,2,1), ones], dim=1)
-        bottom_flat = torch.cat([bottom_flat.permute(0,2,1).int(), ones], dim=1)
+        bottom_flat = torch.cat([bottom_flat.permute(0,2,1), ones], dim=1)
         bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
 
         right_flat_ = D.view(batch_size, 1, -1) * right_flat
