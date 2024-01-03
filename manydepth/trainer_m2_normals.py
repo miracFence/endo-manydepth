@@ -868,8 +868,8 @@ class Trainer_Monodepth2:
         D_hat_pa2 = D[:,:,top_right_flat[0,1,:].long(), top_right_flat[0,0,:].long()]
         D_hat_pb2 = D[:,:,bottom_left_flat[0,1,:].long(), bottom_left_flat[0,0,:].long()]
 
-        wandb.log({"disp_multi_pa": wandb.Image(D_hat_pa[0].view(1,height,width))},step=self.step)
-        wandb.log({"disp_multi_pb": wandb.Image(D_hat_pb[0].view(1,height,width))},step=self.step)
+        #wandb.log({"disp_multi_pa": wandb.Image(D_hat_pa[0].view(1,height,width))},step=self.step)
+        #wandb.log({"disp_multi_pb": wandb.Image(D_hat_pb[0].view(1,height,width))},step=self.step)
 
         #print(top_left_depth.shape)
 
