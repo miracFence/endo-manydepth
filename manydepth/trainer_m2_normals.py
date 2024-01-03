@@ -687,7 +687,7 @@ class Trainer_Monodepth2:
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized, X_tilde_p.view(batch_size,3,height, width))
-        print(Cpp.shape)
+        #print(Cpp.shape)
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
