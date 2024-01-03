@@ -722,7 +722,7 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
-        return torch.mean(orth_loss)
+        return torch.abs(orth_loss)
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
