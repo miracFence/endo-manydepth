@@ -188,7 +188,7 @@ class Project3D(nn.Module):
         P = torch.matmul(K, T)[:, :3, :]
 
         cam_points = torch.matmul(P, points)
-        #print(cam_points.shape)
+        print(cam_points.shape)
         pix_coords = cam_points[:, :2, :] / (cam_points[:, 2, :].unsqueeze(1) + self.eps)
         #print(pix_coords.shape)
         #print(pix_coords)
