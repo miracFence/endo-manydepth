@@ -806,7 +806,7 @@ class Trainer_Monodepth2:
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        D_inv = 1.0 / D
+        #D_inv = 1.0 / D
         #D_inv = 1.0 / D
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
@@ -903,10 +903,10 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
         #print(top_left_flat_.shape)
-        D_hat_pa = torch.nn.functional.grid_sample(D_inv, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb = torch.nn.functional.grid_sample(D_inv, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pa2 = torch.nn.functional.grid_sample(D_inv, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb2 = torch.nn.functional.grid_sample(D_inv, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
         #print(D_hat_pa.shape)
         #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
