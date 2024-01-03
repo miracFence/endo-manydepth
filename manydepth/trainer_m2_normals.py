@@ -906,12 +906,12 @@ class Trainer_Monodepth2:
         #print(top_left_flat_.shape)
         V = D_hat_pa.view(batch_size,1,-1) * pa_tl - D_hat_pb.view(batch_size,1,-1) * pb_br
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
-        #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
+        orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
-        V += D_hat_pa2.view(batch_size,1,-1) * pa_tr - D_hat_pb2.view(batch_size,1,-1) * pb_bl
+        V = D_hat_pa2.view(batch_size,1,-1) * pa_tr - D_hat_pb2.view(batch_size,1,-1) * pb_bl
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
@@ -930,8 +930,8 @@ class Trainer_Monodepth2:
         #orth_loss = torch.sum(V.view(batch_size,3,-1) * N_hat_normalized.view(batch_size,3,-1),dim=1)
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
-        #ol = orth_loss1+orth_loss2
-        return -torch.mean(orth_loss2)
+        ol = orth_loss1+orth_loss2
+        return torch.mean(ol)
 
 
     
