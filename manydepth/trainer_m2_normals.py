@@ -815,13 +815,13 @@ class Trainer_Monodepth2:
         bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
         bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
-        
+
+        """        
         top_left_flat_ = D.view(batch_size, 1, -1) * top_left_flat
         bottom_right_flat_ = D.view(batch_size, 1, -1) * bottom_right_flat
         top_right_flat_ = D.view(batch_size, 1, -1) * top_right_flat
         bottom_left_flat_ = D.view(batch_size, 1, -1) * bottom_left_flat
         
-        #print(top_left_flat_.shape)
         top_left_flat_ = top_left_flat_[:, :2, :] / (top_left_flat_[:, 2, :].unsqueeze(1) + 1e-7)
         top_left_depth = top_left_flat_.view(batch_size,2,height,width).clone()
         top_left_depth = top_left_depth.permute(0, 2, 3, 1)
@@ -850,28 +850,26 @@ class Trainer_Monodepth2:
         bottom_left_depth[..., 1] /= height - 1
         bottom_left_depth = (bottom_left_depth - 0.5) * 2
         
-        #print(top_left_flat)
-        """        
         top_left_depth = top_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
-        #print(top_left_flat_.shape)
+        """
         D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
-        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)"""
         #print(D_hat_pa.shape)
         #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
-        """
-        top_left_depth = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
-        bottom_right_depth = D[:,:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
-        top_right_depth = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
-        bottom_left_depth = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]"""
+        
+        D_hat_pa = D[:,:,top_left_flat[0,:,1].long(), top_left_flat[0,:,0].long()]
+        D_hat_pb = D[:,:,bottom_right_flat[0,:,1].long(), bottom_right_flat[0,:,0].long()]
+        D_hat_pa2 = D[:,:,top_right_flat[0,:,1].long(), top_right_flat[0,:,0].long()]
+        D_hat_pb2 = D[:,:,bottom_left_flat[0,:,1].long(), bottom_left_flat[0,:,0].long()]
 
-        wandb.log({"disp_multi_tl": wandb.Image(D_hat_pa[0].view(1,height,width))},step=self.step)
-        wandb.log({"disp_multi_o": wandb.Image(D_hat_pb[0].view(1,height,width))},step=self.step)
+        wandb.log({"disp_multi_pa": wandb.Image(D_hat_pa[0].view(1,height,width))},step=self.step)
+        wandb.log({"disp_multi_pb": wandb.Image(D_hat_pb[0].view(1,height,width))},step=self.step)
 
         #print(top_left_depth.shape)
 
