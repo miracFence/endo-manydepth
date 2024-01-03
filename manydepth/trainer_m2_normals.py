@@ -607,7 +607,7 @@ class Trainer_Monodepth2:
         N_hat_normalized = N_hat / magnitude
 
         # Calculate positions of top-left, bottom-right, top-right, and bottom-left pixels
-        #normal = torch.stack([x, y], dim=-1).to(device=K_inv.device)
+        normal = torch.stack([x, y], dim=-1).to(device=K_inv.device)
         right = torch.stack([torch.clamp(x + 1.0, min=0, max=width-1),y], dim=-1).to(device=K_inv.device)
         right_right = torch.stack([torch.clamp(x + 2.0, min=0, max=width-1),y], dim=-1).to(device=K_inv.device)
         bottom = torch.stack([x,torch.clamp(y + 2.0, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
