@@ -705,7 +705,7 @@ class Trainer_Monodepth2:
             #print(depths[idx].shape)
             #print(X_tilde_q.shape)
             Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized, X_tilde_q.view(batch_size,3,height, width))
-            orth_loss += torch.abs(D_inv.view(batch_size, 1, -1) * Cpq.unsqueeze(-1) - depths[idx].view(batch_size,1,-1) * Cpp.unsqueeze(-1))
+            orth_loss = torch.abs(D_inv.view(batch_size, 1, -1) * Cpq.unsqueeze(-1) - depths[idx].view(batch_size,1,-1) * Cpp.unsqueeze(-1))
             
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
@@ -722,7 +722,7 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
-        return orth_loss
+        return torch.mean(orth_loss)
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -806,7 +806,6 @@ class Trainer_Monodepth2:
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
-        #D_inv = 1.0 / D
         #D_inv = 1.0 / D
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
@@ -977,7 +976,7 @@ class Trainer_Monodepth2:
         #return -torch.mean(torch.sum(orth_loss,dim=1))
         #print(orth_loss.shape)
         #ol = orth_loss1+orth_loss2
-        return orth_loss2
+        return torch.mean(orth_loss2)
 
 
     
