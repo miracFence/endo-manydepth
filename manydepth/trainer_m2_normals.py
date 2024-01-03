@@ -866,10 +866,10 @@ class Trainer_Monodepth2:
 
         #print(top_left_depth.shape)
 
-        top_left_flat = torch.cat([top_left_flat_.permute(0,2,1), ones], dim=1)
-        bottom_right_flat = torch.cat([bottom_right_flat_.permute(0,2,1), ones], dim=1)
-        top_right_flat = torch.cat([top_right_flat_.permute(0,2,1), ones], dim=1)
-        bottom_left_flat = torch.cat([bottom_left_flat_.permute(0,2,1), ones], dim=1)
+        top_left_flat = torch.cat([top_left_flat_, ones], dim=1)
+        bottom_right_flat = torch.cat([bottom_right_flat_, ones], dim=1)
+        top_right_flat = torch.cat([top_right_flat_, ones], dim=1)
+        bottom_left_flat = torch.cat([bottom_left_flat_, ones], dim=1)
 
         #print(top_left_flat.shape)
 
