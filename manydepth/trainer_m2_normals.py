@@ -847,7 +847,7 @@ class Trainer_Monodepth2:
         bottom_right_depth = bottom_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
-        print(top_left_flat_.shape)
+        #print(top_left_flat_.shape)
         #D_hat_pa = torch.nn.functional.grid_sample(D, top_left_flat_.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         #D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_flat_.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         #D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_flat_.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
