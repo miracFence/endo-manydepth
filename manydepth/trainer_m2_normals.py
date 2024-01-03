@@ -819,10 +819,10 @@ class Trainer_Monodepth2:
       
         print(top_left_flat_.shape)
         top_left_depth = top_left_flat_.view(batch_size,2,height,width).clone()
-        top_left_depth = top_left_flat_.permute(0, 2, 3, 1)
+        top_left_depth = top_left_depth.permute(0, 2, 3, 1)
         top_left_depth[..., 0] /= width - 1
         top_left_depth[..., 1] /= height - 1
-        top_left_depth = (top_left_depth_ - 0.5) * 2
+        top_left_depth = (top_left_depth - 0.5) * 2
 
         bottom_right_depth = bottom_right_flat.view(batch_size, 2,height,width).clone()
         bottom_right_depth = bottom_right_depth.permute(0, 2, 3, 1)
@@ -831,13 +831,13 @@ class Trainer_Monodepth2:
         bottom_right_depth = (bottom_right_depth - 0.5) * 2
 
         top_right_depth = top_right_flat.view(batch_size, 2,height,width).clone()
-        top_right_depth = top_right_flat_.permute(0, 2, 3, 1)
+        top_right_depth = top_right_depth.permute(0, 2, 3, 1)
         top_right_depth[..., 0] /= width - 1
         top_right_depth[..., 1] /= height - 1
         top_right_depth = (top_right_depth - 0.5) * 2
 
         bottom_left_depth = bottom_left_flat.view(batch_size, 2,height,width).clone()
-        bottom_left_depth = bottom_left_flat_.permute(0, 2, 3, 1)
+        bottom_left_depth = bottom_left_depth.permute(0, 2, 3, 1)
         bottom_left_depth[..., 0] /= width - 1
         bottom_left_depth[..., 1] /= height - 1
         bottom_left_depth = (bottom_left_depth - 0.5) * 2
