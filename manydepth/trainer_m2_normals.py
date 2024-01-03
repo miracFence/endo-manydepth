@@ -686,8 +686,7 @@ class Trainer_Monodepth2:
         bottom_bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
-        Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized, X_tilde_p.view(batch_size,3,height, width))
-        #print(Cpp.shape)
+        #print(X_tilde_p.shape)
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
@@ -704,9 +703,8 @@ class Trainer_Monodepth2:
             #print(D_inv.shape)
             #print(depths[idx].shape)
             #print(X_tilde_q.shape)
-            Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized, X_tilde_q.view(batch_size,3,height, width))
-            orth_loss = torch.abs(D_inv.view(batch_size, 1, -1) * Cpq.unsqueeze(-1) - depths[idx].view(batch_size,1,-1) * Cpp.unsqueeze(-1))
-            
+            abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].view(batch_size,1,-1) * X_tilde_p)
+            orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
         # Compute gradient of the image
@@ -902,10 +900,10 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
         #print(top_left_flat_.shape)
-        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         #print(D_hat_pa.shape)
         #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
