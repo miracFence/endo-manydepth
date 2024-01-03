@@ -898,6 +898,7 @@ class Trainer_Monodepth2:
         bottom_left_depth = ((bottom_left_depth[:, 1, :] + bottom_left_depth[:, 0, :]) / 2).view(batch_size,1,height,width)
         """
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
+        print(top_left_flat_.shape)
         V = top_left_flat_.view(12,1,-1) * pa_tl - bottom_right_flat_.view(12,1,-1) * pb_br
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
