@@ -680,6 +680,10 @@ class Trainer_Monodepth2:
         bottom_depth = D_inv[:, :, bottom_flat[0,:,0].long(), bottom_flat[0,:,1].long()]
         bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0,:,0].long(), bottom_bottom_flat[0,:,1].long()]"""
         
+        right_depth = torch.nn.functional.grid_sample(D_inv, right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        right_right_depth = torch.nn.functional.grid_sample(D_inv, right_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        bottom_bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
@@ -698,7 +702,7 @@ class Trainer_Monodepth2:
             #print(Cpp)
             #print(D_inv.shape)
             #print(depths[idx].shape)
-            print(X_tilde_q.shape)
+            #print(X_tilde_q.shape)
             abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].view(batch_size,1,-1) * X_tilde_p)
             orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
