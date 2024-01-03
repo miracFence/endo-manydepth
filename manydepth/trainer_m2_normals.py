@@ -806,6 +806,7 @@ class Trainer_Monodepth2:
     def compute_orth_loss3(self, disp, N_hat, K_inv):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        D_inv = 1.0 / D
         #D_inv = 1.0 / D
         batch_size,channels, height, width  = D.shape
         # Create coordinate grids
@@ -902,10 +903,10 @@ class Trainer_Monodepth2:
         top_right_depth = top_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
         bottom_left_depth = bottom_left_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)"""
         #print(top_left_flat_.shape)
-        D_hat_pa = torch.nn.functional.grid_sample(D, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb = torch.nn.functional.grid_sample(D, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pa2 = torch.nn.functional.grid_sample(D, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
-        D_hat_pb2 = torch.nn.functional.grid_sample(D, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pa = torch.nn.functional.grid_sample(D_inv, top_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pb = torch.nn.functional.grid_sample(D_inv, bottom_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pa2 = torch.nn.functional.grid_sample(D_inv, top_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
+        D_hat_pb2 = torch.nn.functional.grid_sample(D_inv, bottom_left_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=True)
         #print(D_hat_pa.shape)
         #print(D_hat_pa)
         #D = D.permute(0,2,3,1)
@@ -949,14 +950,14 @@ class Trainer_Monodepth2:
         """
         #cam_points = depth.view(self.batch_size, 1, -1) * cam_points
         #print(top_left_flat_.shape)
-        V = D_hat_pa.view(batch_size,1,-1) * pa_tl - D_hat_pb.view(batch_size,1,-1) * pb_br
+        V = torch.abs(D_hat_pa.view(batch_size,1,-1) * pa_tl - D_hat_pb.view(batch_size,1,-1) * pb_br)
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss1 = V.view(12,3,height,width) * N_hat_normalized
         # Sum over the channel dimension (dimension 1)
         #orth_loss1 = orth_loss1.sum(dim=1)
 
-        V += D_hat_pa2.view(batch_size,1,-1) * pa_tr - D_hat_pb2.view(batch_size,1,-1) * pb_bl
+        V += torch.abs(D_hat_pa2.view(batch_size,1,-1) * pa_tr - D_hat_pb2.view(batch_size,1,-1) * pb_bl)
         #orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
         #orth_loss2 = V.view(12,3,height,width) * N_hat_normalized
