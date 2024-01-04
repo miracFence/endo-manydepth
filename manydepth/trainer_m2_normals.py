@@ -690,15 +690,16 @@ class Trainer_Monodepth2:
         bottom_bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         """
 
-        # Extracting the specific neighbors
-        padded_depth = torch.nn.functional.pad(D_inv, (1, 1, 1, 1), mode='constant', value=0)
-        # Top-left and bottom-right
-        right_depth = padded_depth[:, :, :, 2:]  # Top-left
-        #print(top_left_depth.shape)
-        right_right_depth = padded_depth[:, :, :, 3:]  # Bottom-right
-        # Top-right and bottom-left
-        bottom_depth = padded_depth[:, :, 2:, :]  # Top-right
-        bottom_bottom_depth = padded_depth[:, :, 3:, :]  # Bottom-left
+        padded_tensor = torch.nn.functional.pad(D_inv, (0, 2, 0, 2), mode='constant', value=0)
+
+        # Extract right neighbors
+        # Original pixel at [i, j] has right neighbor at [i, j+1] in the padded tensor
+        right_neighbors = padded_tensor[:, :, :height, 1:]
+        right_right_neighbors = padded_tensor[:, :, :height, 2:]
+        # Extract bottom neighbors
+        # Original pixel at [i, j] has bottom neighbor at [i+1, j] in the padded tensor
+        bottom_neighbors = padded_tensor[:, :, 1:, :width]
+        bottom_bottom_neighbors = padded_tensor[:, :, 2:, :width]
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
@@ -706,8 +707,8 @@ class Trainer_Monodepth2:
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
         #Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
-        movements = [right_flat,right_right_flat,bottom_flat,bottom_bottom_flat]
-        depths = [right_depth,right_right_depth,bottom_depth,bottom_bottom_depth]
+        movements = [right_flat,bottom_flat]
+        depths = [right_neighbors,bottom_neighbors]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
