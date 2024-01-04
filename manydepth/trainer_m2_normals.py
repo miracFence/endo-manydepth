@@ -697,31 +697,31 @@ class Trainer_Monodepth2:
         bottom_neighbors = padded_tensor[:, :, 1:, :width]
         # Extract bottom neighbors
         # Original pixel at [i, j] has bottom neighbor at [i+1, j] in the padded tensor
-        padded_tensor = torch.nn.functional.pad(D_inv, (0, 2, 0, 2), mode='constant', value=0)
+        """padded_tensor = torch.nn.functional.pad(D_inv, (0, 2, 0, 2), mode='constant', value=0)
         
         right_right_neighbors = padded_tensor[:, :, :height, 2:]
-        bottom_bottom_neighbors = padded_tensor[:, :, 2:, :width]
+        bottom_bottom_neighbors = padded_tensor[:, :, 2:, :width]"""
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
 
         #Cpp = torch.einsum('bijk,bijk->', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(batch_size,3,-1))
         #Cpp = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_p.view(12, 3, -1))
-        #Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
-        movements = [right_flat,right_right_flat,bottom_flat,bottom_bottom_flat]
-        depths = [right_neighbors,right_right_neighbors,bottom_neighbors,bottom_bottom_neighbors]
+        Cpp = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_p.view(batch_size,3,height,width))
+        movements = [right_flat,bottom_flat]
+        depths = [right_neighbors,bottom_neighbors]
 
         for idx,m in enumerate(movements):
             X_tilde_q = torch.matmul(K_inv[:, :3, :3], m)
-            #Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
+            Cpq = torch.einsum('bijk,bijk->bi', N_hat_normalized,X_tilde_q.view(batch_size,3,height,width))
             #Cpq = torch.einsum('bik,bik->bi', N_hat_normalized.view(12, 3, -1),X_tilde_q.view(12, 3, -1))
             #print(Cpq)
             #print(Cpp)
             #print(D_inv.shape)
             #print(depths[idx].shape)
             #print(padded_depth.shape)
-            abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].reshape(batch_size,1,-1) * X_tilde_p)
-            orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
+            orth_loss += torch.abs(D_inv.view(batch_size, 1, -1) * Cpq - depths[idx].reshape(batch_size,1,-1) * Cpp)
+            #orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
         # Compute gradient of the image
@@ -737,7 +737,7 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
-        return torch.mean(orth_loss)
+        return torch.sum(orth_loss)
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
