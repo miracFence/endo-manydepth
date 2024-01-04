@@ -977,6 +977,69 @@ class Trainer_Monodepth2:
         #ol = orth_loss1+orth_loss2
         return torch.mean(orth_loss1+orth_loss2)
 
+    def compute_orth_loss5(self, disp, N_hat, K_inv):
+        orth_loss = 0
+        _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
+        #D_inv = 1.0 / D
+        batch_size,channels, height, width  = D.shape
+        # Create coordinate grids
+        y, x = torch.meshgrid(torch.arange(0, height), torch.arange(0, width))
+        y = y.float().unsqueeze(0).unsqueeze(0)
+        x = x.float().unsqueeze(0).unsqueeze(0)
+        
+        #ones = torch.ones(12, height * width,1).to(device=K_inv.device)
+        ones = torch.ones(batch_size, 1, height * width).to(device=K_inv.device)
+        magnitude = torch.norm(N_hat, dim=1, keepdim=True)
+        magnitude[magnitude == 0] = 1
+        N_hat_normalized = N_hat / magnitude
+
+        top_left = torch.stack([torch.clamp(x - 1, min=0, max=width-1), torch.clamp(y - 1, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
+        bottom_right = torch.stack([torch.clamp(x + 1, min=0, max=width-1), torch.clamp(y + 1, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
+        top_right = torch.stack([torch.clamp(x + 1, min=0, max=width-1), torch.clamp(y - 1, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
+        bottom_left = torch.stack([torch.clamp(x - 1, min=0, max=width-1), torch.clamp(y + 1, min=0, max=height-1)], dim=-1).to(device=K_inv.device)
+        
+        top_left_flat = top_left.view(1,-1, 2).expand(12, -1, -1)
+        bottom_right_flat = bottom_right.view(1,-1, 2).expand(12, -1, -1)
+        top_right_flat = top_right.view(1,-1, 2).expand(12, -1, -1)
+        bottom_left_flat = bottom_left.view(1,-1, 2).expand(12, -1, -1)
+
+        top_left_flat = torch.cat([top_left_flat.permute(0,2,1), ones], dim=1)
+        bottom_right_flat = torch.cat([bottom_right_flat.permute(0,2,1), ones], dim=1)
+        top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
+        bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
+        
+        top_left_flat_ = D.view(batch_size, 1, -1) * top_left_flat
+        bottom_right_flat_ = D.view(batch_size, 1, -1) * bottom_right_flat
+        top_right_flat_ = D.view(batch_size, 1, -1) * top_right_flat
+        bottom_left_flat_ = D.view(batch_size, 1, -1) * bottom_left_flat
+        
+        padded_depth = torch.nn.functional.pad(D, (1, 1, 1, 1), mode='constant', value=0)
+
+        # Extracting the specific neighbors
+        # Top-left and bottom-right
+        top_left_depth = padded_depth[:, :, :-2, :-2]  # Top-left
+        bottom_right_depth = padded_depth[:, :, 2:, 2:]  # Bottom-right
+
+        # Top-right and bottom-left
+        top_right_depth = padded_depth[:, :, :-2, 2:]  # Top-right
+        bottom_left_depth = padded_depth[:, :, 2:, :-2]  # Bottom-left
+
+
+        pa_tl = torch.matmul(K_inv[:, :3, :3],top_left_flat.to(device=K_inv.device))
+        pb_br = torch.matmul(K_inv[:, :3, :3],bottom_right_flat.to(device=K_inv.device))
+
+        pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
+        pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
+
+        V = top_left_depth.view(batch_size,1,-1) * pa_tl - bottom_right_depth.view(batch_size,1,-1) * pb_br
+        orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
+
+        V = top_right_depth.view(batch_size,1,-1) * pa_tr - bottom_left_depth.view(batch_size,1,-1) * pb_bl
+        orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
+
+        return torch.mean(orth_loss1+orth_loss2)
+
+
 
     
     def get_ilumination_invariant_loss(self, pred, target):
@@ -1053,7 +1116,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss3(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss5(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
