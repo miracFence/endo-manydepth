@@ -593,7 +593,7 @@ class Trainer_Monodepth2:
             orth_loss += torch.abs(D_inv * Cpq - Ds[d_names[idx]] * Cpp)
         return orth_loss.sum()
 
-    def compute_orth_loss4(self, disp, N_hat, K_inv):
+    def compute_orth_loss4(self, disp, N_hat, K_inv, I):
         orth_loss = 0
         _, D = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
         D_inv = 1.0 / D
@@ -726,6 +726,9 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
         #print(image_batch.shape)
+
+        G_p = torch.exp(-1 * torch.abs(torch.gradient(I)) / 1**2)
+        loss = G_p * orth_loss
         """
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
@@ -737,7 +740,7 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
         G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
-        return torch.sum(orth_loss)
+        return torch.sum(loss)
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
@@ -1127,7 +1130,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)],inputs[("color", 0, 0)])
         losses["loss"] = total_loss
         
         return losses
