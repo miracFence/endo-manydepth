@@ -13,10 +13,10 @@ class SCAREDDataset(MonoDataset):
     def __init__(self, *args, **kwargs):
         super(SCAREDDataset, self).__init__(*args, **kwargs)
         #SCARED Dataset
-        self.K = np.array([[0.82, 0, 0.5, 0],
+        """self.K = np.array([[0.82, 0, 0.5, 0],
                            [0, 1.02, 0.5, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)
+                           [0, 0, 0, 1]], dtype=np.float32)"""
                 
         #256 / 320
         #fx769.807403688120 fy769.720558534159 cx675.226397736271 cy548.903474592445 k1-0.454260397098776 k20.179156666748519 k3-0.0285017743214105 p1-0.00134889190333418 p20.000738912923806121 skew-0.141152521412316
@@ -27,10 +27,10 @@ class SCAREDDataset(MonoDataset):
         #RNNSLAM synthetic dataset
         #480 / 640
         #fx = 232.5044678; fy = 232.5044678; cx = 240.0; cy = 320.0; baseline = 4.5; %unit in milimeter
-        """self.K = np.array([[0.3632, 0, 0.375, 0],
+        self.K = np.array([[0.3632, 0, 0.375, 0],
                            [0, 0.4843,0.666, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)"""
+                           [0, 0, 0, 1]], dtype=np.float32)
         #Colon10k dataset
         #256 / 320
         #Camera Intrinsics: Pinhole fx=145.4410 fy=145.4410 cx=135.6993 cy=107.8946 width=270 height=216
