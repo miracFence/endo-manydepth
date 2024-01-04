@@ -691,7 +691,7 @@ class Trainer_Monodepth2:
         """
 
         # Extracting the specific neighbors
-        padded_depth = torch.nn.functional.pad(D_inv, (2, 2, 2, 2), mode='constant', value=0)
+        padded_depth = torch.nn.functional.pad(D_inv, (1, 1, 1, 1), mode='constant', value=0)
         # Top-left and bottom-right
         right_depth = padded_depth[:, :, :, 2:]  # Top-left
         #print(top_left_depth.shape)
