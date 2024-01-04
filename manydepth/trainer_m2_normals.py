@@ -726,8 +726,12 @@ class Trainer_Monodepth2:
 
         # Compute gradient of the image
         #print(image_batch.shape)
+        # Compute gradients along x and y dimensions
+        grad_x, grad_y = torch.gradient(I)
 
-        G_p = torch.exp(-1 * torch.abs(torch.gradient(I)) / 1**2)
+        # Calculate the magnitude of the gradient
+        grad_magnitude = torch.sqrt(grad_x ** 2 + grad_y ** 2)
+        G_p = torch.exp(-1 * torch.abs(grad_magnitude) / 1**2)
         loss = G_p * orth_loss
         """
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
