@@ -632,6 +632,7 @@ class Trainer_Monodepth2:
         bottom_flat = torch.cat([bottom_flat.permute(0,2,1), ones], dim=1)
         bottom_bottom_flat = torch.cat([bottom_bottom_flat.permute(0,2,1), ones], dim=1)
 
+        """
         right_flat_ = D.view(batch_size, 1, -1) * right_flat
         right_right_flat_ = D.view(batch_size, 1, -1) * right_right_flat
         bottom_flat_ = D.view(batch_size, 1, -1) * bottom_flat
@@ -665,6 +666,7 @@ class Trainer_Monodepth2:
         bottom_bottom_depth[..., 0] /= width - 1
         bottom_bottom_depth[..., 1] /= height - 1
         bottom_bottom_depth = (bottom_bottom_depth - 0.5) * 2
+        """
 
         #right_depth = right_flat.permute(0, 2, 1).to(device=K_inv.device) * D_inv.view(batch_size, 1, -1)
         #right_right_depth = right_right_flat.permute(0, 2, 1).to(device=K_inv.device) * D.view(batch_size, 1, -1)
@@ -681,10 +683,22 @@ class Trainer_Monodepth2:
         bottom_depth = D_inv[:, :, bottom_flat[0,:,0].long(), bottom_flat[0,:,1].long()]
         bottom_bottom_depth = D_inv[:, :, bottom_bottom_flat[0,:,0].long(), bottom_bottom_flat[0,:,1].long()]"""
         
+        """
         right_depth = torch.nn.functional.grid_sample(D_inv, right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         right_right_depth = torch.nn.functional.grid_sample(D_inv, right_right_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         bottom_bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
+        """
+
+        # Extracting the specific neighbors
+        padded_depth = torch.nn.functional.pad(D_inv, (2, 2, 2, 2), mode='constant', value=0)
+        # Top-left and bottom-right
+        right_depth = padded_depth[:, :, :, 2:]  # Top-left
+        #print(top_left_depth.shape)
+        right_right_depth = padded_depth[:, :, :, 3:]  # Bottom-right
+        # Top-right and bottom-left
+        bottom_depth = padded_depth[:, :, 2:, :]  # Top-right
+        bottom_bottom_depth = padded_depth[:, :, 3:, :]  # Bottom-left
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
@@ -1015,7 +1029,6 @@ class Trainer_Monodepth2:
         top_left_depth = padded_depth[:, :, :-2, :-2]  # Top-left
         #print(top_left_depth.shape)
         bottom_right_depth = padded_depth[:, :, 2:, 2:]  # Bottom-right
-
         # Top-right and bottom-left
         top_right_depth = padded_depth[:, :, :-2, 2:]  # Top-right
         bottom_left_depth = padded_depth[:, :, 2:, :-2]  # Bottom-left
@@ -1112,7 +1125,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.5 * self.compute_orth_loss5(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
+        total_loss += 0.5 * self.compute_orth_loss4(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
         return losses
