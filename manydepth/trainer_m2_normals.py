@@ -690,20 +690,17 @@ class Trainer_Monodepth2:
         bottom_bottom_depth = torch.nn.functional.grid_sample(D_inv, bottom_bottom_depth.reshape(batch_size,height,width,2), mode='bilinear', align_corners=False)
         """
 
-        padded_tensor = torch.nn.functional.pad(D_inv, (0, 2, 0, 2), mode='constant', value=0)
-
+        padded_tensor = torch.nn.functional.pad(D_inv, (0, 1, 0, 1), mode='constant', value=0)
         # Extract right neighbors
         # Original pixel at [i, j] has right neighbor at [i, j+1] in the padded tensor
         right_neighbors = padded_tensor[:, :, :height, 1:]
-        print(right_neighbors.shape)
-        right_right_neighbors = padded_tensor[:, :, :height, 2:]
-        print(right_right_neighbors.shape)
+        bottom_neighbors = padded_tensor[:, :, 1:, :width]
         # Extract bottom neighbors
         # Original pixel at [i, j] has bottom neighbor at [i+1, j] in the padded tensor
-        bottom_neighbors = padded_tensor[:, :, 1:, :width]
-        print(bottom_neighbors.shape)
+        padded_tensor = torch.nn.functional.pad(D_inv, (0, 2, 0, 2), mode='constant', value=0)
+        
+        right_right_neighbors = padded_tensor[:, :, :height, 2:]
         bottom_bottom_neighbors = padded_tensor[:, :, 2:, :width]
-        print(bottom_bottom_neighbors.shape)
 
         X_tilde_p = torch.matmul(K_inv[:, :3, :3],normal_flat)
         #print(X_tilde_p.shape)
