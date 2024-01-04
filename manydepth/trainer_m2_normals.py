@@ -724,16 +724,7 @@ class Trainer_Monodepth2:
             #orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
-        # Compute gradient of the image
-        #print(image_batch.shape)
-        # Compute gradients along x and y dimensions
-        grad_x, grad_y = torch.gradient(I)
-
-        # Calculate the magnitude of the gradient
-        grad_magnitude = torch.sqrt(grad_x ** 2 + grad_y ** 2)
-        G_p = torch.exp(-1 * torch.abs(grad_magnitude) / 1**2)
-        loss = G_p * orth_loss
-        """
+        
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         gradient_x = F.conv2d(image_batch, x.view(1, 3, 1, 1))
@@ -743,8 +734,8 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.sqrt(gradient_x**2 + gradient_y**2)
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
-        G_p = torch.exp(-1 * gradient_magitude **2 / 1)"""
-        return torch.sum(loss)
+        G_p = torch.exp(-1 * torch.abs(grad_magnitude) / 1**2)
+        return torch.sum(G_p*loss)
         
     def compute_orth_loss2(self, disp, N_hat, K_inv):
         orth_loss = 0
