@@ -691,7 +691,7 @@ class Trainer_Monodepth2:
         """
 
         # Extracting the specific neighbors
-        padded_depth = torch.nn.functional.pad(D_inv, (1, 1, 1, 1), mode='constant', value=0)
+        padded_depth = torch.nn.functional.pad(D_inv, (2, 2, 2, 2), mode='constant', value=0)
         # Top-left and bottom-right
         right_depth = padded_depth[:, :, :, 2:]  # Top-left
         #print(top_left_depth.shape)
@@ -718,7 +718,7 @@ class Trainer_Monodepth2:
             #print(D_inv.shape)
             #print(depths[idx].shape)
             #print(X_tilde_q.shape)
-            abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].reshape(batch_size,1,-1) * X_tilde_p)
+            abss = torch.abs(D_inv.view(batch_size, 1, -1) * X_tilde_q - depths[idx].reshape(batch_size,1,81920) * X_tilde_p)
             orth_loss += torch.einsum('bijk,bijk->bi', N_hat_normalized, abss.view(batch_size,3,height, width))
             #orth_loss += torch.abs(torch.matmul(D_inv.view(12, -1).transpose(1, 0) , Cpq) - torch.matmul(depths[idx].view(batch_size,-1).transpose(1, 0) , Cpp))
 
