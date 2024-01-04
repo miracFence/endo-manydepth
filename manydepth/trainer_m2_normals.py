@@ -141,7 +141,8 @@ class Trainer_Monodepth2:
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
                          "kitti_odom": datasets.KITTIOdomDataset,
-                         "endovis": datasets.SCAREDDataset}
+                         "endovis": datasets.SCAREDDataset,
+                         "RNNSLAM": datasets.SCAREDDataset}
 
         self.dataset = datasets_dict[self.opt.dataset]
 
