@@ -1008,16 +1008,12 @@ class Trainer_Monodepth2:
         top_right_flat = torch.cat([top_right_flat.permute(0,2,1), ones], dim=1)
         bottom_left_flat = torch.cat([bottom_left_flat.permute(0,2,1), ones], dim=1)
         
-        top_left_flat_ = D.view(batch_size, 1, -1) * top_left_flat
-        bottom_right_flat_ = D.view(batch_size, 1, -1) * bottom_right_flat
-        top_right_flat_ = D.view(batch_size, 1, -1) * top_right_flat
-        bottom_left_flat_ = D.view(batch_size, 1, -1) * bottom_left_flat
-        
         padded_depth = torch.nn.functional.pad(D, (1, 1, 1, 1), mode='constant', value=0)
 
         # Extracting the specific neighbors
         # Top-left and bottom-right
         top_left_depth = padded_depth[:, :, :-2, :-2]  # Top-left
+        print(top_left_depth.shape)
         bottom_right_depth = padded_depth[:, :, 2:, 2:]  # Bottom-right
 
         # Top-right and bottom-left
