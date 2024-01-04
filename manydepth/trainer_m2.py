@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader
 import wandb
 
 
-wandb.init(project="MySfMLearner3", entity="respinosa")
+wandb.init(project="MySfMLearner4", entity="respinosa")
 
 
 import json
@@ -141,7 +141,8 @@ class Trainer_Monodepth:
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
                          "kitti_odom": datasets.KITTIOdomDataset,
-                         "endovis": datasets.SCAREDDataset}
+                         "endovis": datasets.SCAREDDataset,
+                         "RNNSLAM": datasets.SCAREDDataset}
 
         self.dataset = datasets_dict[self.opt.dataset]
 

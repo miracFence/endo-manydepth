@@ -33,8 +33,8 @@ class MonodepthOptions:
                                  type=str,
                                  help="which training split to use",
                                  choices=["eigen_zhou", "eigen_full", "odom", "benchmark",
-                                          "cityscapes_preprocessed","endovis"],
-                                 default="eigen_zhou")
+                                          "cityscapes_preprocessed","endovis","RNNSLAM"],
+                                 default="RNNSLAM")
         self.parser.add_argument("--num_layers",
                                  type=int,
                                  help="number of resnet layers",
@@ -55,7 +55,7 @@ class MonodepthOptions:
                                  help="dataset to train on",
                                  default="kitti",
                                  choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test",
-                                          "cityscapes_preprocessed","endovis"])
+                                          "cityscapes_preprocessed","endovis","RNNSLAM"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
