@@ -1094,14 +1094,14 @@ class Trainer_Monodepth2:
                 rep_identity = self.compute_reprojection_loss(pred, target)
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
-                #reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
+                reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
                 #Losses
                 target = outputs[("color_refined", frame_id, scale)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
                 #target = inputs[("color", 0, 0)]
-                #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Normal loss
                 normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
@@ -1115,7 +1115,7 @@ class Trainer_Monodepth2:
             #loss += 0.5 * self.compute_orth_loss2(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
                 
             #Illumination invariant loss
-            #loss += 0.1 * loss_ilumination_invariant / 2.0
+            loss += 0.5 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
