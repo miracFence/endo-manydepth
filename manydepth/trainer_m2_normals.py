@@ -980,7 +980,7 @@ class Trainer_Monodepth2:
 
         V = top_right_depth.reshape(batch_size,1,-1) * pa_tr - bottom_left_depth.reshape(batch_size,1,-1) * pb_bl
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
-
+        """
         x = torch.tensor([[-1, 0, 1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         y = torch.tensor([[-1], [0], [1]]).to(device=K_inv.device).type(torch.cuda.FloatTensor)
         gradient_x = F.conv2d(I, x.view(1, 3, 1, 1))
@@ -990,9 +990,9 @@ class Trainer_Monodepth2:
         gradient_magitude = torch.sqrt(gradient_x**2 + gradient_y**2)
         gradient_magitude = torch.mean(gradient_magitude)
         # Calculate G(p)
-        G_p = torch.exp(-1 * torch.abs(gradient_magitude) / 1**2)
+        G_p = torch.exp(-1 * torch.abs(gradient_magitude) / 1**2)"""
 
-        return torch.mean(G_p * (orth_loss1+orth_loss2))
+        return torch.mean(orth_loss1+orth_loss2)
 
 
 
@@ -1071,7 +1071,7 @@ class Trainer_Monodepth2:
 
         
         total_loss /= self.num_scales
-        total_loss += 0.6 * self.compute_orth_loss5(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)],inputs[("color", 0, 0)])
+        total_loss += 0.5 * self.compute_orth_loss5(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)],inputs[("color", 0, 0)])
         #total_loss += 0.6 * self.compute_orth_loss5(outputs[("disp", 0)], outputs["normal_inputs"][("normal", 0)], inputs[("inv_K", 0)])
         losses["loss"] = total_loss
         
