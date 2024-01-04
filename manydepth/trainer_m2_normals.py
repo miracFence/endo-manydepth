@@ -131,7 +131,7 @@ class Trainer_Monodepth2:
 
         #if self.opt.load_weights_folder is not None:
         self.load_model()
-        self.freeze_models()
+        #self.freeze_models()
 
         print("Training model named:\n  ", self.opt.model_name)
         print("Models and tensorboard events files are saved to:\n  ", self.opt.log_dir)
