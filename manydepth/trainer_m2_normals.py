@@ -1013,7 +1013,7 @@ class Trainer_Monodepth2:
         # Extracting the specific neighbors
         # Top-left and bottom-right
         top_left_depth = padded_depth[:, :, :-2, :-2]  # Top-left
-        print(top_left_depth.shape)
+        #print(top_left_depth.shape)
         bottom_right_depth = padded_depth[:, :, 2:, 2:]  # Bottom-right
 
         # Top-right and bottom-left
@@ -1027,10 +1027,10 @@ class Trainer_Monodepth2:
         pa_tr = torch.matmul(K_inv[:, :3, :3],top_right_flat.to(device=K_inv.device))
         pb_bl = torch.matmul(K_inv[:, :3, :3],bottom_left_flat.to(device=K_inv.device))
 
-        V = top_left_depth.view(batch_size,1,-1) * pa_tl - bottom_right_depth.view(batch_size,1,-1) * pb_br
+        V = top_left_depth.reshape(batch_size,1,-1) * pa_tl - bottom_right_depth.reshape(batch_size,1,-1) * pb_br
         orth_loss1 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
 
-        V = top_right_depth.view(batch_size,1,-1) * pa_tr - bottom_left_depth.view(batch_size,1,-1) * pb_bl
+        V = top_right_depth.reshape(batch_size,1,-1) * pa_tr - bottom_left_depth.vireshapeew(batch_size,1,-1) * pb_bl
         orth_loss2 = torch.sum(torch.einsum('bijk,bijk->bi', V.view(batch_size,3,height,width),N_hat_normalized.view(batch_size,3,height,width)))
 
         return torch.mean(orth_loss1+orth_loss2)
