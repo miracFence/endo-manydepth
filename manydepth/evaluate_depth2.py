@@ -82,13 +82,15 @@ def evaluate(opt):
         decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
         
         encoder_dict = torch.load(encoder_path)
-        HEIGHT, WIDTH = 256, 320
+        HEIGHT, WIDTH = 240, 320
         #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
 
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
                                            HEIGHT, WIDTH,
-                                           [0], 4, is_train=False)
+                                           [0], 4, is_train=False, img_ext=img_ext)
+
+        img_ext = '.png' if self.opt.png else '.jpg'
         dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
