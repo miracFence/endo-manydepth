@@ -68,7 +68,6 @@ def evaluate(opt):
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
 
     if opt.ext_disp_to_eval is None:
-        img_ext = ""
         opt.load_weights_folder = os.path.expanduser(opt.load_weights_folder)
 
         assert os.path.isdir(opt.load_weights_folder), \
@@ -90,7 +89,7 @@ def evaluate(opt):
                                            HEIGHT, WIDTH,
                                            [0], 4, is_train=False, img_ext=img_ext)
 
-        img_ext = '.png' if self.opt.png else '.jpg'
+        img_ext = '.png' 
         dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
