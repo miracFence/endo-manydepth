@@ -81,7 +81,7 @@ def evaluate(opt):
         decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
         
         encoder_dict = torch.load(encoder_path)
-        HEIGHT, WIDTH = 252, 320
+        HEIGHT, WIDTH = 256, 320
         #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
         img_ext = '.png' if opt.png else '.jpg'
