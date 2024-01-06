@@ -84,12 +84,12 @@ def evaluate(opt):
         HEIGHT, WIDTH = 240, 320
         #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
-
+        img_ext = '.png' if self.opt.png else '.jpg'
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
                                            HEIGHT, WIDTH,
                                            [0], 4, is_train=False, img_ext=img_ext)
 
-        img_ext = '.png' 
+        
         dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
