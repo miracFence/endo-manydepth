@@ -137,7 +137,7 @@ class Trainer_Monodepth:
         print("Models and tensorboard events files are saved to:\n  ", self.opt.log_dir)
         print("Training is using:\n  ", self.device)
 
-                # DATA
+        # DATA
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
                          "kitti_odom": datasets.KITTIOdomDataset,
@@ -699,6 +699,7 @@ class Trainer_Monodepth:
 
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
+            print(color.shape)
             #Losses & compute mask
             for frame_id in self.opt.frame_ids[1:]:
                 # Mask
