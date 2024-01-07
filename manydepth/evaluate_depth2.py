@@ -225,7 +225,7 @@ def evaluate(opt):
 
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
-
+        print(opt.pred_depth_scale_factor)
         pred_depth *= opt.pred_depth_scale_factor
         
         if not opt.disable_median_scaling:
