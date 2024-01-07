@@ -10,6 +10,7 @@ import os
 import argparse
 import numpy as np
 import PIL.Image as pil
+import torch
 
 from utils import readlines
 from kitti_utils import generate_depth_map
