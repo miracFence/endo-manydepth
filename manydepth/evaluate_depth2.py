@@ -223,9 +223,9 @@ def evaluate(opt):
         else:
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
-        pred_depth = pred_depth[mask]
-        gt_depth = gt_depth[mask]
-        print(opt.pred_depth_scale_factor)
+        #pred_depth = pred_depth[mask]
+        #gt_depth = gt_depth[mask]
+        #print(opt.pred_depth_scale_factor)
         pred_depth *= opt.pred_depth_scale_factor
         
         if not opt.disable_median_scaling:
