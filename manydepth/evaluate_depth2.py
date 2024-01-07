@@ -143,10 +143,10 @@ def evaluate(opt):
 
                 pred_disps.append(pred_disp)
 
-        pred_disps = np.concatenate(pred_disps)
-        depth_tensor = torch.Tensor(pred_disps)
-        median_prediction = torch.median(depth_tensor) 
-        print(median_prediction)
+        pred_disps = np.concatenate(pred_disps) * 10.3011
+        #depth_tensor = torch.Tensor(pred_disps)
+        #median_prediction = torch.median(depth_tensor) 
+        #print(median_prediction)
 
     else:
         # Load predictions from file
