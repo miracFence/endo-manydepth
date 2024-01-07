@@ -236,7 +236,7 @@ class MonodepthOptions:
         self.parser.add_argument("--pred_depth_scale_factor",
                                  help="if set multiplies predictions by this number",
                                  type=float,
-                                 default=1)
+                                 default=10.3011)
         self.parser.add_argument("--ext_disp_to_eval",
                                  type=str,
                                  help="optional path to a .npy disparities file to evaluate")

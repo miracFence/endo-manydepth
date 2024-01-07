@@ -143,13 +143,13 @@ def evaluate(opt):
 
                 pred_disps.append(pred_disp)
 
-        pred_disps = np.concatenate(pred_disps) * 10.3011
+        pred_disps = np.concatenate(pred_disps) 
         #depth_tensor = torch.Tensor(pred_disps)
         #median_prediction = torch.median(depth_tensor) 
         #print(median_prediction)
 
     else:
-        # Load predictions from file
+        # Load predictions from fileF
         print("-> Loading predictions from {}".format(opt.ext_disp_to_eval))
         pred_disps = np.load(opt.ext_disp_to_eval)
 
@@ -227,6 +227,7 @@ def evaluate(opt):
         gt_depth = gt_depth[mask]
 
         pred_depth *= opt.pred_depth_scale_factor
+        
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
             ratios.append(ratio)
