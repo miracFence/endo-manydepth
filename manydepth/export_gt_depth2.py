@@ -55,10 +55,10 @@ def export_gt_depths_kitti():
             gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
 
         gt_depths.append(gt_depth.astype(np.float32))
-
+        gt_depth_tensor = torch.Tensor(gt_depths)
         # Compute median of ground-truth depths
-        median_ground_truth = torch.median(gt_depths)
-        print(median_ground_truth.shape)
+        median_ground_truth = torch.median(gt_depth_tensor)
+        print(median_ground_truth)
 
     output_path = os.path.join(split_folder, "gt_depths.npz")
 
