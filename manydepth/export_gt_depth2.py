@@ -38,7 +38,7 @@ def export_gt_depths_kitti():
 
     gt_depths = []
     for line in lines:
-        print(line)
+        #print(line)
         folder, frame_id, _ = line.split()
         frame_id = int(frame_id)
 
@@ -52,7 +52,7 @@ def export_gt_depths_kitti():
                                          "groundtruth", "image_02", "{:010d}.png".format(frame_id))
         elif opt.split == "RNNSLAM":
             gt_depth_path = os.path.join(opt.data_path,folder, "{0}.png".format(frame_id))
-            gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
+            gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32)
             print(gt_depth.shape)
 
         gt_depths.append(gt_depth.astype(np.float32))
