@@ -38,7 +38,7 @@ def export_gt_depths_kitti():
 
     gt_depths = []
     for line in lines:
-
+        print(line)
         folder, frame_id, _ = line.split()
         frame_id = int(frame_id)
 
