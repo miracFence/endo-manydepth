@@ -60,6 +60,7 @@ class SCAREDDataset(MonoDataset):
         line = self.filenames[index].split()
         if len(line) < 1:
             print(line)
+            print(index)
 
         folder = line[0]
 
