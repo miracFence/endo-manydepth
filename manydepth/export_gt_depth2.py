@@ -53,6 +53,7 @@ def export_gt_depths_kitti():
         elif opt.split == "RNNSLAM":
             gt_depth_path = os.path.join(opt.data_path,folder, "{0}.png".format(frame_id))
             gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
+            print(gt_depth.shape)
 
         gt_depths.append(gt_depth.astype(np.float32))
     """    
