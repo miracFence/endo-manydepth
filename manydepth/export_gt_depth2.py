@@ -55,15 +55,15 @@ def export_gt_depths_kitti():
             gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
 
         gt_depths.append(gt_depth.astype(np.float32))
-        
+    """    
     gt_depth_tensor = torch.Tensor(gt_depths)
     median_ground_truth = torch.median(gt_depth_tensor)
-    print(median_ground_truth)
+    print(median_ground_truth)"""
     output_path = os.path.join(split_folder, "gt_depths.npz")
 
     print("Saving to {}".format(opt.split))
 
-    #np.savez_compressed(output_path, data=np.array(gt_depths))
+    np.savez_compressed(output_path, data=np.array(gt_depths))
 
 
 if __name__ == "__main__":
