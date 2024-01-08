@@ -1615,7 +1615,6 @@
 3/rgb 817 l
 3/rgb 818 l
 3/rgb 819 l
-3/rgb 820 l
 4/rgb 1 l
 4/rgb 2 l
 4/rgb 3 l
