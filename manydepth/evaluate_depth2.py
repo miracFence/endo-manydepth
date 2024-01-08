@@ -91,7 +91,7 @@ def evaluate(opt):
         decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
         
         encoder_dict = torch.load(encoder_path)
-        HEIGHT, WIDTH = 256, 320
+        HEIGHT, WIDTH = 240, 320
         #self.opt.height
         #encoder_dict2 = torch.load(encoder_path2)
         img_ext = '.png' if opt.png else '.jpg'
@@ -223,8 +223,8 @@ def evaluate(opt):
         else:
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
-        #pred_depth = pred_depth[mask]
-        #gt_depth = gt_depth[mask]
+        pred_depth = pred_depth[mask]
+        gt_depth = gt_depth[mask]
         #print(opt.pred_depth_scale_factor)
         pred_depth *= opt.pred_depth_scale_factor
         
