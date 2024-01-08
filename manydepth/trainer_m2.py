@@ -699,7 +699,6 @@ class Trainer_Monodepth:
 
             disp = outputs[("disp", scale)]
             color = inputs[("color", 0, scale)]
-            print(color.shape)
             #Losses & compute mask
             for frame_id in self.opt.frame_ids[1:]:
                 # Mask

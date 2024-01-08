@@ -25,10 +25,10 @@ class SCAREDDataset(MonoDataset):
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)"""
         #RNNSLAM synthetic dataset
-        #240 / 320
-        #fx = 232.5044678; fy = 232.5044678; cx = 240.0; cy = 320.0; baseline = 4.5; %unit in milimeter
-        self.K = np.array([[0.72, 0, 0.75, 0],
-                           [0, 0.96,1.33, 0],
+        #256 / 320
+        #fx = 155.0029785575048732943469785575 fy= 165.33651046133853151397011046134 cx = 128.0; cy = 160.0;
+        self.K = np.array([[0.48, 0, 0.4, 0],
+                           [0, 0.64,0.62, 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
         #Colon10k dataset
