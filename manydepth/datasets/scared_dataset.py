@@ -58,9 +58,9 @@ class SCAREDDataset(MonoDataset):
         """Convert index in the dataset to a folder name, frame_idx and any other bits
         """
         line = self.filenames[index].split()
-        if len(line) < 1:
+        """if len(line) < 1:
             print(line)
-            print(index)
+            print(index)"""
 
         folder = line[0]
 
