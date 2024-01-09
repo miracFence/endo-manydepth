@@ -234,8 +234,8 @@ def evaluate(opt):
             ratios.append(ratio)
             pred_depth *= ratio
         """
-        pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
-        pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
+        #pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
+        #pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
     """
