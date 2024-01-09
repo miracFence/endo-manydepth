@@ -129,7 +129,7 @@ def evaluate(opt):
                 #print(input_color.shape)
                 if opt.post_process:
                     # Post-processed results require each image to have two forward passes
-                    #input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
+                    input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
                 
                 features = encoder(input_color)
                 output = depth_decoder(features)
@@ -221,12 +221,12 @@ def evaluate(opt):
             mask = np.logical_and(mask, crop_mask)
 
         else:
-            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
+            #mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
-        pred_depth = pred_depth[mask]
-        gt_depth = gt_depth[mask]
+        #pred_depth = pred_depth[mask]
+        #gt_depth = gt_depth[mask]
         #print(opt.pred_depth_scale_factor)
-        #pred_depth *= opt.pred_depth_scale_factor  5.0
+        #pred_depth *= opt.pred_depth_scale_factor 
         pred_depth *= 5.0
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
