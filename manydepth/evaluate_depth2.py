@@ -220,14 +220,14 @@ def evaluate(opt):
             crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
-        #else:
-            #mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
+        else:
+            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         #pred_depth = pred_depth[mask]
         #gt_depth = gt_depth[mask]
         #print(opt.pred_depth_scale_factor)
         #pred_depth *= opt.pred_depth_scale_factor 
-        pred_depth *= 5.0
+        #pred_depth *= 5.0
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
             ratios.append(ratio)
