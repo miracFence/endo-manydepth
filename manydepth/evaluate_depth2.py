@@ -228,22 +228,20 @@ def evaluate(opt):
         #print(opt.pred_depth_scale_factor)
         #pred_depth *= opt.pred_depth_scale_factor  5.0
         pred_depth *= 5.0
-        """
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
             ratios.append(ratio)
             pred_depth *= ratio
-        """
-        #pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
-        #pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
+        
+        pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
+        pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
-    """
     if not opt.disable_median_scaling:
         ratios = np.array(ratios)
         med = np.median(ratios)
         print(" Scaling ratios | med: {:0.3f} | std: {:0.3f}".format(med, np.std(ratios / med)))
-    """
+
     mean_errors = np.array(errors).mean(0)
 
     print("\n  " + ("{:>8} | " * 7).format("abs_rel", "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
