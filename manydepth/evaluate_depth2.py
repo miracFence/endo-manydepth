@@ -220,7 +220,7 @@ def evaluate(opt):
             crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
-        else:
+        #else:
             #mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         #pred_depth = pred_depth[mask]
