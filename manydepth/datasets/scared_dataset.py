@@ -27,17 +27,17 @@ class SCAREDDataset(MonoDataset):
         #RNNSLAM synthetic dataset
         #256 / 320
         #fx = 155.00297855750486 fy= 165.3365104613385 cx = 160.0; cy = 128.0;
-        self.K = np.array([[0.48, 0, 0.5, 0],
+        """self.K = np.array([[0.48, 0, 0.5, 0],
                            [0, 0.64,0.5, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)
+                           [0, 0, 0, 1]], dtype=np.float32)"""
         #Colon10k dataset
         #256 / 320
         #Camera Intrinsics: Pinhole fx=145.4410 fy=145.4410 cx=135.6993 cy=107.8946 width=270 height=216
-        """self.K = np.array([[0.454503125, 0, 0.4240603125, 0],
+        self.K = np.array([[0.454503125, 0, 0.4240603125, 0],
                            [0, 0.56812890625,0.42146328125, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)"""
+                           [0, 0, 0, 1]], dtype=np.float32)
 
         # self.full_res_shape = (1280, 1024)
         self.side_map = {"2": 2, "3": 3, "l": 2, "r": 3}
