@@ -170,10 +170,6 @@ class Trainer_Monodepth:
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
         self.val_iter = iter(self.val_loader)
 
-        #self.writers = {}
-        #for mode in ["train", "val"]:
-        #    self.writers[mode] = SummaryWriter(os.path.join(self.log_path, mode))
-
         if not self.opt.no_ssim:
             self.ssim = SSIM()
             self.ssim.to(self.device)
@@ -201,28 +197,6 @@ class Trainer_Monodepth:
             len(train_dataset), len(val_dataset)))
 
         self.save_opts()
-
-    def freeze_models(self):
-        # Freeze all layers
-        for param in self.models["encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["depth"].parameters():
-            param.requires_grad = False
-        for param in self.models["pose_encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["lighting"].parameters():
-            param.requires_grad = False
-        
-    
-    def unfreeze_models(self):
-        for param in self.models["encoder"].parameters():
-            param.requires_grad = True
-        for param in self.models["depth"].parameters():
-            param.requires_grad = True
-        for param in self.models["pose_encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["lighting"].parameters():
-            param.requires_grad = False
 
     def set_train(self):
         """Convert all models to training mode
@@ -253,22 +227,6 @@ class Trainer_Monodepth:
 
         print("Training",self.epoch)
         self.set_train()
-        """
-        self.normal_flag = 0
-        if self.epoch < 5:
-            self.normal_weight = 1e-9
-            self.orthogonal_weight = 1e-9
-        if self.epoch >= 5 and self.epoch < 10:
-            self.freeze_models()
-            self.normal_weight = 0.01
-            self.orthogonal_weight = 0.5
-            self.normal_flag = 1
-        if self.epoch >= 10:
-            self.unfreeze_models()
-            self.normal_weight = 0.005
-            self.orthogonal_weight = 0.001
-            self.normal_flag = 1
-        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)"""
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -507,12 +465,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
                 
-        #Normal prediction
-        """        
-        for i, frame_id in enumerate(self.opt.frame_ids[1:]):
-            features = self.models["encoder"](outputs[("color", frame_id, 0)])
-            outputs[("normal",frame_id)] = self.models["normal"](features)"""
-            
+          
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -578,24 +531,14 @@ class Trainer_Monodepth:
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 #Illuminations invariant loss
-                #target = inputs[("color", 0, 0)]
-                #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
-                #Normal loss
-                #if self.normal_flag == 1: 
-                #    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                target = inputs[("color", 0, 0)]
+                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                
                 
             loss += loss_reprojection / 2.0    
-            #Normal loss
-            #if self.normal_flag == 1:
-                #self.normal_weight = 0.005
-                #self.orthogonal_weight = 0.001
-                #loss += self.normal_weight * normal_loss / 2.0
-            #Orthogonal loss
-            #if self.normal_flag == 1:
-                #loss += self.orthogonal_weight * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
                 
             #Illumination invariant loss
-            #loss += 0.5 * loss_ilumination_invariant / 2.0
+            loss += 0.5 * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
