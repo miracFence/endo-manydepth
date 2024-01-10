@@ -78,11 +78,6 @@ class Trainer_Monodepth:
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
-        """
-        self.models["normal"] = networks.NormalDecoder(
-            self.models["encoder"].num_ch_enc, self.opt.scales)
-        self.models["normal"].to(self.device)
-        self.parameters_to_train += list(self.models["normal"].parameters())"""
 
         if self.use_pose_net:
             if self.opt.pose_model_type == "separate_resnet":
@@ -351,12 +346,7 @@ class Trainer_Monodepth:
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
                     # To maintain ordering we always pass frames in temporal order
-                    """
-                    if f_i < 0:
-                        pose_inputs = [pose_feats[f_i], pose_feats[0]]
-                    else:
-                        pose_inputs = [pose_feats[0], pose_feats[f_i]]"""
-                    
+                   
                     pose_inputs = [pose_feats[f_i], pose_feats[0]]
                     
 
@@ -365,25 +355,7 @@ class Trainer_Monodepth:
                         
                     elif self.opt.pose_model_type == "posecnn":
                         pose_inputs = torch.cat(pose_inputs, 1)
-                    """
-                    if f_i < 0:
-                        iif_all = [get_ilumination_invariant_features(pose_feats[f_i]),get_ilumination_invariant_features(pose_feats[0])] 
-                    else:
-                        iif_all = [get_ilumination_invariant_features(pose_feats[0]),get_ilumination_invariant_features(pose_feats[f_i])] 
-                    """
                     
-                    #motion_inputs = [self.models["ii_encoder"](torch.cat(pose_inputs, 1))]
-                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
-                    
-                    """input_combined = pose_inputs
-                    concatenated_list = []
-                    # Iterate over the corresponding tensors in list1 and list2 and concatenate them
-                    for tensor1, tensor2 in zip(pose_inputs[0], motion_inputs[0]):
-                        concatenated_tensor = torch.cat([tensor1, tensor2], dim=1)
-                        concatenated_list.append(concatenated_tensor)
-                    
-                    axisangle, translation = self.models["pose"]([concatenated_list])
-                    """
                     # Original
                     axisangle, translation = self.models["pose"](pose_inputs)
 
@@ -398,17 +370,16 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    #outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    
                     
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        
                         
             
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
-                    #outputs[("color_motion", f_i, scale)] = self.spatial_transform(inputs[("color", 0, 0)],outputs["mf_"+str(0)+"_"+str(f_i)])
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
@@ -720,19 +691,10 @@ class Trainer_Monodepth:
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
-                #Normal loss
-                #if self.normal_flag == 1: 
-                #    normal_loss += (self.norm_loss(outputs[("normal",frame_id)][("normal", scale)],outputs["normal_inputs"][("normal", scale)], rot_from_axisangle(outputs[("axisangle", 0, frame_id)][:, 0].detach()),frame_id) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
+                
                 
             loss += loss_reprojection / 2.0    
-            #Normal loss
-            #if self.normal_flag == 1:
-                #self.normal_weight = 0.005
-                #self.orthogonal_weight = 0.001
-                #loss += self.normal_weight * normal_loss / 2.0
-            #Orthogonal loss
-            #if self.normal_flag == 1:
-                #loss += self.orthogonal_weight * self.compute_orth_loss2(outputs[("disp", scale)], outputs["normal_inputs"][("normal", scale)], inputs[("inv_K", scale)])
+            
                 
             #Illumination invariant loss
             loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
