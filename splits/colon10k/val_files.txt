@@ -1,4 +1,3 @@
-20/image 0 l
 20/image 1 l
 20/image 2 l
 20/image 3 l
@@ -589,3 +588,4 @@
 20/image 588 l
 20/image 589 l
 20/image 590 l
+20/image 591 l

@@ -37,7 +37,7 @@ def export_gt_depths_kitti():
     print("Exporting ground truth depths for {}".format(opt.split))
 
     gt_depths = []
-    newsize = (256, 320)
+    newsize = (320, 256)
     for line in lines:
         #print(line)
         folder, frame_id, _ = line.split()
