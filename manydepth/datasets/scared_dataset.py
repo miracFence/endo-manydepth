@@ -86,7 +86,7 @@ class SCAREDDataset(MonoDataset):
         #image_path = os.path.join(self.data_path, folder, "data", f_str)
         #COLON10k
         f_str=str(frame_index) + self.img_ext
-        image_path = os.path.join(self.data_path, folder, f_str)
+        image_path = os.path.join(self.data_path, folder,"image", f_str)
             
         return image_path
 
@@ -100,8 +100,8 @@ class SCAREDRAWDataset(SCAREDDataset):
         #image_path = os.path.join(self.data_path, folder, "data", f_str)
         #COLON10k
         f_str=str(frame_index) + self.img_ext
-        image_path = os.path.join(self.data_path, folder,"image", f_str)
-        print(image_path)
+        image_path = os.path.join(self.data_path, folder, f_str)
+            
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
