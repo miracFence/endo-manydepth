@@ -346,8 +346,10 @@ class Trainer_Monodepth:
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
                     # To maintain ordering we always pass frames in temporal order
-                   
-                    pose_inputs = [pose_feats[f_i], pose_feats[0]]
+                    if f_i < 0:
+                        pose_inputs = [pose_feats[f_i], pose_feats[0]]
+                    else:
+                        pose_inputs = [pose_feats[0], pose_feats[f_i]]
                     
 
                     if self.opt.pose_model_type == "separate_resnet":
