@@ -86,8 +86,7 @@ class SCAREDDataset(MonoDataset):
         #image_path = os.path.join(self.data_path, folder, "data", f_str)
         #COLON10k
         f_str=str(frame_index) + self.img_ext
-        image_path = os.path.join(self.data_path, folder, f_str)
-        #RNNSLAM
+        image_path = os.path.join(self.data_path, folder,"image", f_str)
             
         return image_path
 
