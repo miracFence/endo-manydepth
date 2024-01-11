@@ -27,17 +27,17 @@ class SCAREDDataset(MonoDataset):
         #RNNSLAM synthetic dataset
         #256 / 320
         #fx = 155.00297855750486 fy= 165.3365104613385 cx = 160.0; cy = 128.0;
-        """self.K = np.array([[0.48, 0, 0.5, 0],
+        self.K = np.array([[0.48, 0, 0.5, 0],
                            [0, 0.64,0.5, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)"""
+                           [0, 0, 0, 1]], dtype=np.float32)
         #Colon10k dataset
         #256 / 320
         #Camera Intrinsics: Pinhole fx=145.4410 fy=145.4410 cx=135.6993 cy=107.8946 width=270 height=216
-        self.K = np.array([[0.538875, 0, 0.50234375, 0],
+        """self.K = np.array([[0.538875, 0, 0.50234375, 0],
                            [0, 0.67359375,0.4992578125, 0],
                            [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=np.float32)
+                           [0, 0, 0, 1]], dtype=np.float32)"""
         """
         Focal Lengths: fx ≈ 172.44, fy ≈ 172.44
         Principal Points: cx ≈ 160.75, cy ≈ 127.81
