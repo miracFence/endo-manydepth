@@ -101,7 +101,7 @@ class SCAREDRAWDataset(SCAREDDataset):
         #COLON10k
         f_str=str(frame_index) + self.img_ext
         image_path = os.path.join(self.data_path, folder,"image", f_str)
-            
+        print(image_path)
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
