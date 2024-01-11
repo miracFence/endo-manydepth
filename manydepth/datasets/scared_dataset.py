@@ -27,8 +27,9 @@ class SCAREDDataset(MonoDataset):
         #RNNSLAM synthetic dataset
         #256 / 320
         #fx = 155.00297855750486 fy= 165.3365104613385 cx = 160.0; cy = 128.0;
+        #fy = 176.358213824 cy =  136.533333333
         self.K = np.array([[0.48, 0, 0.5, 0],
-                           [0, 0.64,0.5, 0],
+                           [0, 0.6888,0.5333, 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
         #Colon10k dataset
