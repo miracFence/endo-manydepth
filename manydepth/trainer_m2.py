@@ -363,11 +363,11 @@ class Trainer_Monodepth:
                     outputs[("translation", 0, f_i)] = translation
 
                     # Invert the matrix if the frame id is negative
-                    outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
-
                     """outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0])"""
+                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))"""
+
+                    outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
+                        axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
                     
