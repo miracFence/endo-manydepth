@@ -1,4 +1,3 @@
-train1/rgb 1 l
 train1/rgb 2 l
 train1/rgb 3 l
 train1/rgb 4 l
@@ -997,8 +996,6 @@ train1/rgb 996 l
 train1/rgb 997 l
 train1/rgb 998 l
 train1/rgb 999 l
-train1/rgb 1000 l
-train2/rgb 1 l
 train2/rgb 2 l
 train2/rgb 3 l
 train2/rgb 4 l
@@ -1997,8 +1994,6 @@ train2/rgb 996 l
 train2/rgb 997 l
 train2/rgb 998 l
 train2/rgb 999 l
-train2/rgb 1000 l
-train3/rgb 1 l
 train3/rgb 2 l
 train3/rgb 3 l
 train3/rgb 4 l
@@ -2997,8 +2992,6 @@ train3/rgb 996 l
 train3/rgb 997 l
 train3/rgb 998 l
 train3/rgb 999 l
-train3/rgb 1000 l
-train4/rgb 1 l
 train4/rgb 2 l
 train4/rgb 3 l
 train4/rgb 4 l
@@ -3997,8 +3990,6 @@ train4/rgb 996 l
 train4/rgb 997 l
 train4/rgb 998 l
 train4/rgb 999 l
-train4/rgb 1000 l
-train5/rgb 1 l
 train5/rgb 2 l
 train5/rgb 3 l
 train5/rgb 4 l
@@ -4997,8 +4988,6 @@ train5/rgb 996 l
 train5/rgb 997 l
 train5/rgb 998 l
 train5/rgb 999 l
-train5/rgb 1000 l
-train6/rgb 1 l
 train6/rgb 2 l
 train6/rgb 3 l
 train6/rgb 4 l
@@ -5997,8 +5986,6 @@ train6/rgb 996 l
 train6/rgb 997 l
 train6/rgb 998 l
 train6/rgb 999 l
-train6/rgb 1000 l
-train7/rgb 1 l
 train7/rgb 2 l
 train7/rgb 3 l
 train7/rgb 4 l
@@ -6076,8 +6063,6 @@ train7/rgb 75 l
 train7/rgb 76 l
 train7/rgb 77 l
 train7/rgb 78 l
-train7/rgb 79 l
-train8/rgb 1 l
 train8/rgb 2 l
 train8/rgb 3 l
 train8/rgb 4 l
@@ -7076,8 +7061,6 @@ train8/rgb 996 l
 train8/rgb 997 l
 train8/rgb 998 l
 train8/rgb 999 l
-train8/rgb 1000 l
-train9/rgb 1 l
 train9/rgb 2 l
 train9/rgb 3 l
 train9/rgb 4 l
@@ -8076,8 +8059,6 @@ train9/rgb 996 l
 train9/rgb 997 l
 train9/rgb 998 l
 train9/rgb 999 l
-train9/rgb 1000 l
-train10/rgb 1 l
 train10/rgb 2 l
 train10/rgb 3 l
 train10/rgb 4 l
@@ -9076,4 +9057,3 @@ train10/rgb 996 l
 train10/rgb 997 l
 train10/rgb 998 l
 train10/rgb 999 l
-train10/rgb 1000 l
