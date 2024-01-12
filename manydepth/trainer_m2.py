@@ -248,22 +248,6 @@ class Trainer_Monodepth:
 
         print("Training",self.epoch)
         self.set_train()
-        """
-        self.normal_flag = 0
-        if self.epoch < 5:
-            self.normal_weight = 1e-9
-            self.orthogonal_weight = 1e-9
-        if self.epoch >= 5 and self.epoch < 10:
-            self.freeze_models()
-            self.normal_weight = 0.01
-            self.orthogonal_weight = 0.5
-            self.normal_flag = 1
-        if self.epoch >= 10:
-            self.unfreeze_models()
-            self.normal_weight = 0.005
-            self.orthogonal_weight = 0.001
-            self.normal_flag = 1
-        print(self.normal_weight,self.orthogonal_weight,self.normal_flag)"""
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
@@ -389,7 +373,7 @@ class Trainer_Monodepth:
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     #outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
-                    outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
+                    outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
 
 
         else:
