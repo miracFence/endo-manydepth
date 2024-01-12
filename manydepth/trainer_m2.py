@@ -314,11 +314,11 @@ class Trainer_Monodepth:
             
         else:
             # Otherwise, we only feed the image with frame_id 0 through the depth encoder
-            features = self.models["encoder"](inputs["color_aug", 0, 0])
+            features = self.models["encoder"](inputs["color", 0, 0])
             outputs = self.models["depth"](features)
-
+        """
         if self.opt.predictive_mask:
-            outputs["predictive_mask"] = self.models["predictive_mask"](features)
+            outputs["predictive_mask"] = self.models["predictive_mask"](features)"""
 
         if self.use_pose_net:
             outputs.update(self.predict_poses(inputs, features))
@@ -341,7 +341,7 @@ class Trainer_Monodepth:
             if self.opt.pose_model_type == "shared":
                 pose_feats = {f_i: features[f_i] for f_i in self.opt.frame_ids}
             else:
-                pose_feats = {f_i: inputs["color_aug", f_i, 0] for f_i in self.opt.frame_ids}
+                pose_feats = {f_i: inputs["color", f_i, 0] for f_i in self.opt.frame_ids}
 
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
