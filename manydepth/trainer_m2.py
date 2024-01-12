@@ -372,10 +372,10 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])"""
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    
+                    """
                     wandb.log({"original": wandb.Image(inputs[("color", 0, 0)][0].data)},step=self.step)
                     wandb.log({"input_0": wandb.Image(pose_feats[0][0].data)},step=self.step)
-                    wandb.log({"input_fi": wandb.Image(pose_feats[f_i][0].data)},step=self.step)
+                    wandb.log({"input_fi": wandb.Image(pose_feats[f_i][0].data)},step=self.step)"""
                 
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
