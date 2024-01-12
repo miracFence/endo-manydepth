@@ -621,7 +621,7 @@ class Trainer_Monodepth:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_motion", frame_id, s)][j].data)},step=self.step)
-                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id, s)][j].data)},step=self.step)
+                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id)][j].data)},step=self.step)
                     #wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(self.visualize_normal_image(inputs[("normal",0)][j]))},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("ch",s, frame_id)][j].data)},step=self.step)
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("bh",s, frame_id)][j].data)},step=self.step)
