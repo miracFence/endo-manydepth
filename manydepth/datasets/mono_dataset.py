@@ -136,9 +136,10 @@ class MonoDataset(data.Dataset):
         """
         inputs = {}
 
-        do_color_aug = self.is_train and random.random() > 0.5
-        do_flip = self.is_train and random.random() > 0.5
-
+        #do_color_aug = self.is_train and random.random() > 0.5
+        #do_flip = self.is_train and random.random() > 0.5
+        do_flip = False
+        do_flip = False
         folder, frame_index, side = self.index_to_folder_and_frame_idx(index)
 
         poses = {}
