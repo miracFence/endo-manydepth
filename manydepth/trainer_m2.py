@@ -380,16 +380,16 @@ class Trainer_Monodepth:
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
+                        #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
                         
                 
-            """
+            
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
-                    #outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
-                    #outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                    outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                    outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     #outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
-                    outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]"""
+                    outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
 
 
         else:
