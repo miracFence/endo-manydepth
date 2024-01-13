@@ -526,7 +526,7 @@ class Trainer_Monodepth:
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
-        #orthonogal_loss = 0
+        loss_motion_flow = 0
         normal_loss = 0
 
         for scale in self.opt.scales:
@@ -582,6 +582,7 @@ class Trainer_Monodepth:
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
             loss += self.opt.disparity_smoothness * smooth_loss / (2 ** scale)
+            loss += 0.001 * loss_motion_flow / (2 ** scale)
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
