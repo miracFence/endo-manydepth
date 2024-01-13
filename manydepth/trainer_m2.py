@@ -98,6 +98,10 @@ class Trainer_Monodepth:
                 self.models["lighting"].to(self.device)
                 self.parameters_to_train += list(self.models["lighting"].parameters())
 
+                self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
+                self.models["motion_flow"].to(self.device)
+                self.parameters_to_train += list(self.models["motion_flow"].parameters())
+
             elif self.opt.pose_model_type == "shared":
                 self.models["pose"] = networks.PoseDecoder(
                     self.models["encoder"].num_ch_enc, self.num_pose_frames)
@@ -356,31 +360,33 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
                     
                     """
                     wandb.log({"original": wandb.Image(inputs[("color", 0, 0)][0].data)},step=self.step)
                     wandb.log({"input_"+str(f_i): wandb.Image(pose_feats[f_i][0].data)},step=self.step)
                     wandb.log({"input_0": wandb.Image(pose_feats[0][0].data)},step=self.step)"""
 
-                    """
+                    
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        wandb.log({"b": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
-                        wandb.log({"c": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
-                        #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]"""
+                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        #wandb.log({"b": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
+                        #wandb.log({"c": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
+                        #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
 
-                    outputs["b_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,0,None,:, :]
-                    outputs["c_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,1,None,:, :]    
+                    #outputs["b_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,0,None,:, :]
+                    #outputs["c_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,1,None,:, :]    
                     #outputs[("color_refined", f_i)] = outputs["c_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(f_i)]
                 
-            """
+            
             for f_i in self.opt.frame_ids[1:]:
                 for scale in self.opt.scales:
                     outputs[("bh",scale, f_i)] = F.interpolate(outputs["b_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("ch",scale, f_i)] = F.interpolate(outputs["c_"+str(scale)+"_"+str(f_i)], [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                     outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
-                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]"""
+                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]
 
 
 
@@ -451,10 +457,20 @@ class Trainer_Monodepth:
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
+                
+                outputs["mfh_"+str(scale)+"_"+str(frame_id)]=outputs["mf_"+str(0)+"_"+str(frame_id)].permute(0,2,3,1)
+                outputs["cf_"+str(scale)+"_"+str(frame_id)] = outputs["sample_"+str(frame_id)+"_"+str(scale)] + outputs["mfh_"+str(scale)+"_"+str(frame_id)]
+                
+                outputs[("color", frame_id, scale)] = F.grid_sample(
+                    inputs[("color", frame_id, source_scale)],
+                    outputs["cf_"+str(scale)+"_"+str(frame_id)],
+                    padding_mode="border",align_corners=True)
+                    
+                """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
                     outputs[("sample", frame_id, scale)],
-                    padding_mode="border",align_corners=True)
+                    padding_mode="border",align_corners=True)"""
 
             
 
@@ -526,8 +542,8 @@ class Trainer_Monodepth:
 
                 #outputs[("refined", scale, f_i)] = (outputs[("transform", "high", scale, f_i)] * outputs[("occu_mask_backward", 0, f_i)].detach()  + inputs[("color", 0, 0)])
                 #outputs[("refined", scale, f_i)] = torch.clamp(outputs[("refined", scale, f_i)], min=0.0, max=1.0)
-                outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask + inputs[("color", 0, 0)]
-                outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
+                #outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask + inputs[("color", 0, 0)]
+                #outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
                 #Losses
                 target = outputs[("color_refined", frame_id)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
