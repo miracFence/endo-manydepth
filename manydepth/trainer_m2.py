@@ -519,7 +519,7 @@ class Trainer_Monodepth:
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
                 #print(reprojection_loss_mask.shape)
-                outputs[("color_refined", frame_id)] = (outputs["c_"+str(f_i)] * reprojection_loss_mask) * inputs[("color", 0, 0)].detach() + (outputs["b_"+str(f_i)] * reprojection_loss_mask)
+                outputs[("color_refined", frame_id)] = (outputs["c_"+str(frame_id)] * reprojection_loss_mask) * inputs[("color", 0, 0)].detach() + (outputs["b_"+str(frame_id)] * reprojection_loss_mask)
                 #Losses
                 target = outputs[("color_refined", frame_id)] #Lighting
                 pred = outputs[("color", frame_id, scale)]
