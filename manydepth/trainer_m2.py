@@ -667,7 +667,7 @@ class Trainer_Monodepth:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_motion", frame_id, s)][j].data)},step=self.step)
-                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id,scale)][j].data)},step=self.step)
+                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id,s)][j].data)},step=self.step)
                     #wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(self.visualize_normal_image(inputs[("normal",0)][j]))},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("ch",s, frame_id)][j].data)},step=self.step)
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("bh",s, frame_id)][j].data)},step=self.step)
@@ -675,10 +675,10 @@ class Trainer_Monodepth:
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             #wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
             #wandb.log({"normal_predicted{}/{}".format(s, j): wandb.Image(self.visualize_normals(outputs["normal"][("normal", 0)][j].data))},step=self.step)
-            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
+            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
             """if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...])},self.step)
