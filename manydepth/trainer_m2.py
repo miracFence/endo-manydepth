@@ -465,7 +465,7 @@ class Trainer_Monodepth:
                     inputs[("color", frame_id, source_scale)],
                     outputs["cf_"+str(scale)+"_"+str(frame_id)],
                     padding_mode="border",align_corners=True)
-                    
+
                 """
                 outputs[("color", frame_id, scale)] = F.grid_sample(
                     inputs[("color", frame_id, source_scale)],
