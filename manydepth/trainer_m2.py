@@ -372,7 +372,7 @@ class Trainer_Monodepth:
 
                     outputs["b_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,0,None,:, :]
                     outputs["c_"+str(f_i)] = outputs_lighting[("lighting", 0)][:,1,None,:, :]    
-                    outputs[("color_refined", f_i)] = outputs["c_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(f_i)]
+                    #outputs[("color_refined", f_i)] = outputs["c_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(f_i)]
                 
             """
             for f_i in self.opt.frame_ids[1:]:
@@ -526,7 +526,7 @@ class Trainer_Monodepth:
 
                 #outputs[("refined", scale, f_i)] = (outputs[("transform", "high", scale, f_i)] * outputs[("occu_mask_backward", 0, f_i)].detach()  + inputs[("color", 0, 0)])
                 #outputs[("refined", scale, f_i)] = torch.clamp(outputs[("refined", scale, f_i)], min=0.0, max=1.0)
-                outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask  + inputs[("color", 0, 0)]
+                outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask + inputs[("color", 0, 0)]
                 outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
                 #Losses
                 target = outputs[("color_refined", frame_id)] #Lighting
