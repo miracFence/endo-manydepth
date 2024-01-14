@@ -360,7 +360,12 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    outputs_mf = self.models["motion_flow"](pose_inputs[0])
+                    if f_i < 0:
+                        pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
+                    else:
+                        pose_inputs_motion = [pose_feats[0], pose_feats[f_i]]
+                    pose_inputs_motion = [self.models["pose_encoder"](torch.cat(pose_inputs_motion, 1))]
+                    outputs_mf = self.models["motion_flow"](pose_inputs_motion[0])
                     
                     """
                     wandb.log({"original": wandb.Image(inputs[("color", 0, 0)][0].data)},step=self.step)
