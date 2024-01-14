@@ -360,11 +360,13 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    
                     if f_i < 0:
                         pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
                     else:
                         pose_inputs_motion = [pose_feats[0], pose_feats[f_i]]
-                    pose_inputs_motion = [self.models["pose_encoder"](torch.cat(pose_inputs_motion, 1))]
+                    with torch.no_grad():
+                        pose_inputs_motion = [self.models["pose_encoder"](torch.cat(pose_inputs_motion, 1))]
                     outputs_mf = self.models["motion_flow"](pose_inputs_motion[0])
                     
                     """
@@ -480,7 +482,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
 
-            
+                outputs[("color", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)],outputs["mf_"+str(0)+"_"+str(frame_id)])
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -572,8 +574,6 @@ class Trainer_Monodepth:
                 #outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
                 #Losses
                 target = outputs[("color_refined", frame_id, scale)] #Lighting               
-                
-                outputs[("color", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)],outputs["mf_"+str(0)+"_"+str(frame_id)])
                 #outputs[("color", frame_id, scale)] = (outputs[("color", frame_id, scale)] * reprojection_loss_mask  + target)
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
