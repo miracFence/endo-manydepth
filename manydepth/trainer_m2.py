@@ -334,10 +334,10 @@ class Trainer_Monodepth:
             for f_i in self.opt.frame_ids[1:]:
                 if f_i != "s":
                     # To maintain ordering we always pass frames in temporal order
-                    if f_i < 0:
-                        pose_inputs = [pose_feats[f_i], pose_feats[0]]
-                    else:
-                        pose_inputs = [pose_feats[0], pose_feats[f_i]]
+                    #if f_i < 0:
+                    pose_inputs = [pose_feats[f_i], pose_feats[0]]
+                    #else:
+                    #pose_inputs = [pose_feats[0], pose_feats[f_i]]
                     
 
                     if self.opt.pose_model_type == "separate_resnet":
@@ -353,11 +353,11 @@ class Trainer_Monodepth:
                     outputs[("translation", 0, f_i)] = translation
 
                     # Invert the matrix if the frame id is negative
-                    outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))
-
                     """outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0])"""
+                        axisangle[:, 0], translation[:, 0], invert=(f_i < 0))"""
+
+                    outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
+                        axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
                     outputs_mf = self.models["motion_flow"](pose_inputs[0])
