@@ -360,7 +360,7 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    
+                    """
                     if f_i < 0:
                         pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
                     else:
@@ -368,7 +368,7 @@ class Trainer_Monodepth:
                     with torch.no_grad():
                         pose_inputs_motion = [self.models["pose_encoder"](torch.cat(pose_inputs_motion, 1))]
                     outputs_mf = self.models["motion_flow"](pose_inputs_motion[0])
-                    
+                    """
                     """
                     wandb.log({"original": wandb.Image(inputs[("color", 0, 0)][0].data)},step=self.step)
                     wandb.log({"input_"+str(f_i): wandb.Image(pose_feats[f_i][0].data)},step=self.step)
@@ -378,7 +378,7 @@ class Trainer_Monodepth:
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         #wandb.log({"b": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
                         #wandb.log({"c": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
                         #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
@@ -482,7 +482,7 @@ class Trainer_Monodepth:
                     outputs[("sample", frame_id, scale)],
                     padding_mode="border",align_corners=True)
 
-                outputs[("color", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)],outputs["mf_"+str(0)+"_"+str(frame_id)])
+                #outputs[("color", frame_id, scale)] = self.spatial_transform(outputs[("color", frame_id, scale)],outputs["mf_"+str(0)+"_"+str(frame_id)])
 
 
     def compute_reprojection_loss(self, pred, target):
@@ -536,8 +536,8 @@ class Trainer_Monodepth:
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
-        loss_motion_flow = 0
-        normal_loss = 0
+        #loss_motion_flow = 0
+        #normal_loss = 0
 
         for scale in self.opt.scales:
             loss = 0
@@ -581,7 +581,7 @@ class Trainer_Monodepth:
                 #Illuminations invariant loss
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
-                loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
+                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
                 
                 
                 
@@ -594,7 +594,7 @@ class Trainer_Monodepth:
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
             loss += self.opt.disparity_smoothness * smooth_loss / (2 ** scale)
-            loss += 0.001 * loss_motion_flow / (2 ** scale)
+            #loss += 0.001 * loss_motion_flow / (2 ** scale)
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
@@ -687,10 +687,10 @@ class Trainer_Monodepth:
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
             #wandb.log({"normal_target_{}/{}".format(s, j): wandb.Image(self.norm_to_rgb(outputs["normal_inputs"][("normal", 0)][j].data))},step=self.step)
             #wandb.log({"normal_predicted{}/{}".format(s, j): wandb.Image(self.visualize_normals(outputs["normal"][("normal", 0)][j].data))},step=self.step)
-            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
+            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
             """if self.opt.predictive_mask:
                 for f_idx, frame_id in enumerate(self.opt.frame_ids[1:]):
                     wandb.log({"predictive_mask_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs["predictive_mask"][("disp", s)][j, f_idx][None, ...])},self.step)
