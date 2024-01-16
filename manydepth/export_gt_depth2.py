@@ -11,6 +11,7 @@ import argparse
 import numpy as np
 import PIL.Image as pil
 import torch
+from os.path import exists
 
 from utils import readlines
 from kitti_utils import generate_depth_map
@@ -53,7 +54,10 @@ def export_gt_depths_kitti():
                                          "groundtruth", "image_02", "{:010d}.png".format(frame_id))
         elif opt.split == "RNNSLAM":
             gt_depth_path = os.path.join(opt.data_path,folder, "{0}.png".format(frame_id))
-            gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
+            if(exists(gt_depth_path.replace("rgb","depth"))):
+                gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth"))).astype(np.float32) / 256
+            else:
+                gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
             #gt_depth = np.array(gt_depth.resize(newsize)).astype(np.float32) / 256
 
         gt_depths.append(gt_depth.astype(np.float32))
