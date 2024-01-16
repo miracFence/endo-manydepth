@@ -12,6 +12,7 @@ import numpy as np
 import PIL.Image as pil
 import torch
 from os.path import exists
+import cv2
 
 from utils import readlines
 from kitti_utils import generate_depth_map
