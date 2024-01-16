@@ -189,7 +189,7 @@ def evaluate(opt):
 
     gt_path = os.path.join(splits_dir, opt.eval_split, "gt_depths.npz")
     gt_depths = np.load(gt_path, fix_imports=True, encoding='latin1')["data"]
-
+    print(gt_depths.shape)
     print("-> Evaluating")
 
     if opt.eval_stereo:
