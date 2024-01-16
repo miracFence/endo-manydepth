@@ -228,7 +228,7 @@ def evaluate(opt):
         gt_depth = gt_depth[mask]
         #print(opt.pred_depth_scale_factor)
         #pred_depth *= opt.pred_depth_scale_factor 
-        pred_depth *= 1
+        #pred_depth *= 1
         
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
