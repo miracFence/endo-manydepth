@@ -58,6 +58,7 @@ def export_gt_depths_kitti():
                 gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth"))).astype(np.float32) / 256
             else:
                 gt_depth = np.array(pil.open(gt_depth_path.replace("rgb","depth_gt"))).astype(np.float32) / 256
+            gt_depth = cv2.resize(gt_depth, (320, 256))
             #gt_depth = np.array(gt_depth.resize(newsize)).astype(np.float32) / 256
 
         gt_depths.append(gt_depth.astype(np.float32))
