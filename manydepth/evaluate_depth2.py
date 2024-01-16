@@ -137,9 +137,10 @@ def evaluate(opt):
                 pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
 
+                """
                 if opt.post_process:
                     N = pred_disp.shape[0] // 2
-                    pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
+                    pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])"""
 
                 pred_disps.append(pred_disp)
 
@@ -228,19 +229,21 @@ def evaluate(opt):
         #print(opt.pred_depth_scale_factor)
         #pred_depth *= opt.pred_depth_scale_factor 
         pred_depth *= 5.0
+        """
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
             ratios.append(ratio)
-            pred_depth *= ratio
+            pred_depth *= ratio"""
         
         pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
         errors.append(compute_errors(gt_depth, pred_depth))
+    """
     if not opt.disable_median_scaling:
         ratios = np.array(ratios)
         med = np.median(ratios)
-        print(" Scaling ratios | med: {:0.3f} | std: {:0.3f}".format(med, np.std(ratios / med)))
+        print(" Scaling ratios | med: {:0.3f} | std: {:0.3f}".format(med, np.std(ratios / med)))"""
 
     mean_errors = np.array(errors).mean(0)
 
