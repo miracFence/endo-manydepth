@@ -73,7 +73,7 @@ class Trainer_Monodepth:
         self.models["encoder"].to(self.device)
         self.parameters_to_train += list(self.models["encoder"].parameters())
  
-        self.models["depth"] = networks.DepthDecoderT(
+        self.models["depth"] = networks.DepthDecoder(
             num_ch_enc = self.models["encoder"].num_ch_enc, scales = self.opt.scales)
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
