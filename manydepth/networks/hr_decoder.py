@@ -18,8 +18,8 @@ class DepthDecoderT(nn.Module):
         self.num_ch_dec = np.array([16, 32, 64, 128, 256])
         self.convs = nn.ModuleDict()
         
-        print(self.ch_enc.shape)
-        print(self.num_ch_enc.shape)
+        print(self.ch_enc)
+        print(self.num_ch_enc)
         # decoder
         self.convs = nn.ModuleDict()
         
