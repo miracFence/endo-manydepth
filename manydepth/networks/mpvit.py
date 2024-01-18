@@ -26,7 +26,7 @@ from torch import nn, einsum
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from mmengine.runner import load_checkpoint,load_state_dict
-from mmengine import build_norm_layer
+from mmcv.cnn import build_norm_layer
 
 
 
