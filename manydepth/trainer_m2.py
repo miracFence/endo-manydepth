@@ -68,9 +68,9 @@ class Trainer_Monodepth:
         if self.opt.use_stereo:
             self.opt.frame_ids.append("s")
         
-        self.models["encoder"] = networks.ResnetEncoder(
-            self.opt.num_layers, self.opt.weights_init == "pretrained")
-        #self.models["encoder"] = networks.mpvit_small()            
+        """self.models["encoder"] = networks.ResnetEncoder(
+            self.opt.num_layers, self.opt.weights_init == "pretrained")"""
+        self.models["encoder"] = networks.mpvit_small()            
         self.models["encoder"].num_ch_enc = [64,64,128,216,288]
         self.models["encoder"].to(self.device)
         #self.parameters_to_train += list(self.models["encoder"].parameters())
@@ -203,28 +203,6 @@ class Trainer_Monodepth:
             len(train_dataset), len(val_dataset)))
 
         self.save_opts()
-
-    def freeze_models(self):
-        # Freeze all layers
-        for param in self.models["encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["depth"].parameters():
-            param.requires_grad = False
-        for param in self.models["pose_encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["lighting"].parameters():
-            param.requires_grad = False
-        
-    
-    def unfreeze_models(self):
-        for param in self.models["encoder"].parameters():
-            param.requires_grad = True
-        for param in self.models["depth"].parameters():
-            param.requires_grad = True
-        for param in self.models["pose_encoder"].parameters():
-            param.requires_grad = False
-        for param in self.models["lighting"].parameters():
-            param.requires_grad = False
 
     def set_train(self):
         """Convert all models to training mode
