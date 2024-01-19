@@ -30,8 +30,9 @@ from mmcv.cnn import build_norm_layer
 
 
 
-
-from mmseg.utils import get_root_logger
+from mmcv.utils import get_logger
+from mmdet.utils.logger import get_root_logger
+#from mmseg.utils import get_root_logger
 from mmseg.models.builder import BACKBONES
 
 __all__ = [
