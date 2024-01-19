@@ -816,7 +816,7 @@ def mpvit_small(**kwargs):
     #logger = get_root_logger()
     #load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
-    del logger
+    #del logger
     model.default_cfg = _cfg_mpvit()
     return model
 
