@@ -73,8 +73,7 @@ class Trainer_Monodepth:
         self.models["encoder"] = networks.mpvit_small()            
         self.models["encoder"].num_ch_enc = [64,64,128,216,288]
         self.models["encoder"].to(self.device)
-        #self.parameters_to_train += list(self.models["encoder"].parameters())
- 
+        #self.parameters_to_train += list(self.models["encoder"].parameters()) 
         """self.models["depth"] = networks.DepthDecoderT(
             self.models["encoder"].num_ch_enc, self.opt.scales)"""
         self.models["depth"] = networks.DepthDecoderT()
@@ -97,13 +96,14 @@ class Trainer_Monodepth:
                     num_input_features=1,
                     num_frames_to_predict_for=2)
 
+                """
                 self.models["lighting"] = networks.LightingDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
                 self.parameters_to_train += list(self.models["lighting"].parameters())
 
                 self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["motion_flow"].to(self.device)
-                self.parameters_to_train += list(self.models["motion_flow"].parameters())
+                self.parameters_to_train += list(self.models["motion_flow"].parameters())"""
 
             elif self.opt.pose_model_type == "shared":
                 self.models["pose"] = networks.PoseDecoder(
@@ -340,7 +340,7 @@ class Trainer_Monodepth:
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0])
                     
-                    outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    #outputs_lighting = self.models["lighting"](pose_inputs[0])
                     """
                     if f_i < 0:
                         pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
@@ -355,7 +355,7 @@ class Trainer_Monodepth:
                     wandb.log({"input_"+str(f_i): wandb.Image(pose_feats[f_i][0].data)},step=self.step)
                     wandb.log({"input_0": wandb.Image(pose_feats[0][0].data)},step=self.step)"""
 
-                    
+                    """
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
@@ -377,7 +377,7 @@ class Trainer_Monodepth:
                     outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
 
                     #outputs["refinedCB_"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * outputs["color_motion_"+str(f_i)+"_"+str(scale)] + outputs[("bh",scale, f_i)]
-                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]
+                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]"""
 
 
 
@@ -554,7 +554,7 @@ class Trainer_Monodepth:
                 #outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask + inputs[("color", 0, 0)]
                 #outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
                 #Losses
-                target = outputs[("color_refined", frame_id, scale)] #Lighting               
+                #target = outputs[("color_refined", frame_id, scale)] #Lighting               
                 #outputs[("color", frame_id, scale)] = (outputs[("color", frame_id, scale)] * reprojection_loss_mask  + target)
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
