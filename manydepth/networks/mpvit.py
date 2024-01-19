@@ -24,7 +24,8 @@ from einops import rearrange
 from functools import partial
 from torch import nn, einsum
 from torch.nn.modules.batchnorm import _BatchNorm
-from mmcv.utils import load_checkpoint,load_state_dict
+#from mmcv.utils import load_checkpoint,load_state_dict
+from mmengine.runner.checkpoint import load_checkpoint,load_state_dict
 from mmcv.cnn import build_norm_layer
 
 
