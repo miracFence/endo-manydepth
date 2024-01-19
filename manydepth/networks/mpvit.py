@@ -702,8 +702,8 @@ class MPViT(nn.Module):
 
         if isinstance(pretrained, str):
             self.apply(_init_weights)
-            logger = get_root_logger()
-            load_checkpoint(self, pretrained, strict=False, logger=logger)
+            #logger = get_root_logger()
+            #load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
             self.apply(_init_weights)
         else:
@@ -787,8 +787,8 @@ def mpvit_xsmall(**kwargs):
         **kwargs,
     )
     checkpoint = torch.load('./ckpt/mpvit_xsmall.pth', map_location=lambda storage, loc: storage)['model']
-    logger = get_root_logger()
-    load_state_dict(model, checkpoint, strict=False, logger=logger)
+    #logger = get_root_logger()
+    #load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
     del logger
     model.default_cfg = _cfg_mpvit()
@@ -817,8 +817,8 @@ def mpvit_small(**kwargs):
         **kwargs,
     )
     checkpoint = torch.load('./ckpt/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
-    logger = get_root_logger()
-    load_state_dict(model, checkpoint, strict=False, logger=logger)
+    #logger = get_root_logger()
+    #load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
     del logger
     model.default_cfg = _cfg_mpvit()
