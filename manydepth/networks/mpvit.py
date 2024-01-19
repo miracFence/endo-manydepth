@@ -782,7 +782,7 @@ def mpvit_xsmall(**kwargs):
         num_heads=[8, 8, 8, 8],
         **kwargs,
     )
-    checkpoint = torch.load('./ckpt/mpvit_xsmall.pth', map_location=lambda storage, loc: storage)['model']
+    checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_xsmall.pth', map_location=lambda storage, loc: storage)['model']
     #logger = get_root_logger()
     #load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
