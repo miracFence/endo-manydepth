@@ -29,7 +29,7 @@ from mmengine.runner.checkpoint import load_checkpoint,load_state_dict
 from mmcv.cnn import build_norm_layer
 
 #from mmseg.utils import get_root_logger
-from mmseg.models.builder import BACKBONES
+#from mmseg.models.builder import BACKBONES
 
 __all__ = [
     "mpvit_tiny",
@@ -598,7 +598,7 @@ def dpr_generator(drop_path_rate, num_layers, num_stages):
     return dpr
 
 
-@BACKBONES.register_module()
+#@BACKBONES.register_module()
 class MPViT(nn.Module):
     """Multi-Path ViT class."""
 
