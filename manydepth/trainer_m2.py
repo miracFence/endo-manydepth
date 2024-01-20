@@ -91,7 +91,7 @@ class Trainer_Monodepth:
                     num_input_images=self.num_pose_frames)
 
                 self.models["pose_encoder"].to(self.device)
-                self.models["pose_encoder"] = torch.nn.DataParallel(self.models["pose_encoder"], device_ids=[0, 1])
+                
                 self.parameters_to_train += list(self.models["pose_encoder"].parameters())
 
                 self.models["pose"] = networks.PoseDecoder(self.models["pose_encoder"].num_ch_enc,num_input_features=1,num_frames_to_predict_for=2)
@@ -117,6 +117,8 @@ class Trainer_Monodepth:
 
             self.models["pose"].to(self.device)
             self.parameters_to_train += list(self.models["pose"].parameters())
+
+            self.models["pose_encoder"] = torch.nn.DataParallel(self.models["pose_encoder"], device_ids=[0, 1])
         """
         if self.opt.predictive_mask:
             assert self.opt.disable_automasking, \
