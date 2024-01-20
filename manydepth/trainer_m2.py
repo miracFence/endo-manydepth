@@ -72,11 +72,13 @@ class Trainer_Monodepth:
             self.opt.num_layers, self.opt.weights_init == "pretrained")"""
         self.models["encoder"] = networks.mpvit_small()            
         self.models["encoder"].num_ch_enc = [64,64,128,216,288]
+        self.models["encoder"] = torch.nn.DataParallel(self.models["encoder"], device_ids=[0, 1])
         self.models["encoder"].to(self.device)
         #self.parameters_to_train += list(self.models["encoder"].parameters()) 
         """self.models["depth"] = networks.DepthDecoderT(
             self.models["encoder"].num_ch_enc, self.opt.scales)"""
         self.models["depth"] = networks.DepthDecoderT()
+        self.models["depth"] = torch.nn.DataParallel(self.models["depth"], device_ids=[0, 1])
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
@@ -89,13 +91,15 @@ class Trainer_Monodepth:
                     num_input_images=self.num_pose_frames)
 
                 self.models["pose_encoder"].to(self.device)
+                self.models["pose_encoder"] = torch.nn.DataParallel(self.models["pose_encoder"], device_ids=[0, 1])
                 self.parameters_to_train += list(self.models["pose_encoder"].parameters())
 
                 self.models["pose"] = networks.PoseDecoder(
                     self.models["pose_encoder"].num_ch_enc,
                     num_input_features=1,
                     num_frames_to_predict_for=2)
-
+                self.models["pose"] = torch.nn.DataParallel(self.models["pose"], device_ids=[0, 1])
+                
                 
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
