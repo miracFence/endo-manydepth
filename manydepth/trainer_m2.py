@@ -72,13 +72,13 @@ class Trainer_Monodepth:
             self.opt.num_layers, self.opt.weights_init == "pretrained")"""
         self.models["encoder"] = networks.mpvit_small()            
         self.models["encoder"].num_ch_enc = [64,64,128,216,288]
-        self.models["encoder"] = torch.nn.DataParallel(self.models["encoder"], device_ids=[0, 1])
+        #self.models["encoder"] = torch.nn.DataParallel(self.models["encoder"], device_ids=[0, 1])
         self.models["encoder"].to(self.device)
         #self.parameters_to_train += list(self.models["encoder"].parameters()) 
         """self.models["depth"] = networks.DepthDecoderT(
             self.models["encoder"].num_ch_enc, self.opt.scales)"""
         self.models["depth"] = networks.DepthDecoderT()
-        self.models["depth"] = torch.nn.DataParallel(self.models["depth"], device_ids=[0, 1])
+        #self.models["depth"] = torch.nn.DataParallel(self.models["depth"], device_ids=[0, 1])
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
 
@@ -95,13 +95,13 @@ class Trainer_Monodepth:
                 self.parameters_to_train += list(self.models["pose_encoder"].parameters())
 
                 self.models["pose"] = networks.PoseDecoder(self.models["pose_encoder"].num_ch_enc,num_input_features=1,num_frames_to_predict_for=2)
-                self.models["pose"] = torch.nn.DataParallel(self.models["pose"], device_ids=[0, 1])
+                #self.models["pose"] = torch.nn.DataParallel(self.models["pose"], device_ids=[0, 1])
                 
-                
+                """
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
                 self.models["lighting"] = torch.nn.DataParallel(self.models["lighting"], device_ids=[0, 1])
-                self.parameters_to_train += list(self.models["lighting"].parameters())
+                self.parameters_to_train += list(self.models["lighting"].parameters())"""
                 """
                 self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["motion_flow"].to(self.device)
@@ -118,7 +118,7 @@ class Trainer_Monodepth:
             self.models["pose"].to(self.device)
             self.parameters_to_train += list(self.models["pose"].parameters())
 
-            self.models["pose_encoder"] = torch.nn.DataParallel(self.models["pose_encoder"], device_ids=[0, 1])
+            #self.models["pose_encoder"] = torch.nn.DataParallel(self.models["pose_encoder"], device_ids=[0, 1])
         """
         if self.opt.predictive_mask:
             assert self.opt.disable_automasking, \
@@ -359,7 +359,7 @@ class Trainer_Monodepth:
                     wandb.log({"input_"+str(f_i): wandb.Image(pose_feats[f_i][0].data)},step=self.step)
                     wandb.log({"input_0": wandb.Image(pose_feats[0][0].data)},step=self.step)"""
 
-                    
+                    """
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
@@ -381,7 +381,7 @@ class Trainer_Monodepth:
                     outputs[("color_refined", f_i, scale)] = outputs[("ch",scale, f_i)] * inputs[("color", 0, 0)] + outputs[("bh", scale, f_i)]
 
                     #outputs["refinedCB_"+str(f_i)+"_"+str(scale)] = outputs[("ch",scale, f_i)] * outputs["color_motion_"+str(f_i)+"_"+str(scale)] + outputs[("bh",scale, f_i)]
-                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]
+                    #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", 0, 0)].detach() + outputs["b_"+str(0)+"_"+str(f_i)]"""
 
 
 
@@ -558,7 +558,7 @@ class Trainer_Monodepth:
                 #outputs[("color_refined", frame_id)] = outputs[("color_refined", frame_id)] * reprojection_loss_mask + inputs[("color", 0, 0)]
                 #outputs[("color_refined", frame_id)] = torch.clamp(outputs[("color_refined", frame_id)], min=0.0, max=1.0)
                 #Losses
-                target = outputs[("color_refined", frame_id, scale)] #Lighting               
+                #target = outputs[("color_refined", frame_id, scale)] #Lighting               
                 #outputs[("color", frame_id, scale)] = (outputs[("color", frame_id, scale)] * reprojection_loss_mask  + target)
                 pred = outputs[("color", frame_id, scale)]
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
@@ -664,7 +664,7 @@ class Trainer_Monodepth:
                 if s == 0 and frame_id != 0:
                     wandb.log({"color_pred_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color", frame_id, s)][j].data)},step=self.step)
                     #wandb.log({"color_pred_flow{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_motion", frame_id, s)][j].data)},step=self.step)
-                    wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id,s)][j].data)},step=self.step)
+                    #wandb.log({"color_pred_refined_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("color_refined", frame_id,s)][j].data)},step=self.step)
                     #wandb.log({"normal_{}_{}/{}".format(frame_id, s, j): wandb.Image(self.visualize_normal_image(inputs[("normal",0)][j]))},step=self.step)
                     #wandb.log({"contrast_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("ch",s, frame_id)][j].data)},step=self.step)
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("bh",s, frame_id)][j].data)},step=self.step)
