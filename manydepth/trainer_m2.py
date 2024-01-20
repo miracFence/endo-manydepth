@@ -546,7 +546,7 @@ class Trainer_Monodepth:
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 #wandb.log({"Mask_{}_{}".format(frame_id, scale): wandb.Image(reprojection_loss_mask[0].data)},step=self.step)
-                reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
+                #reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
                 #print(reprojection_loss_mask.shape)
                 #if scale == 0:
                 #outputs["c_"+str(frame_id)] = outputs["c_"+str(frame_id)] * reprojection_loss_mask 
