@@ -26,13 +26,13 @@ class DeepNet(nn.Module):
         if self.type =='depthnet':
             self.encoder = ResnetEncoder(
             self.num_layers, self.weights_init == "pretrained")
-            self.decoder = DepthDecoder(
+            self.decoder = DepthDecoderT(
             self.encoder.num_ch_enc, self.scales)
 
         elif self.type =='mpvitnet':
             self.encoder = mpvit_small()
             #self.decoder = MPDecoder()
-            self.decoder = DepthDecoder()
+            self.decoder = DepthDecoderT()
 
         elif self.type == 'posenet':
             self.encoder = ResnetEncoder(
