@@ -7,3 +7,4 @@ from .lighting_decoder import LightingDecoder
 from .normal_decoder import NormalDecoder
 from .residual_flow_decoder import ResidualFLowDecoder
 from .mpvit import *
+from .nets import DeepNet
