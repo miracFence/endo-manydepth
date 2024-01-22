@@ -816,8 +816,8 @@ def mpvit_small(**kwargs):
     )
     checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
     #logger = get_root_logger()
-    logger = get_logger()
-    load_state_dict(model, checkpoint, strict=False, logger=logger)
+    #logger = get_logger()
+    #load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
     #del logger
     model.default_cfg = _cfg_mpvit()
