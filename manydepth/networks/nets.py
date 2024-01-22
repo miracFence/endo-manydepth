@@ -9,7 +9,7 @@ from collections import OrderedDict
 from layers import *
 
 from .resnet_encoder import ResnetEncoder
-from .hr_decoder import DepthDecoder
+from .hr_decoder import DepthDecoderT
 from .pose_decoder import PoseDecoder
 from .mpvit import *
 
