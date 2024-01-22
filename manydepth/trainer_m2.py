@@ -81,6 +81,7 @@ class Trainer_Monodepth:
         #self.models["depth"] = torch.nn.DataParallel(self.models["depth"], device_ids=[0, 1])
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
+        
 
 
         if self.use_pose_net:
@@ -132,9 +133,11 @@ class Trainer_Monodepth:
             self.models["predictive_mask"].to(self.device)
             self.parameters_to_train += list(self.models["predictive_mask"].parameters())"""
 
-        self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
-        self.model_lr_scheduler = optim.lr_scheduler.StepLR(
-            self.model_optimizer, self.opt.scheduler_step_size, 0.1)
+        self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
+        """self.model_lr_scheduler = optim.lr_scheduler.StepLR(
+            self.model_optimizer, self.opt.scheduler_step_size, 0.1)"""
+        self.model_lr_scheduler = optim.lr_scheduler.ExponentialLR(
+		self.model_optimizer,0.9)
 
         if self.opt.load_weights_folder is not None:
             self.load_model()
