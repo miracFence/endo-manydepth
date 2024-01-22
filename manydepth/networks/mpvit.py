@@ -28,7 +28,8 @@ from torch.nn.modules.batchnorm import _BatchNorm
 from mmengine.runner.checkpoint import load_checkpoint,load_state_dict
 from mmcv.cnn import build_norm_layer
 
-from mmseg.utils import get_root_logger
+#from mmseg.utils import get_root_logger
+from mmcv.utils import get_logger
 #from mmseg.models.builder import BACKBONES
 
 __all__ = [
@@ -698,7 +699,8 @@ class MPViT(nn.Module):
 
         if isinstance(pretrained, str):
             self.apply(_init_weights)
-            logger = get_root_logger()
+            #logger = get_root_logger()
+            logger = get_logger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
             self.apply(_init_weights)
@@ -812,7 +814,8 @@ def mpvit_small(**kwargs):
         **kwargs,
     )
     checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
-    logger = get_root_logger()
+    #logger = get_root_logger()
+    logger = get_logger()
     load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
     #del logger
