@@ -27,8 +27,9 @@ from torch.nn.modules.batchnorm import _BatchNorm
 #from mmcv.utils import load_checkpoint,load_state_dict
 from mmengine.runner.checkpoint import load_checkpoint,load_state_dict
 from mmcv.cnn import build_norm_layer
+import logging from mmcv.utils import get_logger
+#from mmseg.utils import get_root_logger
 
-from mmseg.utils import get_root_logger
 #mmdet.utils.logger
 #from mmcv.utils import get_logger
 #from mmdet.utils import get_root_logger
