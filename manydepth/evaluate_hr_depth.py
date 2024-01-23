@@ -75,31 +75,34 @@ def evaluate(opt):
         print("-> Loading weights from {}".format(opt.load_weights_folder))
 
         filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
-        depth_path = os.path.join(opt.load_weights_folder, "depth.pth")
+        encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
+        decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
 
-        depth_dict = torch.load(depth_path)
-        #new_dict = depth_dict
-        new_dict = {}
-        for k,v in depth_dict.items():
-            name = k[7:]
-            new_dict[name]=v
+        encoder_dict = torch.load(encoder_path)
+
         dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
-                                          opt.height,opt.width,
+                                           encoder_dict['height'], encoder_dict['width'],
                                            [0], 4, is_train=False)
         dataloader = DataLoader(dataset, 8, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
-        depth = networks.DeepNet('mpvitnet')
-        depth.load_state_dict({k: v for k, v in new_dict.items() if k in depth.state_dict()})
-        #depth.load_state_dict({k: v for k, v in new_dict.items() if k in depth.state_dict()})
+        encoder = networks.mpvit_small() #networks.ResnetEncoder(opt.num_layers, False)
+        encoder.num_ch_enc = [64,128,216,288,288]  # = networks.ResnetEncoder(opt.num_layers, False)
+        depth_decoder = networks.DepthDecoder()
 
-        depth.cuda()
-        depth.eval()
+        model_dict = encoder.state_dict()
+        encoder.load_state_dict({k: v for k, v in encoder_dict.items() if k in model_dict})
+        depth_decoder.load_state_dict(torch.load(decoder_path))
+
+        encoder.cuda()
+        encoder.eval()
+        depth_decoder.cuda()
+        depth_decoder.eval()
 
         pred_disps = []
 
         print("-> Computing predictions with size {}x{}".format(
-                   opt.height,opt.width))
+            encoder_dict['width'], encoder_dict['height']))
 
         with torch.no_grad():
             for data in dataloader:
@@ -109,7 +112,7 @@ def evaluate(opt):
                     # Post-processed results require each image to have two forward passes
                     input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
 
-                output = depth(input_color)
+                output = depth_decoder(encoder(input_color))
 
                 pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
@@ -126,6 +129,7 @@ def evaluate(opt):
         # Load predictions from file
         print("-> Loading predictions from {}".format(opt.ext_disp_to_eval))
         pred_disps = np.load(opt.ext_disp_to_eval)
+
         if opt.eval_eigen_to_benchmark:
             eigen_to_benchmark_ids = np.load(
                 os.path.join(splits_dir, "benchmark", "eigen_to_benchmark_ids.npy"))
@@ -217,7 +221,8 @@ def evaluate(opt):
 
     mean_errors = np.array(errors).mean(0)
 
-    save_dir = opt.load_weights_folder[:-7]
+
+
     results_edit=open('results.txt',mode='a')
     results_edit.write("\n " + 'model_name: %s '%(opt.load_weights_folder))
     results_edit.write("\n " + ("{:>8} | " * 7).format("abs_rel", "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
@@ -226,6 +231,7 @@ def evaluate(opt):
     print("\n  " + ("{:>8} | " * 7).format("abs_rel", "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
     print("\n-> Done!")
+
 
 if __name__ == "__main__":
     options = MonodepthOptions()
