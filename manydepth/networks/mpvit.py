@@ -35,7 +35,8 @@ from mmcv.utils import get_logger
 #mmdet.utils.logger
 #from mmcv.utils import get_logger
 #from mmdet.utils import get_root_logger
-from mmseg.models.builder import BACKBONES
+#from mmseg.models.builder import BACKBONES
+from ..builder import BACKBONES
 
 __all__ = [
     "mpvit_tiny",
