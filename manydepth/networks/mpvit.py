@@ -14,7 +14,7 @@
 
 import numpy as np
 import math
-
+import logging
 import torch
 
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
@@ -33,9 +33,9 @@ from mmcv.cnn import build_norm_layer
 #from mmcv.utils import get_logger
 
 #mmdet.utils.logger
-from mmcv.utils import get_logger
+#from mmcv.utils import get_logger
 #from mmdet.utils import get_root_logger
-from mmseg.models.builder import BACKBONES
+#from mmseg.models.builder import BACKBONES
 #from mmcv.cnn.backbones import BACKBONES
 
 
@@ -606,7 +606,7 @@ def dpr_generator(drop_path_rate, num_layers, num_stages):
     return dpr
 
 
-@BACKBONES.register_module()
+#@BACKBONES.register_module()
 class MPViT(nn.Module):
     """Multi-Path ViT class."""
 
@@ -707,8 +707,9 @@ class MPViT(nn.Module):
         if isinstance(pretrained, str):
             self.apply(_init_weights)
             #logger = get_root_logger()
-            logger = get_logger("mpvit")
+            #logger = get_logger("mpvit")
             #logger = get_logger()
+            logger = logging.getLogger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
             self.apply(_init_weights)
