@@ -33,8 +33,8 @@ from mmcv.cnn import build_norm_layer
 #from mmcv.utils import get_logger
 
 #mmdet.utils.logger
-#from mmcv.utils import get_logger
-from mmdet.utils import get_root_logger
+from mmcv.utils import get_logger
+#from mmdet.utils import get_root_logger
 from mmseg.models.builder import BACKBONES
 #from mmcv.cnn.backbones import BACKBONES
 
