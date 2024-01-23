@@ -36,7 +36,7 @@ from mmcv.utils import get_logger
 #from mmcv.utils import get_logger
 #from mmdet.utils import get_root_logger
 #from mmseg.models.builder import BACKBONES
-from mmcv.cnn.backbones import BACKBONES
+#from mmcv.cnn.backbones import BACKBONES
 
 
 __all__ = [
@@ -606,7 +606,7 @@ def dpr_generator(drop_path_rate, num_layers, num_stages):
     return dpr
 
 
-@BACKBONES.register_module()
+#@BACKBONES.register_module()
 class MPViT(nn.Module):
     """Multi-Path ViT class."""
 
