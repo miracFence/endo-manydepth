@@ -549,7 +549,7 @@ class Trainer_Monodepth:
 
                 reprojection_loss_mask = self.compute_loss_masks(rep,rep_identity)
                 #wandb.log({"Mask_{}_{}".format(frame_id, scale): wandb.Image(reprojection_loss_mask[0].data)},step=self.step)
-                #reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
+                reprojection_loss_mask_iil = get_feature_oclution_mask(reprojection_loss_mask)
                 #print(reprojection_loss_mask.shape)
                 #if scale == 0:
                 #outputs["c_"+str(frame_id)] = outputs["c_"+str(frame_id)] * reprojection_loss_mask 
@@ -566,8 +566,9 @@ class Trainer_Monodepth:
                 loss_reprojection += (self.compute_reprojection_loss(pred, target) * reprojection_loss_mask).sum() / reprojection_loss_mask.sum()
                 
                 #Illuminations invariant loss
-                #target = inputs[("color", 0, 0)]
-                #loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                target = inputs[("color", 0, 0)]
+                loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
+                #Motion Flow
                 #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
                 
                 
