@@ -705,8 +705,9 @@ class MPViT(nn.Module):
         if isinstance(pretrained, str):
             self.apply(_init_weights)
             #logger = get_root_logger()
+            logger = get_logger()
             #logger = get_logger()
-            #load_checkpoint(self, pretrained, strict=False, logger=logger)
+            load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
             self.apply(_init_weights)
         else:
