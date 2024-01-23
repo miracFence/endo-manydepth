@@ -83,7 +83,8 @@ def evaluate(opt):
         """dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                            encoder_dict['height'], encoder_dict['width'],
                                            [0], 4, is_train=False)"""
-        HEIGHT, WIDTH = 256, 320                                           
+        HEIGHT, WIDTH = 256, 320      
+        img_ext = '.png' if opt.png else '.jpg'                                     
         dataset = datasets.SCAREDRAWDataset(opt.data_path, filenames,
                                            HEIGHT, WIDTH,
                                            [0], 4, is_train=False, img_ext=img_ext)                                        
