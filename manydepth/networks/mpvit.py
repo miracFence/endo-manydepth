@@ -705,7 +705,7 @@ class MPViT(nn.Module):
         if isinstance(pretrained, str):
             self.apply(_init_weights)
             #logger = get_root_logger()
-            logger = get_logger()
+            logger = get_logger("mpvit")
             #logger = get_logger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
@@ -790,7 +790,7 @@ def mpvit_xsmall(**kwargs):
         num_heads=[8, 8, 8, 8],
         **kwargs,
     )
-    checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_xsmall.pth', map_location=lambda storage, loc: storage)['model']
+    checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit/mpvit_xsmall.pth', map_location=lambda storage, loc: storage)['model']
     load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
     del logger
@@ -819,8 +819,8 @@ def mpvit_small(**kwargs):
         num_heads=[8, 8, 8, 8],
         **kwargs,
     )
-    checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
-    logger = get_logger()
+    checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
+    logger = get_logger("mpvit")
     
     load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
