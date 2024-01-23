@@ -27,7 +27,7 @@ from torch.nn.modules.batchnorm import _BatchNorm
 #from mmcv.utils import load_checkpoint,load_state_dict
 from mmengine.runner.checkpoint import load_checkpoint,load_state_dict
 from mmcv.cnn import build_norm_layer
-#from mmcv.utils import get_logger
+
 from mmseg.utils import get_root_logger
 #from mmseg.utils import get_root_logger
 
@@ -818,11 +818,10 @@ def mpvit_small(**kwargs):
         **kwargs,
     )
     checkpoint = torch.load('/workspace/endo-manydepth/manydepth/mpvit_small.pth', map_location=lambda storage, loc: storage)['model']
-    #logger = get_root_logger()
-    #logger = get_logger()
-    #load_state_dict(model, checkpoint, strict=False, logger=logger)
+    logger = get_root_logger()
+    load_state_dict(model, checkpoint, strict=False, logger=logger)
     del checkpoint
-    #del logger
+    del logger
     model.default_cfg = _cfg_mpvit()
     return model
 
