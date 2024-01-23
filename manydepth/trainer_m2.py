@@ -522,7 +522,7 @@ class Trainer_Monodepth:
 
         losses = {}
         loss_reprojection = 0
-        #loss_ilumination_invariant = 0
+        loss_ilumination_invariant = 0
         total_loss = 0
         #loss_motion_flow = 0
 
@@ -577,7 +577,7 @@ class Trainer_Monodepth:
             
                 
             #Illumination invariant loss
-            #loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
+            loss += self.opt.illumination_invariant * loss_ilumination_invariant / 2.0
             mean_disp = disp.mean(2, True).mean(3, True)
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
