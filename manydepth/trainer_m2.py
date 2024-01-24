@@ -68,21 +68,23 @@ class Trainer_Monodepth:
         if self.opt.use_stereo:
             self.opt.frame_ids.append("s")
         
-        """
+        
         #Transformer
         self.models["encoder"] = networks.mpvit_small()            
         self.models["encoder"].num_ch_enc = [64,64,128,216,288]
-        """
+        
         #Normal Depth
-        self.models["encoder"] = networks.ResnetEncoder(
-            self.opt.num_layers, self.opt.weights_init == "pretrained")
-        self.models["encoder"].to(self.device)
-        self.parameters_to_train += list(self.models["encoder"].parameters()) 
-        self.models["depth"] = networks.DepthDecoder(
-            self.models["encoder"].num_ch_enc, self.opt.scales)
         """
+        self.models["encoder"] = networks.ResnetEncoder(
+            self.opt.num_layers, self.opt.weights_init == "pretrained")"""
+        self.models["encoder"].to(self.device)
+        #self.parameters_to_train += list(self.models["encoder"].parameters()) 
+        """
+        self.models["depth"] = networks.DepthDecoder(
+            self.models["encoder"].num_ch_enc, self.opt.scales)"""
+        
         #Transformer
-        self.models["depth"] = networks.DepthDecoderT()"""
+        self.models["depth"] = networks.DepthDecoderT()
         self.models["depth"].to(self.device)
         self.parameters_to_train += list(self.models["depth"].parameters())
         
@@ -105,10 +107,10 @@ class Trainer_Monodepth:
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
                 self.parameters_to_train += list(self.models["lighting"].parameters())
-     
+                """
                 self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["motion_flow"].to(self.device)
-                self.parameters_to_train += list(self.models["motion_flow"].parameters())
+                self.parameters_to_train += list(self.models["motion_flow"].parameters())"""
 
             elif self.opt.pose_model_type == "shared":
                 self.models["pose"] = networks.PoseDecoder(
@@ -337,14 +339,14 @@ class Trainer_Monodepth:
                         axisangle[:, 0], translation[:, 0])
                     
                     outputs_lighting = self.models["lighting"](pose_inputs[0])
-                    
+                    """
                     if f_i < 0:
                         pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
                     else:
                         pose_inputs_motion = [pose_feats[0], pose_feats[f_i]]
                     with torch.no_grad():
                         pose_inputs_motion = [self.models["pose_encoder"](torch.cat(pose_inputs_motion, 1))]
-                    outputs_mf = self.models["motion_flow"](pose_inputs_motion[0])
+                    outputs_mf = self.models["motion_flow"](pose_inputs_motion[0])"""
                     
                     """
                     wandb.log({"original": wandb.Image(inputs[("color", 0, 0)][0].data)},step=self.step)
@@ -355,7 +357,7 @@ class Trainer_Monodepth:
                     for scale in self.opt.scales:
                         outputs["b_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,0,None,:, :]
                         outputs["c_"+str(scale)+"_"+str(f_i)] = outputs_lighting[("lighting", scale)][:,1,None,:, :]
-                        outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
+                        #outputs["mf_"+str(scale)+"_"+str(f_i)] = outputs_mf[("flow", scale)]
                         #wandb.log({"b": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
                         #wandb.log({"c": wandb.Image(outputs["b_"+str(scale)+"_"+str(f_i)][0].data)},step=self.step)
                         #outputs[("color_refined", f_i, scale)] = outputs["c_"+str(0)+"_"+str(f_i)] * inputs[("color", f_i, 0)] + outputs["b_"+str(0)+"_"+str(f_i)]
@@ -513,7 +515,7 @@ class Trainer_Monodepth:
         loss_reprojection = 0
         loss_ilumination_invariant = 0
         total_loss = 0
-        loss_motion_flow = 0
+        #loss_motion_flow = 0
 
         for scale in self.opt.scales:
             loss = 0
@@ -557,7 +559,7 @@ class Trainer_Monodepth:
                 target = inputs[("color", 0, 0)]
                 loss_ilumination_invariant += (self.get_ilumination_invariant_loss(pred,target) * reprojection_loss_mask_iil).sum() / reprojection_loss_mask_iil.sum()
                 #Motion Flow
-                loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
+                #loss_motion_flow += (self.get_motion_flow_loss(outputs["mf_"+str(scale)+"_"+str(frame_id)]))
                 
                 
                 
@@ -570,7 +572,7 @@ class Trainer_Monodepth:
             norm_disp = disp / (mean_disp + 1e-7)
             smooth_loss = get_smooth_loss(norm_disp, color)
             loss += self.opt.disparity_smoothness * smooth_loss / (2 ** scale)
-            loss += 0.001 * loss_motion_flow / (2 ** scale)
+            #loss += 0.001 * loss_motion_flow / (2 ** scale)
             total_loss += loss
             losses["loss/{}".format(scale)] = loss
 
@@ -659,10 +661,10 @@ class Trainer_Monodepth:
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("bh",s, frame_id)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
-            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)
+            wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
            
                   
 
