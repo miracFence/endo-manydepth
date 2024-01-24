@@ -102,8 +102,9 @@ class Trainer_Monodepth:
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
                 self.models["lighting"] = torch.nn.DataParallel(self.models["lighting"], device_ids=[0, 1])
-                self.parameters_to_train += list(self.models["lighting"].parameters())"""
+                self.parameters_to_train += list(self.models["lighting"].parameters())
                 
+                """
                 self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
                 self.models["motion_flow"].to(self.device)
                 self.parameters_to_train += list(self.models["motion_flow"].parameters())"""
