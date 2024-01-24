@@ -101,7 +101,7 @@ class Trainer_Monodepth:
                 
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
-                self.models["lighting"] = torch.nn.DataParallel(self.models["lighting"], device_ids=[0, 1])
+                #self.models["lighting"] = torch.nn.DataParallel(self.models["lighting"], device_ids=[0, 1])
                 self.parameters_to_train += list(self.models["lighting"].parameters())
                 
                 """
