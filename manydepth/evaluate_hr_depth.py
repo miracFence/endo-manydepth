@@ -132,9 +132,10 @@ def evaluate(opt):
                 pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
 
+                """
                 if opt.post_process:
                     N = pred_disp.shape[0] // 2
-                    pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
+                    pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])"""
 
                 pred_disps.append(pred_disp)
 
@@ -160,7 +161,7 @@ def evaluate(opt):
     if opt.no_eval:
         print("-> Evaluation disabled. Done.")
         quit()
-
+    """
     elif opt.eval_split == 'benchmark':
         save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
         print("-> Saving out benchmark predictions to {}".format(save_dir))
@@ -176,7 +177,7 @@ def evaluate(opt):
             cv2.imwrite(save_path, depth)
 
         print("-> No ground truth is available for the KITTI benchmark, so not evaluating. Done.")
-        quit()
+        quit()"""
 
     gt_path = os.path.join(splits_dir, opt.eval_split, "gt_depths.npz")
     gt_depths = np.load(gt_path, fix_imports=True,allow_pickle=True, encoding='latin1')["data"]
@@ -202,7 +203,7 @@ def evaluate(opt):
         pred_disp = pred_disps[i]
         pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))
         pred_depth = 1 / pred_disp
-
+        """
         if opt.eval_split == "eigen":
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
@@ -212,13 +213,13 @@ def evaluate(opt):
             crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
-        else:
-            mask = gt_depth > 0
+        else:"""
+        mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
 
-        pred_depth *= opt.pred_depth_scale_factor
+        #pred_depth *= opt.pred_depth_scale_factor
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
             ratios.append(ratio)
