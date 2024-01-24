@@ -100,12 +100,10 @@ class Trainer_Monodepth:
                 self.parameters_to_train += list(self.models["pose_encoder"].parameters())
 
                 self.models["pose"] = networks.PoseDecoder(self.models["pose_encoder"].num_ch_enc,num_input_features=1,num_frames_to_predict_for=2)
-                #self.models["pose"] = torch.nn.DataParallel(self.models["pose"], device_ids=[0, 1])
                 
                 
                 self.models["lighting"] = networks.LightingDecoder(self.models["pose_encoder"].num_ch_enc, self.opt.scales)
                 self.models["lighting"].to(self.device)
-                #self.models["lighting"] = torch.nn.DataParallel(self.models["lighting"], device_ids=[0, 1])
                 self.parameters_to_train += list(self.models["lighting"].parameters())
      
                 self.models["motion_flow"] = networks.ResidualFLowDecoder(self.models["encoder"].num_ch_enc, self.opt.scales)
@@ -338,7 +336,7 @@ class Trainer_Monodepth:
                     outputs[("cam_T_cam", 0, f_i)] = transformation_from_parameters(
                         axisangle[:, 0], translation[:, 0])
                     
-                    #outputs_lighting = self.models["lighting"](pose_inputs[0])
+                    outputs_lighting = self.models["lighting"](pose_inputs[0])
                     
                     if f_i < 0:
                         pose_inputs_motion = [pose_feats[f_i], pose_feats[0]]
