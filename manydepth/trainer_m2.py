@@ -23,7 +23,15 @@ from torch.utils.data import DataLoader
 import wandb
 
 
-wandb.init(project="MySfMLearner4", entity="respinosa")
+wandb.login()
+os.environ['WANDB_SILENT']="true"
+run = wandb.init(
+    # Set the project where this run will be logged
+    project="MySfMLearner5",
+    
+)
+#wandb.init(project="MySfMLearner", entity="respinosa")
+
 
 
 import json
@@ -645,6 +653,7 @@ class Trainer_Monodepth:
         """Write an event to the tensorboard events file
         """
         #writer = self.writers[mode]
+        """
         for l, v in losses.items():
             wandb.log({mode+"{}".format(l):v},step =self.step)
 
@@ -661,7 +670,7 @@ class Trainer_Monodepth:
                     #wandb.log({"brightness_{}_{}/{}".format(frame_id, s, j): wandb.Image(outputs[("bh",s, frame_id)][j].data)},step=self.step)
             disp = self.colormap(outputs[("disp", s)][j, 0])
             wandb.log({"disp_multi_{}/{}".format(s, j): wandb.Image(disp.transpose(1, 2, 0))},step=self.step)
-            """f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
+            f = outputs["mf_"+str(s)+"_"+str(frame_id)][j].data
             flow = self.flow2rgb(f,32)
             flow = torch.from_numpy(flow)
             wandb.log({"motion_flow_{}_{}".format(s,j): wandb.Image(flow)},step=self.step)"""
